@@ -878,54 +878,7 @@
 
 @section('content')
 
-  <div class="announce">
-    <div class="container announce-inner">
-      <span class="pulse"></span>
-      <span>Now booking Q3 engagements — <a href="#contact">claim your strategy call →</a></span>
-    </div>
-  </div>
-
-  <header class="nav" id="nav">
-    <div class="nav-inner container">
-      <a href="#top" class="logo" aria-label="Digirisers home">
-        <span class="logo-mark" aria-hidden="true">
-          <svg viewBox="0 0 40 40" width="32" height="32">
-            <defs>
-              <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#60a5fa"/>
-                <stop offset="1" stop-color="#1e3a8a"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="36" height="36" rx="10" fill="url(#lg)"/>
-            <path d="M10 26 L16 18 L22 24 L30 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="30" cy="12" r="2.5" fill="#fff"/>
-          </svg>
-        </span>
-        <span class="logo-text">Digirisers<span class="logo-dot">.</span></span>
-      </a>
-
-      <nav class="nav-links" aria-label="Primary">
-        <a href="#services">Services</a>
-        <a href="#industries">Industries</a>
-        <a href="#results">Results</a>
-        <a href="{{ url('/pricing') }}">Pricing</a>
-        <a href="#process">Process</a>
-        <a href="#contact">Contact</a>
-      </nav>
-
-      <div class="nav-right">
-        <a href="tel:+14019987807" class="nav-phone" aria-label="Call Digirisers">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1L6.6 10.8z"/></svg>
-          <span>+1 (401) 998-7807</span>
-        </a>
-        <a href="#contact" class="btn btn-primary nav-cta">Start a project</a>
-      </div>
-
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span>
-      </button>
-    </div>
-  </header>
+  @include('partials.header')
 
   <section class="hero" id="top">
     <div class="hero-bg" aria-hidden="true">
@@ -1410,115 +1363,12 @@
     </div>
   </section>
 
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-cta">
-        <h2>Let's build something <span class="serif-italic">that grows.</span></h2>
-        <a href="#contact" class="btn btn-light btn-lg">Start your project →</a>
-      </div>
-
-      <div class="footer-inner">
-        <div class="footer-brand">
-          <a href="#top" class="logo">
-            <span class="logo-mark" aria-hidden="true">
-              <svg viewBox="0 0 40 40" width="28" height="28">
-                <rect x="2" y="2" width="36" height="36" rx="10" fill="#3b82f6"/>
-                <path d="M10 26 L16 18 L22 24 L30 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="30" cy="12" r="2.5" fill="#fff"/>
-              </svg>
-            </span>
-            <span class="logo-text">Digirisers<span class="logo-dot">.</span></span>
-          </a>
-          <p>Digital marketing that rises above. Strategy, creative, and engineering under one roof.</p>
-          <a href="tel:+14019987807" class="footer-phone">+1 (401) 998-7807</a>
-        </div>
-
-        <div class="footer-cols">
-          <div>
-            <h5>Grow</h5>
-            <ul>
-              <li><a href="#services">SEO</a></li>
-              <li><a href="#services">PPC</a></li>
-              <li><a href="#services">Social</a></li>
-              <li><a href="#services">Content</a></li>
-              <li><a href="#services">Email</a></li>
-            </ul>
-          </div>
-          <div>
-            <h5>Build</h5>
-            <ul>
-              <li><a href="#services">Web Design</a></li>
-              <li><a href="#services">Ecommerce</a></li>
-              <li><a href="#services">WordPress</a></li>
-              <li><a href="#services">Shopify</a></li>
-              <li><a href="#services">AI Agents</a></li>
-            </ul>
-          </div>
-          <div>
-            <h5>Convert</h5>
-            <ul>
-              <li><a href="#services">CRO</a></li>
-              <li><a href="#services">Landing Pages</a></li>
-              <li><a href="#services">Personalization</a></li>
-              <li><a href="#services">ABM</a></li>
-              <li><a href="#services">Attribution</a></li>
-            </ul>
-          </div>
-          <div>
-            <h5>Company</h5>
-            <ul>
-              <li><a href="#results">Results</a></li>
-              <li><a href="#industries">Industries</a></li>
-              <li><a href="#process">Process</a></li>
-              <li><a href="#contact">Contact</a></li>
-              <li><a href="{{ url('/pricing') }}">Pricing</a></li>
-              <li><a href="{{ url('/privacy') }}">Privacy Policy</a></li>
-              <li><a href="{{ url('/terms') }}">Terms &amp; Conditions</a></li>
-              <li><a href="{{ url('/refund') }}">Refund Policy</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <small>© <span id="year"></span> Digirisers. All rights reserved.</small>
-        <small class="footer-links">
-          <a href="{{ url('/pricing') }}">Pricing</a> <span>•</span> <a href="{{ url('/privacy') }}">Privacy</a> <span>•</span> <a href="{{ url('/terms') }}">Terms</a> <span>•</span> <a href="{{ url('/refund') }}">Refund</a> <span>•</span> <a href="tel:+14019987807">+1 (401) 998-7807</a>
-        </small>
-      </div>
-    </div>
-  </footer>
+  @include('partials.footer')
 
 @endsection
 
 @push('scripts')
   <script>
-    // Sticky nav
-    const nav = document.getElementById('nav');
-    const onScroll = () => {
-      if (window.scrollY > 8) nav.classList.add('scrolled');
-      else nav.classList.remove('scrolled');
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-
-    // Mobile menu toggle
-    const navToggle = document.getElementById('navToggle');
-    navToggle?.addEventListener('click', () => {
-      const open = nav.classList.toggle('open');
-      navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-    document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', () => {
-        nav.classList.remove('open');
-        navToggle?.setAttribute('aria-expanded', 'false');
-      });
-    });
-
-    // Year
-    const yearEl = document.getElementById('year');
-    if (yearEl) yearEl.textContent = new Date().getFullYear();
-
     // Reveal on scroll
     const revealTargets = document.querySelectorAll(
       '.service-card, .stat-card, .step, .tcard, .industry, .hero-copy, .hero-visual, .section-head, .contact-card, .footer-cta'

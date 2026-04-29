@@ -1,0 +1,872 @@
+@extends('layouts.app')
+
+@section('title', 'Shop — Digirisers')
+@section('description', 'Shop Digirisers services — fixed-price packages for web development, SEO, design, AI automation, and brand strategy. Add to cart, send your order, and get started.')
+@section('robots', 'index,follow')
+
+@push('styles')
+  <link rel="stylesheet" href="{{ asset('assets/css/legal.css') }}" />
+  <style>
+    /* Shop-specific (extends legal.css) */
+    section { padding: 90px 0; position: relative; }
+    .container { max-width: 1240px; }
+
+    /* Hero */
+    .shop-hero {
+      position: relative; overflow: hidden;
+      background: var(--grad-soft);
+      padding: 90px 0 60px;
+      border-bottom: 1px solid var(--line);
+    }
+    .shop-hero::before {
+      content: ""; position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(148,163,184,.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,.15) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(ellipse 60% 60% at 50% 30%, #000 30%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 30%, #000 30%, transparent 80%);
+      pointer-events: none;
+    }
+    .shop-hero::after {
+      content: ""; position: absolute; top: -160px; left: 50%; transform: translateX(-50%);
+      width: 1100px; height: 600px;
+      background: radial-gradient(ellipse at center, rgba(59,130,246,.22) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .shop-hero-inner { position: relative; z-index: 1; max-width: 820px; text-align: center; margin: 0 auto; }
+    .shop-hero h1 { margin-bottom: 18px; }
+    .shop-hero p {
+      font-size: 1.15rem; color: var(--muted);
+      max-width: 660px; margin: 0 auto 32px;
+    }
+
+    /* Filter bar */
+    .filter-bar {
+      position: sticky; top: 76px; z-index: 50;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      border-bottom: 1px solid var(--line);
+      padding: 16px 0;
+    }
+    .filter-inner {
+      display: flex; align-items: center; gap: 14px;
+      flex-wrap: wrap; justify-content: space-between;
+    }
+    .filter-pills {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    }
+    .filter-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      font-size: .85rem; font-weight: 600;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s ease;
+      font-family: inherit;
+    }
+    .filter-pill:hover { color: var(--ink); border-color: var(--ink); }
+    .filter-pill.active {
+      background: var(--ink); color: #fff;
+      border-color: var(--ink);
+    }
+    .filter-pill .count {
+      font-size: .72rem;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: var(--blue-50); color: var(--blue-700);
+      font-weight: 700;
+    }
+    .filter-pill.active .count { background: rgba(255,255,255,.18); color: #fff; }
+
+    .filter-search {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #fff; border: 1px solid var(--line); border-radius: 999px;
+      padding: 7px 14px;
+      min-width: 240px;
+    }
+    .filter-search svg { color: var(--soft); flex-shrink: 0; }
+    .filter-search input {
+      border: 0; outline: 0; background: transparent;
+      font-family: inherit; font-size: .88rem; color: var(--ink);
+      flex: 1; min-width: 0;
+    }
+    .filter-search input::placeholder { color: var(--soft-2); }
+
+    /* Catalog */
+    .catalog { background: #fff; padding: 56px 0 100px; }
+    .cat-section { margin-bottom: 56px; scroll-margin-top: 160px; }
+    .cat-section:last-child { margin-bottom: 0; }
+    .cat-head {
+      display: flex; align-items: end; justify-content: space-between;
+      gap: 20px; flex-wrap: wrap;
+      margin-bottom: 28px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .cat-head h2 {
+      margin: 0; font-size: clamp(1.5rem, 2.6vw, 2rem);
+      letter-spacing: -0.025em;
+    }
+    .cat-head h2 .cat-num {
+      display: inline-block;
+      font-family: var(--font-mono); font-size: .8rem;
+      color: var(--blue-700); margin-right: 10px;
+      vertical-align: middle;
+      background: var(--blue-50); padding: 4px 10px; border-radius: 8px;
+      font-weight: 600; letter-spacing: .04em;
+    }
+    .cat-head p { margin: 4px 0 0; color: var(--soft); font-size: .95rem; max-width: 520px; }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+    }
+    .product {
+      position: relative;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 22px 20px;
+      display: flex; flex-direction: column;
+      transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+    }
+    .product.hidden { display: none; }
+    .product:hover { transform: translateY(-3px); border-color: var(--blue-300); box-shadow: var(--shadow-lg); }
+    .product.featured {
+      background: linear-gradient(180deg, #f5f8ff 0%, #fff 60%);
+      border-color: var(--blue-300);
+      box-shadow: var(--shadow);
+    }
+    .product-tag {
+      position: absolute; top: 14px; right: 14px;
+      font-size: .65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em;
+      padding: 4px 9px; border-radius: 999px;
+    }
+    .product-tag.popular { background: var(--ink); color: #fff; }
+    .product-tag.new { background: var(--blue-600); color: #fff; }
+    .product-tag.bundle { background: #f59e0b; color: #fff; }
+
+    .product h3 {
+      font-size: 1.02rem; font-weight: 700;
+      color: var(--ink); margin: 0 0 6px;
+      letter-spacing: -0.015em;
+      padding-right: 60px;
+    }
+    .product p { font-size: .85rem; color: var(--soft); margin: 0 0 16px; line-height: 1.5; min-height: 38px; }
+
+    .price-row {
+      display: flex; align-items: baseline; gap: 4px;
+      margin-bottom: 4px;
+    }
+    .price-from {
+      font-size: .72rem; font-weight: 600;
+      color: var(--soft); text-transform: uppercase; letter-spacing: .08em;
+      margin-right: 6px;
+    }
+    .price-amt {
+      font-size: 1.7rem; font-weight: 800;
+      color: var(--ink); letter-spacing: -0.025em;
+      line-height: 1;
+    }
+    .price-cycle { font-size: .82rem; color: var(--soft); font-weight: 500; }
+    .price-note { font-size: .72rem; color: var(--soft-2); margin-bottom: 14px; font-family: var(--font-mono); letter-spacing: .02em; }
+
+    .product-cta {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%;
+      padding: 11px 16px;
+      border-radius: 12px;
+      font-size: .88rem; font-weight: 600;
+      background: var(--ink); color: #fff;
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+      margin-top: auto;
+    }
+    .product-cta:hover { background: var(--blue-700); transform: translateY(-1px); box-shadow: 0 10px 24px -10px rgba(37,99,235,.6); }
+    .product-cta.added { background: #16a34a; }
+    .product-cta.added:hover { background: #15803d; }
+    .product-cta svg { transition: transform .25s ease; }
+    .product-cta:hover svg { transform: scale(1.1); }
+
+    .product.featured .product-cta { background: var(--grad); box-shadow: 0 8px 22px -8px rgba(37,99,235,.5); }
+    .product.featured .product-cta:hover { background: var(--grad); }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--soft);
+      font-size: .95rem;
+      border: 2px dashed var(--line);
+      border-radius: 18px;
+    }
+
+    /* Floating cart button */
+    .cart-fab {
+      position: fixed; bottom: 28px; right: 28px;
+      z-index: 80;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 22px;
+      background: var(--ink); color: #fff;
+      border-radius: 999px;
+      box-shadow: 0 20px 50px -10px rgba(11,16,32,.4);
+      font-weight: 600; font-size: .95rem;
+      cursor: pointer; border: 0; font-family: inherit;
+      transform: translateY(120%);
+      transition: transform .3s ease;
+    }
+    .cart-fab.show { transform: translateY(0); }
+    .cart-fab:hover { background: var(--blue-700); }
+    .cart-fab .cart-count {
+      background: var(--blue-500); color: #fff;
+      font-size: .72rem; font-weight: 700;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+    }
+
+    /* Cart drawer */
+    .cart-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: min(440px, 100vw);
+      background: #fff;
+      box-shadow: -20px 0 60px -20px rgba(11,16,32,.3);
+      z-index: 200;
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .35s ease;
+    }
+    .cart-drawer.open { transform: translateX(0); }
+    .cart-overlay {
+      position: fixed; inset: 0;
+      background: rgba(11,16,32,.45);
+      z-index: 190;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s ease;
+    }
+    .cart-overlay.show { opacity: 1; pointer-events: auto; }
+    .cart-head {
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cart-head h3 { margin: 0; font-size: 1.1rem; color: var(--ink); }
+    .cart-close {
+      background: transparent; border: 0; cursor: pointer;
+      width: 36px; height: 36px; border-radius: 10px;
+      display: grid; place-items: center;
+      color: var(--muted);
+      transition: background .2s ease, color .2s ease;
+    }
+    .cart-close:hover { background: var(--bg-soft); color: var(--ink); }
+
+    .cart-body {
+      flex: 1; overflow-y: auto;
+      padding: 18px 24px;
+    }
+    .cart-empty {
+      text-align: center; padding: 60px 20px; color: var(--soft);
+    }
+    .cart-empty svg { color: var(--soft-2); margin-bottom: 16px; }
+    .cart-empty p { margin: 0 0 6px; font-size: .95rem; color: var(--ink); font-weight: 600; }
+    .cart-empty small { font-size: .85rem; color: var(--soft); }
+
+    .cart-item {
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 8px 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line-2);
+      align-items: start;
+    }
+    .cart-item:last-child { border-bottom: 0; }
+    .cart-item h4 { margin: 0 0 4px; font-size: .92rem; font-weight: 600; color: var(--ink); }
+    .cart-item small { display: block; font-size: .78rem; color: var(--soft); }
+    .cart-item .ci-price { font-weight: 700; color: var(--ink); font-size: .92rem; white-space: nowrap; }
+    .cart-item .ci-cycle { font-size: .72rem; color: var(--soft); }
+    .ci-remove {
+      background: transparent; border: 0; cursor: pointer;
+      color: var(--soft); font-size: .78rem;
+      padding: 4px 0; font-family: inherit;
+      grid-column: 1 / -1;
+      text-align: left;
+      transition: color .2s ease;
+    }
+    .ci-remove:hover { color: #ef4444; }
+
+    .cart-foot {
+      padding: 18px 24px 22px;
+      border-top: 1px solid var(--line);
+      background: var(--bg-soft);
+    }
+    .cart-totals {
+      display: grid; gap: 6px; margin-bottom: 14px;
+      font-size: .88rem;
+    }
+    .cart-totals .row {
+      display: flex; justify-content: space-between;
+      color: var(--muted);
+    }
+    .cart-totals .row strong { color: var(--ink); font-weight: 700; }
+    .cart-totals .grand {
+      border-top: 1px dashed var(--line);
+      padding-top: 8px; margin-top: 6px;
+      font-size: 1rem;
+    }
+    .cart-checkout {
+      width: 100%; padding: 14px 20px;
+      border-radius: 12px;
+      background: #25D366; color: #fff;
+      font-weight: 600; font-size: .95rem; border: 0;
+      cursor: pointer; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+    }
+    .cart-checkout:hover { background: #1ea952; transform: translateY(-1px); box-shadow: 0 10px 24px -10px rgba(37,211,102,.6); }
+    .cart-checkout:disabled { opacity: .5; cursor: not-allowed; }
+    .cart-note { font-size: .75rem; color: var(--soft); text-align: center; margin: 12px 0 0; line-height: 1.5; }
+
+    /* Saas info strip */
+    .saas-strip {
+      background: var(--ink); color: #fff;
+      padding: 36px 0;
+    }
+    .saas-strip-inner {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+    .saas-pill {
+      display: flex; align-items: start; gap: 14px;
+    }
+    .saas-pill svg { color: var(--blue-300); flex-shrink: 0; margin-top: 2px; }
+    .saas-pill strong { display: block; color: #fff; font-size: .92rem; margin-bottom: 2px; }
+    .saas-pill small { color: rgba(255,255,255,.65); font-size: .82rem; line-height: 1.5; }
+
+    @media (max-width: 980px) {
+      .saas-strip-inner { grid-template-columns: repeat(2, 1fr); }
+      .filter-bar { top: 70px; }
+    }
+    @media (max-width: 640px) {
+      section { padding: 60px 0; }
+      .shop-hero { padding: 60px 0 40px; }
+      .filter-search { width: 100%; }
+      .saas-strip-inner { grid-template-columns: 1fr; }
+      .cart-fab { bottom: 16px; right: 16px; padding: 12px 18px; font-size: .9rem; }
+    }
+  </style>
+@endpush
+
+@php
+  // Pricing catalog — easily editable, can be moved to DB later.
+  $catalog = [
+    [
+      'id'    => 'web-dev',
+      'num'   => '01',
+      'title' => 'Web Development & Engineering',
+      'blurb' => 'Secure, full-stack builds — from WordPress to custom Laravel SaaS.',
+      'items' => [
+        ['name' => 'Full-Stack Web Development',         'blurb' => 'Custom-built sites and SaaS platforms with Laravel, Node, or Python.', 'price' => 4999,  'cycle' => 'project',    'tag' => 'popular'],
+        ['name' => 'Secure Web Architecture',            'blurb' => 'Hardened multi-layer architecture with auth, secrets, and audit logging.', 'price' => 2999,  'cycle' => 'project'],
+        ['name' => 'WordPress Development',              'blurb' => 'Custom WP theme/plugin development with performance and security baked in.', 'price' => 1499,  'cycle' => 'project'],
+        ['name' => 'Elementor Custom Development',       'blurb' => 'Custom Elementor widgets, dynamic templates, and Pro-level builds.', 'price' => 999,   'cycle' => 'project'],
+        ['name' => 'Laravel Development',                'blurb' => 'Bespoke Laravel apps — APIs, queues, jobs, multi-tenant SaaS.', 'price' => 3499,  'cycle' => 'project',    'tag' => 'new'],
+        ['name' => 'Python Development',                 'blurb' => 'Python automation, scrapers, FastAPI services, and data pipelines.', 'price' => 2499,  'cycle' => 'project'],
+        ['name' => 'JavaScript Development',             'blurb' => 'Vanilla JS, Alpine, React, or Vue components built to spec.', 'price' => 1999,  'cycle' => 'project'],
+        ['name' => 'Custom HTML/CSS/JavaScript',         'blurb' => 'One-off custom builds, microsites, and interactive components.', 'price' => 799,   'cycle' => 'project'],
+        ['name' => 'API Development & Integration',      'blurb' => 'Build, document, and integrate REST/GraphQL APIs and webhooks.', 'price' => 1999,  'cycle' => 'project'],
+        ['name' => 'Microservices Architecture',         'blurb' => 'Decompose monoliths into resilient microservices.', 'price' => 5999,  'cycle' => 'project'],
+        ['name' => 'Payment Gateway Integration',        'blurb' => 'Stripe, PayPal, Square, Authorize.Net — checkout and subscriptions.', 'price' => 1499,  'cycle' => 'project'],
+        ['name' => 'Subscription & Billing Systems',     'blurb' => 'Recurring billing, dunning, plan changes, and proration.', 'price' => 2499,  'cycle' => 'project'],
+        ['name' => 'Hosting & VPS Management',           'blurb' => 'VPS provisioning, deploys, monitoring, backups.', 'price' => 199,   'cycle' => 'mo',         'tag' => 'popular'],
+        ['name' => 'DNS & SSL Configuration',            'blurb' => 'DNS records, SSL/TLS, HSTS, and email auth (SPF/DKIM/DMARC).', 'price' => 299,   'cycle' => 'setup'],
+        ['name' => 'Infrastructure Security',            'blurb' => 'Hardening, firewalls, access control, and incident response.', 'price' => 1499,  'cycle' => 'project'],
+        ['name' => 'Website Security Implementation',    'blurb' => 'WAF, rate limiting, headers, CSP, and continuous scanning.', 'price' => 999,   'cycle' => 'project'],
+        ['name' => 'Role-Based Access Control (RBAC)',   'blurb' => 'Granular permissions, roles, and audit logs across your app.', 'price' => 1299,  'cycle' => 'project'],
+        ['name' => 'Two-Factor Authentication (2FA)',    'blurb' => 'TOTP, WebAuthn, and SMS-based 2FA implementation.', 'price' => 599,   'cycle' => 'project'],
+        ['name' => 'Secure Authentication Systems',      'blurb' => 'Modern auth — OAuth, SSO, passwordless, session security.', 'price' => 1499,  'cycle' => 'project'],
+        ['name' => 'Data Encryption Practices',          'blurb' => 'At-rest and in-transit encryption, key rotation, KMS setup.', 'price' => 1199,  'cycle' => 'project'],
+        ['name' => 'Web Application Security',           'blurb' => 'Full security audit and remediation against OWASP top 10.', 'price' => 1999,  'cycle' => 'project',    'tag' => 'popular'],
+        ['name' => 'API Security',                       'blurb' => 'Auth, rate limiting, schema validation, and abuse detection.', 'price' => 1299,  'cycle' => 'project'],
+        ['name' => 'OWASP Best Practices Audit',         'blurb' => 'Independent OWASP-aligned audit with prioritized findings.', 'price' => 1499,  'cycle' => 'project'],
+        ['name' => 'Malware Prevention & Threat Mitigation', 'blurb' => 'Active monitoring, malware removal, and ongoing protection.', 'price' => 399,   'cycle' => 'mo'],
+      ],
+    ],
+    [
+      'id'    => 'seo-marketing',
+      'num'   => '02',
+      'title' => 'SEO & Digital Marketing',
+      'blurb' => 'Organic, paid, and AI-search visibility that compounds.',
+      'items' => [
+        ['name' => 'Search Engine Optimization (SEO)',   'blurb' => 'Full-stack SEO retainer — strategy, content, links, and reporting.', 'price' => 1499, 'cycle' => 'mo',       'tag' => 'popular'],
+        ['name' => 'Technical SEO Audit',                'blurb' => 'Crawlability, indexation, schema, Core Web Vitals deep-dive.', 'price' => 999,  'cycle' => 'project'],
+        ['name' => 'On-Page SEO',                        'blurb' => 'On-page optimization across up to 50 priority pages.', 'price' => 799,  'cycle' => 'project'],
+        ['name' => 'Local SEO (Google Maps)',            'blurb' => 'GBP optimization, citations, reviews, local ranking.', 'price' => 599,  'cycle' => 'mo'],
+        ['name' => 'Programmatic SEO',                   'blurb' => 'Template-driven page generation at scale.', 'price' => 2999, 'cycle' => 'project',   'tag' => 'new'],
+        ['name' => 'AI Search Optimization (AEO)',       'blurb' => 'Optimize for ChatGPT, Gemini, Perplexity, and Grok citations.', 'price' => 1299, 'cycle' => 'mo',        'tag' => 'new'],
+        ['name' => 'ChatGPT Optimization',               'blurb' => 'Get cited inside ChatGPT for your category queries.', 'price' => 799,  'cycle' => 'mo'],
+        ['name' => 'Gemini Optimization',                'blurb' => 'Surface in Google Gemini and AI Overviews.', 'price' => 799,  'cycle' => 'mo'],
+        ['name' => 'Grok Optimization',                  'blurb' => 'Visibility inside X / Grok for your audience.', 'price' => 699,  'cycle' => 'mo'],
+        ['name' => 'Search Intent Mapping',              'blurb' => 'Cluster keywords by intent and map to funnel stages.', 'price' => 499,  'cycle' => 'project'],
+        ['name' => 'Keyword Research & Strategy',        'blurb' => 'Comprehensive keyword strategy with priority scoring.', 'price' => 599,  'cycle' => 'project'],
+        ['name' => 'SEO Content Creation',               'blurb' => 'High-intent SEO articles, briefs, and editorial calendar.', 'price' => 999,  'cycle' => 'mo'],
+        ['name' => 'Backlink Strategy & Authority',      'blurb' => 'White-hat link building with editorial placements.', 'price' => 1499, 'cycle' => 'mo',        'tag' => 'popular'],
+        ['name' => 'Core Web Vitals Optimization',       'blurb' => 'LCP, INP, CLS optimization to pass CWV.', 'price' => 999,  'cycle' => 'project'],
+        ['name' => 'Website Performance Optimization',   'blurb' => 'Lighthouse 90+ across mobile and desktop.', 'price' => 799,  'cycle' => 'project'],
+        ['name' => 'Competitor & SERP Analysis',         'blurb' => 'Deep competitive teardown with quarterly refresh.', 'price' => 499,  'cycle' => 'project'],
+        ['name' => 'Paid Advertising Strategy',          'blurb' => 'Channel mix, budget allocation, and KPI framework.', 'price' => 999,  'cycle' => 'project'],
+        ['name' => 'Google PPC Campaigns',               'blurb' => 'Search, Performance Max, and YouTube paid management.', 'price' => 1499, 'cycle' => 'mo',        'tag' => 'popular'],
+        ['name' => 'Meta Ads (Facebook & Instagram)',    'blurb' => 'Full-funnel Meta campaigns — creative + performance.', 'price' => 1499, 'cycle' => 'mo'],
+        ['name' => 'X (Twitter) Ad Campaigns',           'blurb' => 'Promoted posts, takeovers, and B2B targeting.', 'price' => 1199, 'cycle' => 'mo'],
+        ['name' => 'TikTok Ad Campaigns',                'blurb' => 'TikTok creative + paid management for short-form virality.', 'price' => 1499, 'cycle' => 'mo'],
+        ['name' => 'Streaming & Display Advertising',    'blurb' => 'CTV, programmatic display, and audio ad management.', 'price' => 1999, 'cycle' => 'mo'],
+        ['name' => 'Conversion Tracking & Attribution',  'blurb' => 'GTM, GA4, server-side tracking, and attribution model.', 'price' => 1199, 'cycle' => 'project'],
+        ['name' => 'Organic Marketing Strategy',         'blurb' => 'Cross-channel organic playbook with editorial calendar.', 'price' => 1499, 'cycle' => 'project'],
+        ['name' => 'Social Media Marketing',             'blurb' => 'Content + community across IG, TikTok, X, LinkedIn.', 'price' => 1299, 'cycle' => 'mo'],
+        ['name' => 'AI Influencer Systems',              'blurb' => 'Build a virtual influencer with content automation.', 'price' => 3999, 'cycle' => 'setup',     'tag' => 'new'],
+        ['name' => 'Email Marketing Automation',         'blurb' => 'Lifecycle flows, broadcasts, and deliverability tuning.', 'price' => 999,  'cycle' => 'mo'],
+        ['name' => 'SMS Marketing Automation',           'blurb' => 'TCPA-compliant SMS flows and broadcasts.', 'price' => 799,  'cycle' => 'mo'],
+        ['name' => 'LinkedIn DM Outreach',               'blurb' => 'Qualified B2B outreach with personalized sequences.', 'price' => 1299, 'cycle' => 'mo'],
+      ],
+    ],
+    [
+      'id'    => 'design-cro',
+      'num'   => '03',
+      'title' => 'Web Design & Conversion (CRO)',
+      'blurb' => 'Revenue-focused design and conversion systems.',
+      'items' => [
+        ['name' => 'Web Design & UX Engineering',        'blurb' => 'End-to-end product/marketing site design with handoff.', 'price' => 3999, 'cycle' => 'project',  'tag' => 'popular'],
+        ['name' => 'Revenue-Focused Web Design',         'blurb' => 'Design systems built around conversion and pipeline.', 'price' => 4999, 'cycle' => 'project'],
+        ['name' => 'Ecommerce Web Design',               'blurb' => 'Shopify, WooCommerce, or custom — designed to convert.', 'price' => 3499, 'cycle' => 'project'],
+        ['name' => 'Landing Pages & Funnels',            'blurb' => 'High-converting landing pages with A/B variants.', 'price' => 1499, 'cycle' => 'project',   'tag' => 'popular'],
+        ['name' => 'Conversion Rate Optimization (CRO)', 'blurb' => 'CRO program — research, hypotheses, A/B testing.', 'price' => 1999, 'cycle' => 'mo'],
+        ['name' => 'Funnel Architecture & Optimization', 'blurb' => 'Map and rebuild your full acquisition funnel.', 'price' => 1499, 'cycle' => 'project'],
+        ['name' => 'CRM-Driven Personalization',         'blurb' => 'Dynamic content per segment, lifecycle, or intent.', 'price' => 1799, 'cycle' => 'project',   'tag' => 'new'],
+      ],
+    ],
+    [
+      'id'    => 'ai-automation',
+      'num'   => '04',
+      'title' => 'AI, Automation & CRM Systems',
+      'blurb' => 'AI employees, agentic systems, and automation.',
+      'items' => [
+        ['name' => 'Marketing Automation & CRM',         'blurb' => 'CRM setup, pipelines, automations, and dashboards.', 'price' => 1499, 'cycle' => 'project',   'tag' => 'popular'],
+        ['name' => 'GoHighLevel Automation',             'blurb' => 'Snapshots, workflows, sub-accounts, and SaaS mode.', 'price' => 1299, 'cycle' => 'project'],
+        ['name' => 'Credit Repair Cloud Automation',     'blurb' => 'CRC workflows, dispute templates, and integrations.', 'price' => 1499, 'cycle' => 'project'],
+        ['name' => 'Dispute Fox Automation',             'blurb' => 'Dispute Fox setup, automations, and reporting.', 'price' => 1299, 'cycle' => 'project'],
+        ['name' => 'Zoho CRM Automation',                'blurb' => 'Zoho setup, blueprint workflows, and Deluge scripts.', 'price' => 1199, 'cycle' => 'project'],
+        ['name' => 'Zapier Automation',                  'blurb' => 'Multi-step Zaps with branching, filters, and code.', 'price' => 599,  'cycle' => 'project'],
+        ['name' => 'Webhook Architecture',               'blurb' => 'Reliable webhook plumbing with retries and observability.', 'price' => 1199, 'cycle' => 'project'],
+        ['name' => 'Lead Management Systems',            'blurb' => 'Lead routing, scoring, and assignment across teams.', 'price' => 1499, 'cycle' => 'project'],
+        ['name' => 'Appointment & Calendar Automation',  'blurb' => 'Calendly/Cal.com/GHL booking with confirmations.', 'price' => 499,  'cycle' => 'project'],
+        ['name' => 'Referral & Affiliate System Setup',  'blurb' => 'Referral tracking, payouts, and affiliate portals.', 'price' => 1299, 'cycle' => 'project'],
+        ['name' => 'AI Infrastructure & Agentic Systems', 'blurb' => 'Build production-grade agentic AI infrastructure.', 'price' => 7999, 'cycle' => 'project',   'tag' => 'new'],
+        ['name' => 'AI Employees & Assistants',          'blurb' => 'Custom AI assistants trained on your business.', 'price' => 2999, 'cycle' => 'project',   'tag' => 'popular'],
+        ['name' => 'AI Customer Support Agents',         'blurb' => '24/7 AI support agent with escalation paths.', 'price' => 2499, 'cycle' => 'project'],
+        ['name' => 'AI Sales & Appointment Setters',     'blurb' => 'AI SDR that books qualified meetings on autopilot.', 'price' => 2999, 'cycle' => 'project',   'tag' => 'new'],
+        ['name' => 'AI Admin & Task Assistants',         'blurb' => 'AI admin that handles inbox, calendar, and ops.', 'price' => 1999, 'cycle' => 'project'],
+        ['name' => 'AI Data Processing Bots',            'blurb' => 'Automate data extraction, cleaning, and enrichment.', 'price' => 1799, 'cycle' => 'project'],
+        ['name' => 'AI Web Chat & Knowledge Bases',      'blurb' => 'Branded AI chat with retrieval over your docs.', 'price' => 1499, 'cycle' => 'project'],
+        ['name' => 'Predictive Automation & Personalization', 'blurb' => 'ML-driven personalization across email, SMS, and site.', 'price' => 2499, 'cycle' => 'project'],
+        ['name' => 'Prompt Engineering',                 'blurb' => 'Production-grade prompt design, testing, and ops.', 'price' => 999,  'cycle' => 'project'],
+        ['name' => 'AI Workflow Orchestration',          'blurb' => 'Multi-agent orchestration with tools and guardrails.', 'price' => 3499, 'cycle' => 'project'],
+      ],
+    ],
+    [
+      'id'    => 'brand-strategy',
+      'num'   => '05',
+      'title' => 'Branding & Business Strategy',
+      'blurb' => 'Brand systems, video, and revenue-focused strategy.',
+      'items' => [
+        ['name' => 'Branding & Creative Systems',        'blurb' => 'Identity systems with guidelines and templates.', 'price' => 2499, 'cycle' => 'project',   'tag' => 'popular'],
+        ['name' => 'Brand Strategy & Consultation',      'blurb' => 'Positioning, messaging, and category strategy.', 'price' => 1999, 'cycle' => 'project'],
+        ['name' => 'Logo Design',                        'blurb' => 'Logo design with primary, secondary, and favicons.', 'price' => 599,  'cycle' => 'project'],
+        ['name' => 'Video Editing',                      'blurb' => 'Long-form and short-form video editing per piece.', 'price' => 199,  'cycle' => 'project'],
+        ['name' => 'Custom Video Production',            'blurb' => 'Concept to delivery — scripts, shoot, edit.', 'price' => 2499, 'cycle' => 'project'],
+        ['name' => 'Short-Form Video Scriptwriting',     'blurb' => 'Hooks and scripts for TikTok, Reels, Shorts.', 'price' => 299,  'cycle' => 'project'],
+        ['name' => 'Canva Creative Design',              'blurb' => 'Editable Canva templates and brand kits.', 'price' => 399,  'cycle' => 'project'],
+        ['name' => 'CapCut Video Editing',               'blurb' => 'Pro CapCut edits with captions and effects.', 'price' => 149,  'cycle' => 'project'],
+        ['name' => 'Digital Marketing Collateral',       'blurb' => 'Pitch decks, one-pagers, and sales collateral.', 'price' => 799,  'cycle' => 'project'],
+        ['name' => 'Business Systems Engineering',       'blurb' => 'Map and re-engineer ops systems for scale.', 'price' => 4999, 'cycle' => 'project',   'tag' => 'new'],
+        ['name' => 'Digital Strategy',                   'blurb' => 'Annual digital strategy with quarterly OKRs.', 'price' => 2999, 'cycle' => 'project'],
+        ['name' => 'Growth Systems Architecture',        'blurb' => 'Compounding growth loops — paid, organic, lifecycle.', 'price' => 3999, 'cycle' => 'project',   'tag' => 'popular'],
+        ['name' => 'Revenue-Focused Digital Strategy',   'blurb' => 'P&L-driven roadmap with revenue forecasts.', 'price' => 3499, 'cycle' => 'project'],
+        ['name' => 'Scalable Automation Design',         'blurb' => 'Blueprint your end-to-end automation stack.', 'price' => 2999, 'cycle' => 'project'],
+      ],
+    ],
+  ];
+
+  $cycleLabels = [
+    'project' => 'one-time',
+    'mo'      => '/month',
+    'setup'   => 'setup',
+  ];
+@endphp
+
+@section('content')
+
+  @include('partials.header')
+
+  <section class="shop-hero">
+    <div class="container shop-hero-inner">
+      <span class="eyebrow"><span class="dot"></span><span>Digirisers Shop</span></span>
+      <h1>Pick services off the <span class="gradient-text">shelf.</span></h1>
+      <p>Transparent starting prices for every service we offer. Add what you need to your cart, send the order, and we'll confirm scope, timeline, and payment over chat. No payment charged on this site.</p>
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <button type="button" class="btn btn-primary btn-lg" id="openCartBtn">View cart</button>
+        <a href="{{ url('/services') }}" class="btn btn-ghost btn-lg">Browse all services</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="filter-bar">
+    <div class="container filter-inner">
+      <div class="filter-pills" id="filterPills">
+        <button type="button" class="filter-pill active" data-filter="all">All <span class="count">{{ collect($catalog)->sum(fn($c) => count($c['items'])) }}</span></button>
+        @foreach ($catalog as $cat)
+          <button type="button" class="filter-pill" data-filter="{{ $cat['id'] }}">{{ Str::limit(explode(' & ', $cat['title'])[0], 16, '') }} <span class="count">{{ count($cat['items']) }}</span></button>
+        @endforeach
+      </div>
+      <label class="filter-search" aria-label="Search services">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="shopSearch" placeholder="Search 90+ services…" autocomplete="off">
+      </label>
+    </div>
+  </div>
+
+  <section class="catalog">
+    <div class="container">
+      @foreach ($catalog as $cat)
+        <div class="cat-section" id="cat-{{ $cat['id'] }}" data-cat="{{ $cat['id'] }}">
+          <div class="cat-head">
+            <div>
+              <h2><span class="cat-num">{{ $cat['num'] }} / 05</span>{{ $cat['title'] }}</h2>
+              <p>{{ $cat['blurb'] }}</p>
+            </div>
+            <a href="{{ url('/services') }}#{{ $cat['id'] }}" class="btn btn-ghost" style="font-size:.88rem; padding:9px 18px;">Read more →</a>
+          </div>
+
+          <div class="product-grid">
+            @foreach ($cat['items'] as $item)
+              @php
+                $tag = $item['tag'] ?? null;
+                $featured = $tag === 'popular';
+                $sku = $cat['id'] . '__' . Str::slug($item['name']);
+              @endphp
+              <article
+                class="product @if($featured) featured @endif"
+                data-cat="{{ $cat['id'] }}"
+                data-name="{{ $item['name'] }}"
+                data-sku="{{ $sku }}"
+                data-price="{{ $item['price'] }}"
+                data-cycle="{{ $item['cycle'] }}"
+              >
+                @if($tag)
+                  <span class="product-tag {{ $tag }}">{{ $tag }}</span>
+                @endif
+                <h3>{{ $item['name'] }}</h3>
+                <p>{{ $item['blurb'] }}</p>
+                <div class="price-row">
+                  <span class="price-from">From</span>
+                  <span class="price-amt">${{ number_format($item['price']) }}</span>
+                  <span class="price-cycle">{{ $cycleLabels[$item['cycle']] ?? '' }}</span>
+                </div>
+                <div class="price-note">
+                  @if($item['cycle'] === 'mo') Monthly retainer · cancel anytime
+                  @elseif($item['cycle'] === 'setup') One-time setup · ongoing optional
+                  @else One-time project · scope on call
+                  @endif
+                </div>
+                <button type="button" class="product-cta js-add">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+                  <span class="js-add-label">Add to cart</span>
+                </button>
+              </article>
+            @endforeach
+          </div>
+        </div>
+      @endforeach
+
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <strong>No services match your search.</strong><br/>
+        <small>Try a different keyword or clear the filters.</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="saas-strip">
+    <div class="container saas-strip-inner">
+      <div class="saas-pill">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <div><strong>No payment required</strong><small>Send your order, we'll quote and invoice separately.</small></div>
+      </div>
+      <div class="saas-pill">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div><strong>Fast turnaround</strong><small>Most projects kick off within 48 hours of confirmation.</small></div>
+      </div>
+      <div class="saas-pill">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div><strong>Secure & compliant</strong><small>OWASP best practices and data privacy by default.</small></div>
+      </div>
+      <div class="saas-pill">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        <div><strong>Real humans + AI</strong><small>One team for strategy, build, and growth — never offshore-only.</small></div>
+      </div>
+    </div>
+  </section>
+
+  {{-- Floating cart --}}
+  <button type="button" class="cart-fab" id="cartFab" aria-label="Open cart">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+    <span>Cart</span>
+    <span class="cart-count" id="cartCount">0</span>
+  </button>
+
+  {{-- Cart drawer --}}
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart" aria-hidden="true">
+    <div class="cart-head">
+      <h3>Your order</h3>
+      <button type="button" class="cart-close" id="cartClose" aria-label="Close cart">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="cart-body" id="cartBody">
+      <div class="cart-empty" id="cartEmpty">
+        <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+        <p>Your cart is empty</p>
+        <small>Add services to start building your order.</small>
+      </div>
+    </div>
+    <div class="cart-foot" id="cartFoot" style="display:none;">
+      <div class="cart-totals">
+        <div class="row"><span>One-time projects</span><strong id="totalProject">$0</strong></div>
+        <div class="row"><span>Monthly retainers</span><strong id="totalMonthly">$0/mo</strong></div>
+        <div class="row"><span>Setup fees</span><strong id="totalSetup">$0</strong></div>
+        <div class="row grand"><span>Subtotal due upfront</span><strong id="totalUpfront">$0</strong></div>
+      </div>
+      <button type="button" class="cart-checkout" id="cartCheckout">
+        <svg viewBox="0 0 32 32" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3zm0 23.6c-1.9 0-3.7-.5-5.3-1.4l-.4-.2-4.1 1.1 1.1-4-.2-.4c-1-1.6-1.5-3.5-1.5-5.5 0-5.7 4.6-10.4 10.4-10.4 2.8 0 5.4 1.1 7.3 3 2 2 3 4.6 3 7.3.1 5.9-4.6 10.5-10.3 10.5z"/></svg>
+        Send order via WhatsApp
+      </button>
+      <p class="cart-note">No payment is taken on this site. We'll review your scope, confirm pricing, and invoice you separately.</p>
+    </div>
+  </aside>
+
+  @include('partials.footer')
+
+@endsection
+
+@push('scripts')
+  <script>
+    (function () {
+      const STORAGE_KEY = 'digi_cart_v1';
+      const WA_NUMBER   = '14019987807';
+
+      const products    = document.querySelectorAll('.product');
+      const filterPills = document.querySelectorAll('.filter-pill');
+      const searchInput = document.getElementById('shopSearch');
+      const emptyState  = document.getElementById('emptyState');
+      const catSections = document.querySelectorAll('.cat-section');
+
+      const cartFab     = document.getElementById('cartFab');
+      const cartCountEl = document.getElementById('cartCount');
+      const cartDrawer  = document.getElementById('cartDrawer');
+      const cartOverlay = document.getElementById('cartOverlay');
+      const cartClose   = document.getElementById('cartClose');
+      const cartBody    = document.getElementById('cartBody');
+      const cartEmpty   = document.getElementById('cartEmpty');
+      const cartFoot    = document.getElementById('cartFoot');
+      const totalProjectEl = document.getElementById('totalProject');
+      const totalMonthlyEl = document.getElementById('totalMonthly');
+      const totalSetupEl   = document.getElementById('totalSetup');
+      const totalUpfrontEl = document.getElementById('totalUpfront');
+      const cartCheckout   = document.getElementById('cartCheckout');
+      const openCartBtn    = document.getElementById('openCartBtn');
+
+      // --- Cart state ---
+      const loadCart = () => {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+        catch (e) { return []; }
+      };
+      const saveCart = (cart) => localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+      let cart = loadCart();
+
+      const fmt = (n) => '$' + Number(n).toLocaleString('en-US');
+
+      const renderCart = () => {
+        // Sync product CTAs
+        const skus = new Set(cart.map(i => i.sku));
+        document.querySelectorAll('.product').forEach(p => {
+          const btn = p.querySelector('.js-add');
+          const lbl = btn?.querySelector('.js-add-label');
+          if (skus.has(p.dataset.sku)) {
+            btn?.classList.add('added');
+            if (lbl) lbl.textContent = 'Added ✓';
+          } else {
+            btn?.classList.remove('added');
+            if (lbl) lbl.textContent = 'Add to cart';
+          }
+        });
+
+        // Cart badge
+        cartCountEl.textContent = cart.length;
+        if (cart.length > 0) cartFab.classList.add('show');
+        else cartFab.classList.remove('show');
+
+        // Cart body
+        if (cart.length === 0) {
+          cartEmpty.style.display = '';
+          cartFoot.style.display = 'none';
+          cartBody.querySelectorAll('.cart-item').forEach(n => n.remove());
+          return;
+        }
+        cartEmpty.style.display = 'none';
+        cartFoot.style.display = '';
+        cartBody.querySelectorAll('.cart-item').forEach(n => n.remove());
+
+        const cycleLabel = { project: 'one-time', mo: '/month', setup: 'setup' };
+        cart.forEach((item, idx) => {
+          const row = document.createElement('div');
+          row.className = 'cart-item';
+          row.innerHTML = `
+            <div>
+              <h4>${item.name}</h4>
+              <small>${item.cat}</small>
+            </div>
+            <div style="text-align:right;">
+              <div class="ci-price">${fmt(item.price)}</div>
+              <div class="ci-cycle">${cycleLabel[item.cycle] || ''}</div>
+            </div>
+            <button type="button" class="ci-remove" data-idx="${idx}">Remove</button>
+          `;
+          cartBody.appendChild(row);
+        });
+
+        // Totals
+        const totalProject = cart.filter(i => i.cycle === 'project').reduce((s, i) => s + i.price, 0);
+        const totalMonthly = cart.filter(i => i.cycle === 'mo').reduce((s, i) => s + i.price, 0);
+        const totalSetup   = cart.filter(i => i.cycle === 'setup').reduce((s, i) => s + i.price, 0);
+
+        totalProjectEl.textContent = fmt(totalProject);
+        totalMonthlyEl.textContent = fmt(totalMonthly) + '/mo';
+        totalSetupEl.textContent   = fmt(totalSetup);
+        totalUpfrontEl.textContent = fmt(totalProject + totalSetup);
+
+        cartBody.querySelectorAll('.ci-remove').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const idx = Number(btn.dataset.idx);
+            cart.splice(idx, 1);
+            saveCart(cart);
+            renderCart();
+          });
+        });
+      };
+
+      // --- Add / remove ---
+      products.forEach(prod => {
+        prod.querySelector('.js-add')?.addEventListener('click', () => {
+          const sku = prod.dataset.sku;
+          const exists = cart.findIndex(i => i.sku === sku);
+          if (exists >= 0) {
+            cart.splice(exists, 1);
+          } else {
+            const catSection = prod.closest('.cat-section');
+            const catName = catSection?.querySelector('h2')?.textContent.replace(/^\d+\s*\/\s*\d+/, '').trim() || '';
+            cart.push({
+              sku,
+              name:  prod.dataset.name,
+              price: Number(prod.dataset.price),
+              cycle: prod.dataset.cycle,
+              cat:   catName,
+            });
+          }
+          saveCart(cart);
+          renderCart();
+        });
+      });
+
+      // --- Filter & search ---
+      const applyFilters = () => {
+        const activeFilter = document.querySelector('.filter-pill.active')?.dataset.filter || 'all';
+        const q = (searchInput.value || '').trim().toLowerCase();
+        let visibleAny = false;
+
+        catSections.forEach(sec => {
+          let secVisible = false;
+          sec.querySelectorAll('.product').forEach(p => {
+            const matchesCat = activeFilter === 'all' || p.dataset.cat === activeFilter;
+            const text = (p.dataset.name + ' ' + p.querySelector('p').textContent).toLowerCase();
+            const matchesSearch = !q || text.includes(q);
+            const show = matchesCat && matchesSearch;
+            p.classList.toggle('hidden', !show);
+            if (show) { secVisible = true; visibleAny = true; }
+          });
+          sec.style.display = secVisible ? '' : 'none';
+        });
+        emptyState.style.display = visibleAny ? 'none' : '';
+      };
+
+      filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          filterPills.forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          applyFilters();
+        });
+      });
+      searchInput.addEventListener('input', applyFilters);
+
+      // --- Cart drawer ---
+      const openCart = () => {
+        cartDrawer.classList.add('open');
+        cartOverlay.classList.add('show');
+        cartDrawer.setAttribute('aria-hidden', 'false');
+      };
+      const closeCart = () => {
+        cartDrawer.classList.remove('open');
+        cartOverlay.classList.remove('show');
+        cartDrawer.setAttribute('aria-hidden', 'true');
+      };
+      cartFab.addEventListener('click', openCart);
+      openCartBtn?.addEventListener('click', openCart);
+      cartClose.addEventListener('click', closeCart);
+      cartOverlay.addEventListener('click', closeCart);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCart(); });
+
+      // --- Checkout via WhatsApp ---
+      cartCheckout.addEventListener('click', () => {
+        if (cart.length === 0) return;
+        const cycleLabel = { project: 'one-time', mo: '/month', setup: 'setup' };
+        const lines = ['*Digirisers — new order*', ''];
+        cart.forEach((item, i) => {
+          lines.push(`${i + 1}. *${item.name}* — ${fmt(item.price)} ${cycleLabel[item.cycle] || ''}`);
+          if (item.cat) lines.push(`   _${item.cat}_`);
+        });
+        const totalProject = cart.filter(i => i.cycle === 'project').reduce((s, i) => s + i.price, 0);
+        const totalMonthly = cart.filter(i => i.cycle === 'mo').reduce((s, i) => s + i.price, 0);
+        const totalSetup   = cart.filter(i => i.cycle === 'setup').reduce((s, i) => s + i.price, 0);
+        lines.push('', '— Totals —');
+        lines.push(`One-time projects: ${fmt(totalProject)}`);
+        lines.push(`Monthly retainers: ${fmt(totalMonthly)}/mo`);
+        lines.push(`Setup fees: ${fmt(totalSetup)}`);
+        lines.push(`*Subtotal upfront: ${fmt(totalProject + totalSetup)}*`);
+        lines.push('', `Submitted: ${new Date().toLocaleString()}`);
+
+        const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`;
+        const win = window.open(url, '_blank');
+        if (!win) window.location.href = url;
+      });
+
+      // Initial render
+      renderCart();
+    })();
+  </script>
+@endpush

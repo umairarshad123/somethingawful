@@ -10,43 +10,7 @@
 
 @section('content')
 
-  <header class="nav" id="nav">
-    <div class="nav-inner container">
-      <a href="{{ url('/') }}" class="logo" aria-label="Digirisers home">
-        <span class="logo-mark" aria-hidden="true">
-          <svg viewBox="0 0 40 40" width="32" height="32">
-            <defs>
-              <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#60a5fa"/>
-                <stop offset="1" stop-color="#1e3a8a"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="36" height="36" rx="10" fill="url(#lg)"/>
-            <path d="M10 26 L16 18 L22 24 L30 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="30" cy="12" r="2.5" fill="#fff"/>
-          </svg>
-        </span>
-        <span class="logo-text">Digirisers<span class="logo-dot">.</span></span>
-      </a>
-
-      <nav class="nav-links" aria-label="Primary">
-        <a href="{{ url('/') }}#services">Services</a>
-        <a href="{{ url('/') }}#industries">Industries</a>
-        <a href="{{ url('/') }}#results">Results</a>
-        <a href="{{ url('/pricing') }}">Pricing</a>
-        <a href="{{ url('/') }}#process">Process</a>
-        <a href="{{ url('/') }}#contact">Contact</a>
-      </nav>
-
-      <div class="nav-right">
-        <a href="{{ url('/') }}#contact" class="btn btn-primary nav-cta">Start a project</a>
-      </div>
-
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
-        <span></span><span></span>
-      </button>
-    </div>
-  </header>
+  @include('partials.header')
 
   <section class="legal-hero">
     <div class="container legal-hero-inner">
@@ -169,90 +133,7 @@
     </div>
   </section>
 
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-inner">
-        <div class="footer-brand">
-          <a href="{{ url('/') }}" class="logo">
-            <span class="logo-mark" aria-hidden="true">
-              <svg viewBox="0 0 40 40" width="28" height="28">
-                <rect x="2" y="2" width="36" height="36" rx="10" fill="#3b82f6"/>
-                <path d="M10 26 L16 18 L22 24 L30 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="30" cy="12" r="2.5" fill="#fff"/>
-              </svg>
-            </span>
-            <span class="logo-text">Digirisers<span class="logo-dot">.</span></span>
-          </a>
-          <p>Digital marketing that rises above. Strategy, creative, and engineering under one roof.</p>
-          <a href="tel:+14019987807" class="footer-phone">+1 (401) 998-7807</a>
-        </div>
-
-        <div class="footer-cols">
-          <div>
-            <h5>Grow</h5>
-            <ul>
-              <li><a href="{{ url('/') }}#services">SEO</a></li>
-              <li><a href="{{ url('/') }}#services">PPC</a></li>
-              <li><a href="{{ url('/') }}#services">Social</a></li>
-              <li><a href="{{ url('/') }}#services">Content</a></li>
-              <li><a href="{{ url('/') }}#services">Email</a></li>
-            </ul>
-          </div>
-          <div>
-            <h5>Build</h5>
-            <ul>
-              <li><a href="{{ url('/') }}#services">Web Design</a></li>
-              <li><a href="{{ url('/') }}#services">Ecommerce</a></li>
-              <li><a href="{{ url('/') }}#services">WordPress</a></li>
-              <li><a href="{{ url('/') }}#services">Shopify</a></li>
-              <li><a href="{{ url('/') }}#services">AI Agents</a></li>
-            </ul>
-          </div>
-          <div>
-            <h5>Convert</h5>
-            <ul>
-              <li><a href="{{ url('/') }}#services">CRO</a></li>
-              <li><a href="{{ url('/') }}#services">Landing Pages</a></li>
-              <li><a href="{{ url('/') }}#services">Personalization</a></li>
-              <li><a href="{{ url('/') }}#services">ABM</a></li>
-              <li><a href="{{ url('/') }}#services">Attribution</a></li>
-            </ul>
-          </div>
-          <div>
-            <h5>Legal</h5>
-            <ul>
-              <li><a href="{{ url('/pricing') }}">Pricing</a></li>
-              <li><a href="{{ url('/privacy') }}">Privacy Policy</a></li>
-              <li><a href="{{ url('/terms') }}">Terms of Service</a></li>
-              <li><a href="{{ url('/refund') }}">Refund Policy</a></li>
-              <li><a href="{{ url('/') }}#contact">Contact</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <small>&copy; <span id="year"></span> Digirisers. All rights reserved.</small>
-        <small class="footer-links">
-          <a href="{{ url('/pricing') }}">Pricing</a> <span>&bull;</span>
-          <a href="{{ url('/privacy') }}">Privacy</a> <span>&bull;</span>
-          <a href="{{ url('/terms') }}">Terms</a> <span>&bull;</span>
-          <a href="{{ url('/refund') }}">Refund</a>
-        </small>
-      </div>
-    </div>
-  </footer>
+  @php($hideFooterCta = true)
+  @include('partials.footer')
 
 @endsection
-
-@push('scripts')
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-    const navEl = document.getElementById('nav');
-    const toggle = document.getElementById('navToggle');
-    toggle.addEventListener('click', () => {
-      const open = navEl.classList.toggle('open');
-      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-  </script>
-@endpush

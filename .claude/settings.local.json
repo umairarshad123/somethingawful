@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "Bash(php -r ' *)",
+      "Bash(php -S 127.0.0.1:8765 -t . index.php)",
+      "Bash(echo \"Started PHP server in background, PID: $!\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8765__TRACKED_VAR__)",
+      "Bash(curl -s http://127.0.0.1:8765__TRACKED_VAR__)",
+      "Bash(curl -s \"http://127.0.0.1:8765/shop\")",
+      "Bash(curl -s \"http://127.0.0.1:8765/services\")",
+      "Bash(curl -s \"http://127.0.0.1:8765/\")",
+      "Bash(pkill -f \"php -S 127.0.0.1:8765\")"
+    ]
+  }
+}
