@@ -1,0 +1,11 @@
+[29-Apr-2026 22:21:12 UTC] PHP Warning:  require(/home2/digirise/public_html/vendor/autoload.php): failed to open stream: No such file or directory in /home2/digirise/public_html/index.php on line 14
+[29-Apr-2026 22:21:12 UTC] PHP Fatal error:  require(): Failed opening required '/home2/digirise/public_html/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home2/digirise/public_html/index.php on line 14
+[29-Apr-2026 22:22:25 UTC] PHP Warning:  require(/home2/digirise/public_html/vendor/autoload.php): failed to open stream: No such file or directory in /home2/digirise/public_html/index.php on line 14
+[29-Apr-2026 22:22:25 UTC] PHP Fatal error:  require(): Failed opening required '/home2/digirise/public_html/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php74/root/usr/share/pear') in /home2/digirise/public_html/index.php on line 14
+[29-Apr-2026 22:23:37 UTC] PHP Fatal error:  Uncaught RuntimeException: Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.2.0". You are running 7.4.33. in /home2/digirise/public_html/vendor/composer/platform_check.php:22
+Stack trace:
+#0 /home2/digirise/public_html/vendor/composer/autoload_real.php(25): require()
+#1 /home2/digirise/public_html/vendor/autoload.php(22): ComposerAutoloaderInit53b5d56b3b7e3cbac1713e68c8850f6c::getLoader()
+#2 /home2/digirise/public_html/index.php(14): require('/home2/digirise...')
+#3 {main}
+  thrown in /home2/digirise/public_html/vendor/composer/platform_check.php on line 22
