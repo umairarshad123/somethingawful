@@ -1,468 +1,697 @@
 {{--
-  Mega Header Partial — Digirisers
-  Used by: home, services, shop, pricing, privacy, terms, refund
-  Provides: announcement bar + sticky nav with mega menu, plus mobile drawer
+  DigiRisers Mega Header (scoped with `dr-` prefix to avoid global conflicts)
+  Used on every page via @include('partials.header').
+  Conflict-safe: own announce + nav classes; only relies on shared `.btn` utilities.
 --}}
 
 @push('styles')
   <style>
-    /* =========================================
-       Digirisers — Mega Header
-       ========================================= */
-    .announce { background: var(--ink, #0b1020); color: rgba(255,255,255,.9); font-size: .82rem; letter-spacing: .01em; }
-    .announce-inner { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 24px; }
-    .announce a { color: var(--blue-300, #93c5fd); font-weight: 600; }
-    .announce a:hover { color: #fff; }
-    .pulse {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: #22c55e;
-      box-shadow: 0 0 0 0 rgba(34,197,94,.6);
-      animation: pulse 2s ease-out infinite;
+    /* ============================================================
+       DigiRisers Header — scoped (.dr-*)
+       ============================================================ */
+
+    /* Announcement bar */
+    .dr-announce {
+      background: #0b1020;
+      color: rgba(255,255,255,.92);
+      font-size: .82rem;
     }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(34,197,94,.6); }
-      70% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+    .dr-announce-inner {
+      max-width: 1240px; margin: 0 auto;
+      padding: 9px 24px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; text-align: center;
+    }
+    .dr-announce a { color: #93c5fd; font-weight: 600; }
+    .dr-announce a:hover { color: #fff; }
+    .dr-pulse {
+      width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
+      box-shadow: 0 0 0 0 rgba(34,197,94,.6);
+      animation: dr-pulse 2s ease-out infinite; flex-shrink: 0;
+    }
+    @keyframes dr-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(34,197,94,.6); }
+      70%  { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
       100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
     }
 
-    /* Nav core (overrides any page-level .nav rules so the mega header is consistent everywhere) */
-    .nav {
+    /* Header shell — sticky, full-width, the positioning anchor for the mega panel */
+    .dr-nav {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(255, 255, 255, .82);
-      backdrop-filter: saturate(180%) blur(18px);
-      -webkit-backdrop-filter: saturate(180%) blur(18px);
+      background: rgba(255,255,255,.85);
+      backdrop-filter: saturate(180%) blur(16px);
+      -webkit-backdrop-filter: saturate(180%) blur(16px);
       border-bottom: 1px solid transparent;
-      transition: border-color .3s ease, box-shadow .3s ease, background .3s ease;
+      transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
     }
-    .nav.scrolled {
-      background: rgba(255, 255, 255, .92);
-      border-bottom-color: var(--line, #e5e7eb);
-      box-shadow: 0 4px 30px -12px rgba(11, 16, 32, .1);
+    .dr-nav.dr-scrolled {
+      background: rgba(255,255,255,.94);
+      border-bottom-color: #e5e7eb;
+      box-shadow: 0 4px 24px -12px rgba(11,16,32,.12);
     }
-    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; gap: 24px; }
-    .logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.28rem; letter-spacing: -0.02em; color: var(--ink, #0b1020); }
-    .logo:hover { color: var(--ink, #0b1020); }
-    .logo-mark { display: inline-grid; place-items: center; transition: transform .4s ease; }
-    .logo:hover .logo-mark { transform: rotate(-6deg) scale(1.05); }
-    .logo-dot { color: var(--blue-600, #2563eb); }
+    .dr-nav-inner {
+      max-width: 1240px; margin: 0 auto;
+      padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px;
+    }
 
-    .nav-links { display: flex; gap: 30px; font-weight: 500; font-size: .95rem; align-items: center; list-style: none; margin: 0; padding: 0; }
-    .nav-links > li { position: relative; }
-    .nav-links a, .nav-links button.nav-trigger {
-      color: var(--muted, #475569);
-      position: relative; padding: 6px 0;
+    /* Logo */
+    .dr-logo {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 1.18rem; letter-spacing: -0.02em;
+      color: #0b1020; text-decoration: none; flex-shrink: 0;
+    }
+    .dr-logo:hover { color: #0b1020; }
+    .dr-logo svg { display: block; transition: transform .35s ease; }
+    .dr-logo:hover svg { transform: rotate(-6deg) scale(1.05); }
+    .dr-logo-dot { color: #2563eb; }
+
+    /* Primary nav list */
+    .dr-nav-list {
+      list-style: none; margin: 0; padding: 0;
+      display: flex; align-items: center; gap: 28px;
+    }
+    .dr-nav-list > li {
+      /* IMPORTANT: must be static so the mega panel can position relative to the header. */
+      position: static;
+    }
+    .dr-nav-link,
+    .dr-nav-trigger {
+      display: inline-flex; align-items: center; gap: 5px;
+      position: relative;
+      padding: 8px 0;
+      font: inherit; font-size: .92rem; font-weight: 500;
+      color: #475569;
+      background: transparent; border: 0; cursor: pointer;
+      text-decoration: none;
       transition: color .2s ease;
-      background: transparent; border: 0; cursor: pointer; font: inherit;
-      display: inline-flex; align-items: center; gap: 4px;
     }
-    .nav-links a:hover, .nav-links button.nav-trigger:hover, .nav-links li.has-mega:hover button.nav-trigger { color: var(--ink, #0b1020); }
-    .nav-links a::after, .nav-links button.nav-trigger::after {
-      content: ""; position: absolute; left: 0; right: 0; bottom: -2px;
-      height: 2px; background: var(--blue-600, #2563eb);
-      transform: scaleX(0); transform-origin: left; transition: transform .3s ease;
+    .dr-nav-link:hover,
+    .dr-nav-trigger:hover,
+    .dr-has-mega:hover .dr-nav-trigger,
+    .dr-has-mega.dr-open .dr-nav-trigger {
+      color: #0b1020;
     }
-    .nav-links a:hover::after, .nav-links button.nav-trigger:hover::after, .nav-links li.has-mega:hover button.nav-trigger::after { transform: scaleX(1); }
-    .nav-trigger .caret { transition: transform .25s ease; }
-    .nav-links li.has-mega:hover .caret, .nav-links li.has-mega.open .caret { transform: rotate(180deg); }
-    .nav-links a.active { color: var(--ink, #0b1020); }
-    .nav-links a.active::after { transform: scaleX(1); }
+    .dr-nav-link::after,
+    .dr-nav-trigger::after {
+      content: "";
+      position: absolute; left: 0; right: 0; bottom: 2px;
+      height: 2px; background: #2563eb;
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .25s ease;
+    }
+    .dr-nav-link:hover::after,
+    .dr-nav-trigger:hover::after,
+    .dr-has-mega:hover .dr-nav-trigger::after,
+    .dr-has-mega.dr-open .dr-nav-trigger::after,
+    .dr-nav-link.dr-active::after { transform: scaleX(1); }
 
-    .nav-right { display: flex; align-items: center; gap: 14px; }
-    .nav-phone { display: inline-flex; align-items: center; gap: 7px; color: var(--muted, #475569); font-size: .92rem; font-weight: 500; padding: 8px 0; transition: color .2s ease; }
-    .nav-phone:hover { color: var(--blue-700, #1d4ed8); }
-    .nav-phone svg { color: var(--blue-600, #2563eb); }
-    .nav-toggle { display: none; background: transparent; border: 0; width: 44px; height: 44px; padding: 0; cursor: pointer; }
-    .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--ink, #0b1020); margin: 6px auto; border-radius: 2px; transition: .3s; }
+    .dr-caret {
+      transition: transform .25s ease; flex-shrink: 0;
+      color: currentColor; opacity: .6;
+    }
+    .dr-has-mega:hover .dr-caret,
+    .dr-has-mega.dr-open .dr-caret { transform: rotate(180deg); }
 
-    /* ===== Mega Menu Panel ===== */
-    .mega-panel {
-      position: absolute; left: 50%; top: calc(100% + 8px);
+    /* Right cluster */
+    .dr-nav-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    .dr-nav-phone {
+      display: inline-flex; align-items: center; gap: 7px;
+      color: #475569; font-size: .9rem; font-weight: 500;
+      text-decoration: none;
+      transition: color .2s ease;
+    }
+    .dr-nav-phone:hover { color: #1d4ed8; }
+    .dr-nav-phone svg { color: #2563eb; flex-shrink: 0; }
+    .dr-cta {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 10px 18px; border-radius: 999px;
+      font: inherit; font-size: .88rem; font-weight: 600;
+      color: #fff; text-decoration: none;
+      background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+      box-shadow: 0 8px 22px -10px rgba(37,99,235,.6), inset 0 1px 0 rgba(255,255,255,.2);
+      transition: transform .2s ease, box-shadow .25s ease;
+      white-space: nowrap;
+    }
+    .dr-cta:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -10px rgba(37,99,235,.65); color: #fff; }
+
+    /* Hamburger toggle (mobile only) */
+    .dr-toggle {
+      display: none;
+      background: transparent; border: 0;
+      width: 42px; height: 42px; padding: 0; cursor: pointer;
+      border-radius: 10px;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 5px;
+      flex-shrink: 0;
+    }
+    .dr-toggle:hover { background: #f1f5f9; }
+    .dr-toggle span {
+      display: block; width: 22px; height: 2px;
+      background: #0b1020; border-radius: 2px;
+      transition: transform .25s ease, opacity .25s ease;
+    }
+    .dr-nav.dr-open .dr-toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .dr-nav.dr-open .dr-toggle span:nth-child(2) { opacity: 0; }
+    .dr-nav.dr-open .dr-toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ============================================================
+       Mega Panel — centered to viewport, max 1100px, below header
+       ============================================================ */
+    .dr-mega-panel {
+      position: absolute;
+      top: 100%; left: 50%;
       transform: translateX(-50%) translateY(8px);
-      width: min(1180px, calc(100vw - 32px));
+      width: min(1100px, calc(100vw - 32px));
+      margin-top: 8px;
       background: #fff;
-      border: 1px solid var(--line, #e5e7eb);
-      border-radius: 24px;
-      box-shadow: 0 30px 80px -20px rgba(11, 16, 32, .25), 0 8px 24px -8px rgba(11, 16, 32, .08);
-      padding: 28px;
-      opacity: 0; visibility: hidden;
-      transition: opacity .25s ease, transform .25s ease, visibility .25s;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      box-shadow: 0 30px 70px -20px rgba(11,16,32,.25),
+                  0 8px 20px -10px rgba(11,16,32,.08);
+      padding: 24px;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity .2s ease, transform .25s ease, visibility .2s;
       z-index: 200;
     }
-    .nav-links li.has-mega:hover .mega-panel,
-    .nav-links li.has-mega:focus-within .mega-panel,
-    .nav-links li.has-mega.open .mega-panel {
-      opacity: 1; visibility: visible;
+    .dr-has-mega:hover .dr-mega-panel,
+    .dr-has-mega:focus-within .dr-mega-panel,
+    .dr-has-mega.dr-open .dr-mega-panel {
+      opacity: 1; visibility: visible; pointer-events: auto;
       transform: translateX(-50%) translateY(0);
     }
-    .mega-grid {
+
+    .dr-mega-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 18px;
+      gap: 14px;
     }
-    .mega-col {
+    .dr-mega-col {
       display: flex; flex-direction: column;
-      padding: 18px 16px;
-      border-radius: 16px;
-      background: var(--bg-soft, #f8fafc);
+      padding: 14px 12px;
+      border-radius: 12px;
+      background: #f8fafc;
       border: 1px solid transparent;
-      transition: border-color .25s ease, transform .25s ease, background .25s ease;
+      transition: background .2s ease, border-color .2s ease, transform .25s ease;
     }
-    .mega-col:hover { border-color: var(--blue-200, #bfdbfe); background: #fff; transform: translateY(-2px); box-shadow: 0 8px 24px -12px rgba(30, 58, 138, .2); }
-    .mega-icon {
-      width: 38px; height: 38px; border-radius: 10px;
-      background: var(--blue-50, #eff6ff); color: var(--blue-700, #1d4ed8);
-      display: grid; place-items: center; flex-shrink: 0;
-      margin-bottom: 12px;
+    .dr-mega-col:hover {
+      background: #fff;
+      border-color: #bfdbfe;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px -14px rgba(30,58,138,.25);
+    }
+    .dr-mega-icon {
+      width: 32px; height: 32px; border-radius: 9px;
+      background: #eff6ff; color: #1d4ed8;
+      display: grid; place-items: center;
+      margin-bottom: 10px;
       transition: background .25s ease, color .25s ease;
     }
-    .mega-col:hover .mega-icon { background: var(--grad, linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)); color: #fff; }
-    .mega-col h6 {
-      font-size: .92rem; font-weight: 700; color: var(--ink, #0b1020);
-      margin: 0 0 4px; letter-spacing: -0.01em;
+    .dr-mega-col:hover .dr-mega-icon {
+      background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+      color: #fff;
     }
-    .mega-col p { font-size: .78rem; color: var(--soft, #64748b); margin: 0 0 14px; line-height: 1.4; }
-    .mega-col ul { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 6px; }
-    .mega-col li a {
-      display: block; padding: 5px 8px; margin: 0 -8px;
-      font-size: .82rem; color: var(--muted, #475569); line-height: 1.35;
-      border-radius: 7px;
-      transition: background .2s ease, color .2s ease;
+    .dr-mega-col h6 {
+      font-size: .82rem; font-weight: 700;
+      color: #0b1020; margin: 0 0 8px;
+      letter-spacing: -0.01em;
     }
-    .mega-col li a:hover { background: var(--blue-50, #eff6ff); color: var(--blue-800, #1e40af); }
-    .mega-col li a::after { display: none; }
-    .mega-col-foot {
-      margin-top: auto; padding-top: 10px;
-      border-top: 1px dashed var(--line, #e5e7eb);
-      font-size: .78rem; font-weight: 600; color: var(--blue-700, #1d4ed8);
-      display: inline-flex; align-items: center; gap: 4px;
+    .dr-mega-col ul {
+      list-style: none; margin: 0 0 10px; padding: 0;
+      display: flex; flex-direction: column; gap: 1px;
+      flex: 1;
     }
-    .mega-col-foot:hover { color: var(--blue-900, #1e3a8a); }
-    .mega-col-foot::after { display: none; }
+    .dr-mega-col li a {
+      display: block;
+      padding: 6px 8px; margin: 0 -8px;
+      font-size: .8rem; line-height: 1.3;
+      color: #475569; text-decoration: none;
+      border-radius: 6px;
+      transition: background .15s ease, color .15s ease;
+    }
+    .dr-mega-col li a::after { display: none; }
+    .dr-mega-col li a:hover {
+      background: #eff6ff; color: #1e40af;
+    }
+    .dr-mega-foot-link {
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px dashed #e5e7eb;
+      font-size: .75rem; font-weight: 600; color: #1d4ed8;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 3px;
+    }
+    .dr-mega-foot-link::after { display: none; }
+    .dr-mega-foot-link:hover { color: #1e3a8a; }
 
-    .mega-footer {
-      margin-top: 22px; padding-top: 22px;
-      border-top: 1px solid var(--line, #e5e7eb);
+    .dr-mega-footer {
+      margin-top: 18px; padding-top: 18px;
+      border-top: 1px solid #e5e7eb;
       display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; flex-wrap: wrap;
+      gap: 14px; flex-wrap: wrap;
     }
-    .mega-footer .mf-text { font-size: .9rem; color: var(--muted, #475569); margin: 0; }
-    .mega-footer .mf-text strong { color: var(--ink, #0b1020); }
-    .mega-footer .mf-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-    .mega-mini-btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 9px 16px; border-radius: 999px;
-      font-size: .85rem; font-weight: 600;
-      border: 1px solid var(--line, #e5e7eb);
-      color: var(--ink, #0b1020); background: #fff;
+    .dr-mega-footer p {
+      margin: 0; font-size: .85rem; color: #475569;
+    }
+    .dr-mega-footer p strong { color: #0b1020; font-weight: 600; }
+    .dr-mega-footer-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .dr-mega-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 8px 14px; border-radius: 999px;
+      font-size: .82rem; font-weight: 600;
+      text-decoration: none;
+      border: 1px solid #e5e7eb;
+      color: #0b1020; background: #fff;
       transition: all .2s ease;
     }
-    .mega-mini-btn:hover { border-color: var(--ink, #0b1020); background: var(--ink, #0b1020); color: #fff; }
-    .mega-mini-btn.primary { background: var(--grad, linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%)); color: #fff; border-color: transparent; box-shadow: 0 8px 22px -8px rgba(37, 99, 235, .55); }
-    .mega-mini-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 14px 30px -8px rgba(37, 99, 235, .55); color: #fff; }
-    .mega-mini-btn::after { display: none; }
+    .dr-mega-pill::after { display: none; }
+    .dr-mega-pill:hover { border-color: #0b1020; background: #0b1020; color: #fff; }
+    .dr-mega-pill.dr-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+      color: #fff; border-color: transparent;
+      box-shadow: 0 6px 18px -8px rgba(37,99,235,.5);
+    }
+    .dr-mega-pill.dr-primary:hover { transform: translateY(-1px); color: #fff; }
 
-    /* Backdrop overlay when mega is open (desktop) */
-    .mega-backdrop {
-      position: fixed; inset: 0; background: rgba(11, 16, 32, .25);
+    /* Backdrop */
+    .dr-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(11,16,32,.18);
       backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
-      opacity: 0; pointer-events: none; transition: opacity .25s ease;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease;
       z-index: 90;
     }
-    .nav-links li.has-mega.open ~ .mega-backdrop,
-    body.mega-open .mega-backdrop { opacity: 1; pointer-events: auto; }
+    body.dr-mega-open .dr-backdrop { opacity: 1; pointer-events: auto; }
 
-    /* Mobile drawer */
+    /* ============================================================
+       Mobile (≤980px) — drawer + services accordion
+       ============================================================ */
     @media (max-width: 980px) {
-      .nav-inner { flex-wrap: wrap; padding: 14px 0; }
-      .nav-toggle { order: 2; display: block; }
-      .nav-links { order: 3; display: none; width: 100%; flex-direction: column; gap: 4px; padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--line, #e5e7eb); }
-      .nav-links > li { width: 100%; }
-      .nav-links > li > a, .nav-links > li > button.nav-trigger { width: 100%; padding: 12px 4px; justify-content: space-between; font-size: 1rem; }
-      .nav-links > li > a::after, .nav-links > li > button.nav-trigger::after { display: none; }
-      .nav-right { order: 4; display: none; width: 100%; padding-top: 6px; flex-direction: column; align-items: stretch; gap: 10px; }
-      .nav-right .nav-cta { width: 100%; text-align: center; justify-content: center; }
-      .nav-phone { justify-content: center; padding: 10px 0; }
+      .dr-nav-inner { padding: 12px 18px; }
 
-      .nav.open .nav-links { display: flex; }
-      .nav.open .nav-right { display: flex; }
+      /* Hide desktop links / right cluster, show hamburger */
+      .dr-nav-list { display: none; }
+      .dr-nav-right { display: none; }
+      .dr-toggle { display: inline-flex; }
 
-      /* Mobile mega menu = accordion */
-      .mega-panel {
-        position: static; opacity: 1; visibility: visible;
-        transform: none; width: 100%;
-        max-height: 0; padding: 0 14px; margin: 0;
-        border: 0; border-radius: 12px; box-shadow: none;
-        background: var(--bg-soft, #f8fafc);
-        overflow: hidden;
-        transition: max-height .35s ease, padding .25s ease, margin .25s ease;
+      /* Drawer container — slides down from header */
+      .dr-drawer {
+        position: absolute; top: 100%; left: 0; right: 0;
+        background: #fff;
+        border-top: 1px solid #e5e7eb;
+        box-shadow: 0 20px 40px -16px rgba(11,16,32,.18);
+        max-height: 0; overflow: hidden;
+        transition: max-height .35s ease;
       }
-      .nav-links li.has-mega.open .mega-panel {
-        max-height: 2400px;
-        padding: 14px;
-        margin: 4px 0 8px;
+      .dr-nav.dr-open .dr-drawer { max-height: calc(100vh - 60px); overflow-y: auto; }
+      .dr-drawer-inner { padding: 14px 18px 22px; display: flex; flex-direction: column; gap: 4px; }
+
+      /* Mobile links list */
+      .dr-mobile-list {
+        list-style: none; margin: 0; padding: 0;
+        display: flex; flex-direction: column;
       }
-      .mega-grid { grid-template-columns: 1fr; gap: 8px; }
-      .mega-col { padding: 12px 14px; }
-      .mega-col p { display: none; }
-      .mega-col ul { display: none; }
-      .mega-col.expanded ul { display: grid; }
-      .mega-footer { display: none; }
-      .mega-backdrop { display: none; }
+      .dr-mobile-list > li { border-bottom: 1px solid #f1f5f9; }
+      .dr-mobile-list > li:last-child { border-bottom: 0; }
+      .dr-mobile-link,
+      .dr-mobile-trigger {
+        display: flex; align-items: center; justify-content: space-between;
+        width: 100%; padding: 14px 4px;
+        font: inherit; font-size: 1rem; font-weight: 500;
+        color: #0b1020; text-decoration: none;
+        background: transparent; border: 0; cursor: pointer;
+        text-align: left;
+      }
+      .dr-mobile-trigger .dr-caret { transition: transform .25s ease; }
+      .dr-has-mega.dr-open .dr-mobile-trigger .dr-caret { transform: rotate(180deg); }
+
+      /* Mobile mega = accordion section under "Services" */
+      .dr-mobile-mega {
+        max-height: 0; overflow: hidden;
+        transition: max-height .35s ease;
+      }
+      .dr-has-mega.dr-open .dr-mobile-mega { max-height: 1800px; }
+      .dr-mobile-mega-inner { padding: 4px 0 14px; display: flex; flex-direction: column; gap: 12px; }
+      .dr-mobile-cat { background: #f8fafc; border-radius: 12px; padding: 12px 14px; }
+      .dr-mobile-cat h6 { margin: 0 0 8px; font-size: .82rem; font-weight: 700; color: #0b1020; letter-spacing: -0.01em; }
+      .dr-mobile-cat ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+      .dr-mobile-cat li a {
+        display: block; padding: 4px 0;
+        font-size: .82rem; color: #475569;
+        text-decoration: none;
+      }
+      .dr-mobile-cat li a:hover { color: #1d4ed8; }
+
+      /* Mobile CTA cluster (always inside drawer) */
+      .dr-mobile-actions {
+        display: flex; flex-direction: column; gap: 10px;
+        padding-top: 14px; margin-top: 4px;
+        border-top: 1px solid #e5e7eb;
+      }
+      .dr-mobile-actions .dr-cta { width: 100%; padding: 13px 18px; font-size: .95rem; }
+      .dr-mobile-actions .dr-nav-phone {
+        justify-content: center;
+        padding: 12px 16px;
+        border: 1px solid #e5e7eb; border-radius: 999px;
+        font-size: .92rem;
+      }
+
+      /* Hide desktop mega when mobile */
+      .dr-mega-panel { display: none; }
+      .dr-backdrop { display: none; }
+
+      /* Prevent horizontal scroll while drawer is open */
+      body.dr-drawer-open { overflow: hidden; }
     }
 
-    @media (max-width: 540px) {
-      .logo-text { font-size: 1.05rem; }
-      .nav-inner { padding: 12px 0; }
+    @media (max-width: 480px) {
+      .dr-logo { font-size: 1.05rem; }
+      .dr-mobile-cat ul { grid-template-columns: 1fr; }
+    }
+
+    @media (min-width: 981px) {
+      /* Drawer markup is irrelevant on desktop — never render */
+      .dr-drawer { display: none; }
     }
   </style>
 @endpush
 
 @php
-  $current = request()->path();
-  $isHome = $current === '/' || $current === '';
-  $home = url('/');
+  $current = trim(request()->path(), '/');
+  $isHome  = $current === '' || $current === '/';
+  $home    = url('/');
+
+  // Service categories shared by desktop mega + mobile accordion
+  $cats = [
+    [
+      'id'    => 'web-dev',
+      'title' => 'Web Development',
+      'icon'  => 'code',
+      'links' => [
+        'Full-Stack Development',
+        'Laravel & Python',
+        'WordPress & Elementor',
+        'API & Microservices',
+        'Web App Security',
+        'VPS & DNS Management',
+      ],
+    ],
+    [
+      'id'    => 'seo-marketing',
+      'title' => 'SEO & Marketing',
+      'icon'  => 'search',
+      'links' => [
+        'Technical & On-Page SEO',
+        'AI Search (ChatGPT/Gemini/Grok)',
+        'Google PPC & Meta Ads',
+        'TikTok & X Ad Campaigns',
+        'Email & SMS Automation',
+        'Backlink & Authority',
+      ],
+    ],
+    [
+      'id'    => 'design-cro',
+      'title' => 'Design & CRO',
+      'icon'  => 'sparkle',
+      'links' => [
+        'Web Design & UX',
+        'Ecommerce Design',
+        'Landing Pages & Funnels',
+        'Conversion Rate Optimization',
+        'Funnel Architecture',
+        'CRM Personalization',
+      ],
+    ],
+    [
+      'id'    => 'ai-automation',
+      'title' => 'AI & Automation',
+      'icon'  => 'robot',
+      'links' => [
+        'AI Employees & Assistants',
+        'AI Sales & Support Agents',
+        'GoHighLevel Automation',
+        'Zoho & Zapier Workflows',
+        'Lead Management',
+        'Prompt Engineering',
+      ],
+    ],
+    [
+      'id'    => 'brand-strategy',
+      'title' => 'Brand & Strategy',
+      'icon'  => 'eye',
+      'links' => [
+        'Brand Strategy & Logo',
+        'Custom Video Production',
+        'Short-Form Scriptwriting',
+        'Canva & CapCut Editing',
+        'Digital Strategy',
+        'Growth Architecture',
+      ],
+    ],
+  ];
 @endphp
 
-<div class="announce">
-  <div class="container announce-inner">
-    <span class="pulse"></span>
+<div class="dr-announce">
+  <div class="dr-announce-inner">
+    <span class="dr-pulse" aria-hidden="true"></span>
     <span>Now booking Q3 engagements — <a href="{{ $home }}#contact">claim your strategy call →</a></span>
   </div>
 </div>
 
-<header class="nav" id="nav">
-  <div class="nav-inner container">
-    <a href="{{ $home }}" class="logo" aria-label="Digirisers home">
-      <span class="logo-mark" aria-hidden="true">
-        <svg viewBox="0 0 40 40" width="32" height="32">
-          <defs>
-            <linearGradient id="lg-header" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#60a5fa"/>
-              <stop offset="1" stop-color="#1e3a8a"/>
-            </linearGradient>
-          </defs>
-          <rect x="2" y="2" width="36" height="36" rx="10" fill="url(#lg-header)"/>
-          <path d="M10 26 L16 18 L22 24 L30 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="30" cy="12" r="2.5" fill="#fff"/>
-        </svg>
-      </span>
-      <span class="logo-text">Digirisers<span class="logo-dot">.</span></span>
+<header class="dr-nav" id="drNav">
+  <div class="dr-nav-inner">
+    {{-- Logo (left) --}}
+    <a href="{{ $home }}" class="dr-logo" aria-label="Digirisers home">
+      <svg viewBox="0 0 40 40" width="30" height="30" aria-hidden="true">
+        <defs>
+          <linearGradient id="drLogoG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#60a5fa"/>
+            <stop offset="1" stop-color="#1e3a8a"/>
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="36" height="36" rx="10" fill="url(#drLogoG)"/>
+        <path d="M10 26 L16 18 L22 24 L30 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="30" cy="12" r="2.5" fill="#fff"/>
+      </svg>
+      <span>Digirisers<span class="dr-logo-dot">.</span></span>
     </a>
 
-    <ul class="nav-links" aria-label="Primary">
-      <li><a href="{{ $home }}" @class(['active' => $isHome])>Home</a></li>
+    {{-- Nav (center) --}}
+    <ul class="dr-nav-list" aria-label="Primary">
+      <li><a href="{{ $home }}" class="dr-nav-link @if($isHome) dr-active @endif">Home</a></li>
 
-      <li class="has-mega">
-        <button type="button" class="nav-trigger" aria-haspopup="true" aria-expanded="false">
+      <li class="dr-has-mega" data-mega>
+        <button type="button" class="dr-nav-trigger" aria-haspopup="true" aria-expanded="false">
           Services
-          <svg class="caret" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <svg class="dr-caret" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M3 4.5 L6 7.5 L9 4.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
 
-        <div class="mega-panel" role="menu">
-          <div class="mega-grid">
-            {{-- 1. Web Development & Engineering --}}
-            <div class="mega-col">
-              <div class="mega-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <div class="dr-mega-panel" role="menu">
+          <div class="dr-mega-grid">
+            @foreach ($cats as $cat)
+              <div class="dr-mega-col">
+                <div class="dr-mega-icon" aria-hidden="true">
+                  @switch($cat['icon'])
+                    @case('code')
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                      @break
+                    @case('search')
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                      @break
+                    @case('sparkle')
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>
+                      @break
+                    @case('robot')
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+                      @break
+                    @case('eye')
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                      @break
+                  @endswitch
+                </div>
+                <h6>{{ $cat['title'] }}</h6>
+                <ul>
+                  @foreach ($cat['links'] as $link)
+                    <li><a href="{{ url('/services') }}#{{ $cat['id'] }}">{{ $link }}</a></li>
+                  @endforeach
+                </ul>
+                <a href="{{ url('/services') }}#{{ $cat['id'] }}" class="dr-mega-foot-link">Browse all →</a>
               </div>
-              <h6>Web Development</h6>
-              <p>Secure full-stack builds, APIs, and infrastructure.</p>
-              <ul>
-                <li><a href="{{ url('/services') }}#web-dev">Full-Stack Development</a></li>
-                <li><a href="{{ url('/services') }}#web-dev">Laravel & Python</a></li>
-                <li><a href="{{ url('/services') }}#web-dev">WordPress & Elementor</a></li>
-                <li><a href="{{ url('/services') }}#web-dev">API & Microservices</a></li>
-                <li><a href="{{ url('/services') }}#web-dev">Web Application Security</a></li>
-                <li><a href="{{ url('/services') }}#web-dev">VPS & DNS Management</a></li>
-              </ul>
-              <a href="{{ url('/services') }}#web-dev" class="mega-col-foot">Browse Web Dev →</a>
-            </div>
-
-            {{-- 2. SEO & Marketing --}}
-            <div class="mega-col">
-              <div class="mega-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-              </div>
-              <h6>SEO & Marketing</h6>
-              <p>Organic, paid, and AI-search visibility that converts.</p>
-              <ul>
-                <li><a href="{{ url('/services') }}#seo-marketing">Technical & On-Page SEO</a></li>
-                <li><a href="{{ url('/services') }}#seo-marketing">AI Search (ChatGPT/Gemini/Grok)</a></li>
-                <li><a href="{{ url('/services') }}#seo-marketing">Google PPC & Meta Ads</a></li>
-                <li><a href="{{ url('/services') }}#seo-marketing">TikTok & X Ad Campaigns</a></li>
-                <li><a href="{{ url('/services') }}#seo-marketing">Email & SMS Automation</a></li>
-                <li><a href="{{ url('/services') }}#seo-marketing">Backlink & Authority Building</a></li>
-              </ul>
-              <a href="{{ url('/services') }}#seo-marketing" class="mega-col-foot">Browse Marketing →</a>
-            </div>
-
-            {{-- 3. Design & CRO --}}
-            <div class="mega-col">
-              <div class="mega-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
-              </div>
-              <h6>Design & CRO</h6>
-              <p>Revenue-focused design, funnels, and conversion systems.</p>
-              <ul>
-                <li><a href="{{ url('/services') }}#design-cro">Web Design & UX</a></li>
-                <li><a href="{{ url('/services') }}#design-cro">Ecommerce Web Design</a></li>
-                <li><a href="{{ url('/services') }}#design-cro">Landing Pages & Funnels</a></li>
-                <li><a href="{{ url('/services') }}#design-cro">Conversion Rate Optimization</a></li>
-                <li><a href="{{ url('/services') }}#design-cro">Funnel Architecture</a></li>
-                <li><a href="{{ url('/services') }}#design-cro">CRM-Driven Personalization</a></li>
-              </ul>
-              <a href="{{ url('/services') }}#design-cro" class="mega-col-foot">Browse Design →</a>
-            </div>
-
-            {{-- 4. AI, Automation & CRM --}}
-            <div class="mega-col">
-              <div class="mega-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
-              </div>
-              <h6>AI & Automation</h6>
-              <p>AI employees, agentic systems, and CRM automation.</p>
-              <ul>
-                <li><a href="{{ url('/services') }}#ai-automation">AI Employees & Assistants</a></li>
-                <li><a href="{{ url('/services') }}#ai-automation">AI Sales & Support Agents</a></li>
-                <li><a href="{{ url('/services') }}#ai-automation">GoHighLevel Automation</a></li>
-                <li><a href="{{ url('/services') }}#ai-automation">Zoho & Zapier Workflows</a></li>
-                <li><a href="{{ url('/services') }}#ai-automation">Lead Management Systems</a></li>
-                <li><a href="{{ url('/services') }}#ai-automation">Prompt Engineering</a></li>
-              </ul>
-              <a href="{{ url('/services') }}#ai-automation" class="mega-col-foot">Browse AI →</a>
-            </div>
-
-            {{-- 5. Brand & Strategy --}}
-            <div class="mega-col">
-              <div class="mega-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
-              </div>
-              <h6>Brand & Strategy</h6>
-              <p>Brand systems, video, and revenue-focused strategy.</p>
-              <ul>
-                <li><a href="{{ url('/services') }}#brand-strategy">Brand Strategy & Logo</a></li>
-                <li><a href="{{ url('/services') }}#brand-strategy">Custom Video Production</a></li>
-                <li><a href="{{ url('/services') }}#brand-strategy">Short-Form Scriptwriting</a></li>
-                <li><a href="{{ url('/services') }}#brand-strategy">Canva & CapCut Editing</a></li>
-                <li><a href="{{ url('/services') }}#brand-strategy">Digital Strategy</a></li>
-                <li><a href="{{ url('/services') }}#brand-strategy">Growth Systems Architecture</a></li>
-              </ul>
-              <a href="{{ url('/services') }}#brand-strategy" class="mega-col-foot">Browse Brand →</a>
-            </div>
+            @endforeach
           </div>
-
-          <div class="mega-footer">
-            <p class="mf-text"><strong>SaaS-style ordering.</strong> Browse the full catalog or shop priced packages.</p>
-            <div class="mf-actions">
-              <a href="{{ url('/services') }}" class="mega-mini-btn">View all services</a>
-              <a href="{{ url('/shop') }}" class="mega-mini-btn primary">Visit Shop →</a>
+          <div class="dr-mega-footer">
+            <p><strong>SaaS-style ordering.</strong> Browse the full catalog or shop priced packages.</p>
+            <div class="dr-mega-footer-actions">
+              <a href="{{ url('/services') }}" class="dr-mega-pill">View all services</a>
+              <a href="{{ url('/shop') }}" class="dr-mega-pill dr-primary">Visit Shop →</a>
             </div>
           </div>
         </div>
       </li>
 
-      <li><a href="{{ url('/shop') }}" @class(['active' => $current === 'shop'])>Shop</a></li>
-      <li><a href="{{ url('/pricing') }}" @class(['active' => $current === 'pricing'])>Pricing</a></li>
-      <li><a href="{{ $home }}#results">Results</a></li>
-      <li><a href="{{ $home }}#contact">Contact</a></li>
+      <li><a href="{{ url('/shop') }}" class="dr-nav-link @if($current === 'shop') dr-active @endif">Shop</a></li>
+      <li><a href="{{ url('/pricing') }}" class="dr-nav-link @if($current === 'pricing') dr-active @endif">Pricing</a></li>
+      <li><a href="{{ $home }}#results" class="dr-nav-link">Results</a></li>
+      <li><a href="{{ $home }}#contact" class="dr-nav-link">Contact</a></li>
     </ul>
 
-    <div class="nav-right">
-      <a href="tel:+14019987807" class="nav-phone" aria-label="Call Digirisers">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1L6.6 10.8z"/></svg>
+    {{-- Right cluster (phone + CTA) --}}
+    <div class="dr-nav-right">
+      <a href="tel:+14019987807" class="dr-nav-phone" aria-label="Call Digirisers">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1L6.6 10.8z"/></svg>
         <span>+1 (401) 998-7807</span>
       </a>
-      <a href="{{ $home }}#contact" class="btn btn-primary nav-cta">Start a project</a>
+      <a href="{{ $home }}#contact" class="dr-cta">Start a project</a>
     </div>
 
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
-      <span></span><span></span>
+    {{-- Hamburger (mobile only) --}}
+    <button type="button" class="dr-toggle" id="drToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="drDrawer">
+      <span></span><span></span><span></span>
     </button>
   </div>
-  <div class="mega-backdrop" id="megaBackdrop" aria-hidden="true"></div>
+
+  {{-- Mobile drawer --}}
+  <div class="dr-drawer" id="drDrawer" aria-hidden="true">
+    <div class="dr-drawer-inner">
+      <ul class="dr-mobile-list">
+        <li><a href="{{ $home }}" class="dr-mobile-link">Home</a></li>
+        <li class="dr-has-mega" data-mega-mobile>
+          <button type="button" class="dr-mobile-trigger" aria-expanded="false">
+            Services
+            <svg class="dr-caret" viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M3 4.5 L6 7.5 L9 4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="dr-mobile-mega">
+            <div class="dr-mobile-mega-inner">
+              @foreach ($cats as $cat)
+                <div class="dr-mobile-cat">
+                  <h6>{{ $cat['title'] }}</h6>
+                  <ul>
+                    @foreach ($cat['links'] as $link)
+                      <li><a href="{{ url('/services') }}#{{ $cat['id'] }}">{{ $link }}</a></li>
+                    @endforeach
+                  </ul>
+                </div>
+              @endforeach
+              <a href="{{ url('/services') }}" class="dr-mega-pill" style="align-self:flex-start;">View all services →</a>
+            </div>
+          </div>
+        </li>
+        <li><a href="{{ url('/shop') }}" class="dr-mobile-link">Shop</a></li>
+        <li><a href="{{ url('/pricing') }}" class="dr-mobile-link">Pricing</a></li>
+        <li><a href="{{ $home }}#results" class="dr-mobile-link">Results</a></li>
+        <li><a href="{{ $home }}#contact" class="dr-mobile-link">Contact</a></li>
+      </ul>
+
+      <div class="dr-mobile-actions">
+        <a href="tel:+14019987807" class="dr-nav-phone">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1L6.6 10.8z"/></svg>
+          <span>+1 (401) 998-7807</span>
+        </a>
+        <a href="{{ $home }}#contact" class="dr-cta">Start a project</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="dr-backdrop" aria-hidden="true"></div>
 </header>
 
 @push('scripts')
   <script>
     (function () {
-      const nav = document.getElementById('nav');
+      const nav     = document.getElementById('drNav');
       if (!nav) return;
+      const toggle  = document.getElementById('drToggle');
+      const drawer  = document.getElementById('drDrawer');
+      const mqMobile = window.matchMedia('(max-width: 980px)');
 
-      // Sticky shadow on scroll
+      // 1) Sticky shadow
       const onScroll = () => {
-        if (window.scrollY > 8) nav.classList.add('scrolled');
-        else nav.classList.remove('scrolled');
+        if (window.scrollY > 6) nav.classList.add('dr-scrolled');
+        else nav.classList.remove('dr-scrolled');
       };
       window.addEventListener('scroll', onScroll, { passive: true });
       onScroll();
 
-      // Mobile drawer
-      const navToggle = document.getElementById('navToggle');
-      navToggle?.addEventListener('click', () => {
-        const open = nav.classList.toggle('open');
-        navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-        if (!open) {
-          // Collapse any open mega sections
-          nav.querySelectorAll('.has-mega.open').forEach(li => li.classList.remove('open'));
-        }
+      // 2) Drawer (mobile)
+      const closeDrawer = () => {
+        nav.classList.remove('dr-open');
+        document.body.classList.remove('dr-drawer-open');
+        toggle?.setAttribute('aria-expanded', 'false');
+        drawer?.setAttribute('aria-hidden', 'true');
+        // Collapse any open accordion sections
+        nav.querySelectorAll('[data-mega-mobile].dr-open').forEach(el => {
+          el.classList.remove('dr-open');
+          el.querySelector('.dr-mobile-trigger')?.setAttribute('aria-expanded', 'false');
+        });
+      };
+      toggle?.addEventListener('click', () => {
+        const open = !nav.classList.contains('dr-open');
+        nav.classList.toggle('dr-open', open);
+        document.body.classList.toggle('dr-drawer-open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        drawer?.setAttribute('aria-hidden', open ? 'false' : 'true');
+        if (!open) closeDrawer();
       });
 
-      // Mega menu — desktop hover handled in CSS, mobile click toggles open
-      const megaTriggers = nav.querySelectorAll('.has-mega .nav-trigger');
-      megaTriggers.forEach(btn => {
+      // 3) Desktop mega — click toggles, hover handled in CSS
+      nav.querySelectorAll('[data-mega] > .dr-nav-trigger').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          const li = btn.closest('.has-mega');
-          if (!li) return;
-          // On desktop, allow click to also toggle (useful for keyboard/touch)
-          const isMobile = window.matchMedia('(max-width: 980px)').matches;
-          if (isMobile) {
-            e.preventDefault();
-            const willOpen = !li.classList.contains('open');
-            // Close siblings
-            nav.querySelectorAll('.has-mega.open').forEach(x => { if (x !== li) x.classList.remove('open'); });
-            li.classList.toggle('open', willOpen);
-            btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-          } else {
-            const willOpen = !li.classList.contains('open');
-            nav.querySelectorAll('.has-mega.open').forEach(x => { if (x !== li) x.classList.remove('open'); });
-            li.classList.toggle('open', willOpen);
-            btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-            document.body.classList.toggle('mega-open', willOpen);
-          }
+          if (mqMobile.matches) return; // mobile uses separate trigger
+          e.preventDefault();
+          const li = btn.closest('[data-mega]');
+          const open = !li.classList.contains('dr-open');
+          // close siblings
+          nav.querySelectorAll('[data-mega].dr-open').forEach(x => x !== li && x.classList.remove('dr-open'));
+          li.classList.toggle('dr-open', open);
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          document.body.classList.toggle('dr-mega-open', open);
         });
       });
 
-      // Close mega on outside click / Escape
+      // 4) Mobile mega accordion
+      nav.querySelectorAll('[data-mega-mobile] > .dr-mobile-trigger').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const li = btn.closest('[data-mega-mobile]');
+          const open = !li.classList.contains('dr-open');
+          li.classList.toggle('dr-open', open);
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+      });
+
+      // 5) Close on outside click / Escape / link click in drawer
       document.addEventListener('click', (e) => {
-        if (!e.target.closest('.has-mega')) {
-          nav.querySelectorAll('.has-mega.open').forEach(li => {
-            li.classList.remove('open');
-            li.querySelector('.nav-trigger')?.setAttribute('aria-expanded', 'false');
+        if (!e.target.closest('[data-mega]')) {
+          nav.querySelectorAll('[data-mega].dr-open').forEach(li => {
+            li.classList.remove('dr-open');
+            li.querySelector('.dr-nav-trigger')?.setAttribute('aria-expanded', 'false');
           });
-          document.body.classList.remove('mega-open');
+          document.body.classList.remove('dr-mega-open');
         }
       });
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          nav.querySelectorAll('.has-mega.open').forEach(li => {
-            li.classList.remove('open');
-            li.querySelector('.nav-trigger')?.setAttribute('aria-expanded', 'false');
-          });
-          document.body.classList.remove('mega-open');
-        }
+        if (e.key !== 'Escape') return;
+        nav.querySelectorAll('[data-mega].dr-open, [data-mega-mobile].dr-open').forEach(li => {
+          li.classList.remove('dr-open');
+          li.querySelector('.dr-nav-trigger, .dr-mobile-trigger')?.setAttribute('aria-expanded', 'false');
+        });
+        document.body.classList.remove('dr-mega-open');
+        if (nav.classList.contains('dr-open')) closeDrawer();
       });
 
-      // Close drawer on link click (mobile UX)
-      nav.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', () => {
-          if (window.matchMedia('(max-width: 980px)').matches) {
-            nav.classList.remove('open');
-            navToggle?.setAttribute('aria-expanded', 'false');
-          }
+      // Close drawer when a mobile link is clicked (anchors / route changes)
+      drawer?.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+          if (mqMobile.matches) closeDrawer();
         });
       });
+
+      // Close mega when switching from mobile->desktop or vice versa
+      mqMobile.addEventListener?.('change', closeDrawer);
     })();
   </script>
 @endpush

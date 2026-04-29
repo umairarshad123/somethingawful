@@ -10,7 +10,9 @@
       "Bash(curl -s \"http://127.0.0.1:8765/shop\")",
       "Bash(curl -s \"http://127.0.0.1:8765/services\")",
       "Bash(curl -s \"http://127.0.0.1:8765/\")",
-      "Bash(pkill -f \"php -S 127.0.0.1:8765\")"
+      "Bash(pkill -f \"php -S 127.0.0.1:8765\")",
+      "Bash(echo \"Started PID: $!\")",
+      "Read(//tmp/**)"
     ]
   }
 }
