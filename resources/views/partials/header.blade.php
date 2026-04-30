@@ -438,13 +438,6 @@
   $mobileCats = collect($catalog)->sortBy('order')->all();
 @endphp
 
-<div class="dr-announce">
-  <div class="dr-announce-inner">
-    <span class="dr-pulse" aria-hidden="true"></span>
-    <span>Now booking Q3 engagements — <a href="{{ $home }}#contact">claim your strategy call →</a></span>
-  </div>
-</div>
-
 <header class="dr-nav" id="drNav">
   <div class="dr-nav-inner">
     {{-- Logo (left) --}}

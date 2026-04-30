@@ -221,9 +221,9 @@
     .hero {
       position: relative; overflow: hidden;
       background: var(--grad-soft);
-      min-height: calc(100svh - 100px);
+      min-height: calc(100svh - 70px);
       display: flex; align-items: center;
-      padding: 36px 0 44px;
+      padding: 32px 0 40px;
     }
     .hero-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
     .grid-overlay {
@@ -515,7 +515,8 @@
 
     /* Services */
     .services { background: var(--bg-soft); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-    .service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 22px; }
+    /* Platform grid — always tiles evenly: 4×2 desktop, 2×4 tablet, 1×8 mobile */
+    .service-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
     .service-card {
       background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg);
       padding: 34px 30px 28px; position: relative; overflow: hidden;
@@ -565,7 +566,8 @@
 
     /* Industries */
     .industries { background: #fff; padding-top: 120px; }
-    .industry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+    /* Industry chips — 12 items always tile cleanly: 4×3 desktop, 3×4 tablet, 2×6 mobile */
+    .industry-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
     .industry {
       background: #fff; border: 1px solid var(--line); border-radius: 14px;
       padding: 20px 22px; font-weight: 600; color: var(--ink);
@@ -781,8 +783,6 @@
       .hero-inner { grid-template-columns: 1fr; gap: 40px; padding-top: 0; }
       .hero-form { order: 2; max-width: 540px; margin: 0 auto; width: 100%; }
       .hero-stats { max-width: 100%; }
-      .hf-badge-1 { top: -16px; left: 8px; }
-      .hf-badge-2 { bottom: -16px; right: 8px; }
       .hero-visual { order: -1; max-width: 520px; margin: 0 auto; width: 100%; }
       .badge-card-1 { left: -2%; }
       .badge-card-2 { right: -2%; }
@@ -791,6 +791,10 @@
       .stat-grid { grid-template-columns: repeat(2, 1fr); }
       .stat-card:nth-child(2) { border-right: 0; }
       .stat-card:nth-child(1), .stat-card:nth-child(2) { border-bottom: 1px solid var(--line); }
+      /* 8 cards → 2×4 instead of 3×3-2 */
+      .service-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+      /* 12 chips → 3×4 */
+      .industry-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .footer-inner { gap: 56px; }
       .contact-card { padding: 50px 44px; gap: 50px; }
     }
@@ -1081,19 +1085,6 @@
       <aside class="hero-form" id="contact" aria-label="Start your growth plan">
         <span class="hf-glow" aria-hidden="true"></span>
 
-        <div class="hf-badge hf-badge-1" aria-hidden="true">
-          <span class="hf-badge-icon">
-            <svg viewBox="0 0 32 32" width="14" height="14" fill="currentColor"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3z"/></svg>
-          </span>
-          <div><small>Avg reply</small><strong>&lt; 30 min</strong></div>
-        </div>
-        <div class="hf-badge hf-badge-2" aria-hidden="true">
-          <span class="hf-badge-icon alt">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </span>
-          <div><small>Trusted by</small><strong>120+ teams</strong></div>
-        </div>
-
         <div class="hf-head">
           <span class="wa-pill">
             <svg viewBox="0 0 32 32" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3z"/></svg>
@@ -1382,6 +1373,8 @@
 
   {{-- The lead form moved into the hero (above the fold). Anchors to "#contact" still resolve — the form aside in the hero now carries id="contact". --}}
 
+  @include('partials.lead-popup')
+
   @include('partials.footer')
 
 @endsection
@@ -1451,12 +1444,33 @@
       });
     });
 
-    // Contact form → WhatsApp
-    const WA_NUMBER = '14019987807'; // +1 (401) 998-7807
-    const form = document.getElementById('leadForm');
+    // Contact form → Google Sheets + WhatsApp
+    const WA_NUMBER  = '14019987807'; // +1 (401) 998-7807
+    const LEAD_URL   = "{{ route('lead.submit') }}";
+    const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const form     = document.getElementById('leadForm');
     const formNote = document.getElementById('formNote');
 
-    form?.addEventListener('submit', (e) => {
+    async function syncLeadToSheet(payload) {
+      try {
+        const res = await fetch(LEAD_URL, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Accept':         'application/json',
+            'X-CSRF-TOKEN':   CSRF_TOKEN,
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: payload,
+        });
+        return res.ok;
+      } catch (e) {
+        console.warn('Lead sync failed', e);
+        return false;
+      }
+    }
+
+    form?.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const data = new FormData(form);
@@ -1483,9 +1497,26 @@
         return;
       }
 
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = 'Sending…';
+
+      // 1) Push to Google Sheets via Laravel proxy (non-blocking on failure).
+      const sheetPayload = new FormData();
+      sheetPayload.append('name',       name);
+      sheetPayload.append('email',      email);
+      sheetPayload.append('phone',      phone);
+      sheetPayload.append('service',    service);
+      sheetPayload.append('message',    message);
+      sheetPayload.append('consent_tx', 'yes');
+      sheetPayload.append('consent_mk', 'yes');
+      sheetPayload.append('page',       window.location.pathname);
+      await syncLeadToSheet(sheetPayload);
+
+      // 2) Open WhatsApp pre-filled (existing behaviour).
       const lines = [
-        '*New inquiry from Digirisers website*',
-        '',
+        '*New inquiry from Digirisers website*', '',
         `*Name:* ${name}`,
         `*Email:* ${email}`,
         `*Phone:* ${phone}`,
@@ -1493,22 +1524,13 @@
       ];
       if (message) lines.push('', '*Goals / message:*', message);
       lines.push(
-        '',
-        '— Consents —',
+        '', '— Consents —',
         `Non-marketing texts (Digirisers): ${consentTx ? 'Yes' : 'No'}`,
         `Marketing / promotional texts (Digirisers): ${consentMk ? 'Yes' : 'No'}`,
-        '',
-        `Submitted: ${new Date().toLocaleString()}`
+        '', `Submitted: ${new Date().toLocaleString()}`
       );
-
-      const text = encodeURIComponent(lines.join('\n'));
-      const url  = `https://wa.me/${WA_NUMBER}?text=${text}`;
-
-      const btn = form.querySelector('button[type="submit"]');
-      btn.disabled = true;
-      const originalHTML = btn.innerHTML;
+      const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`;
       btn.innerHTML = 'Opening WhatsApp…';
-
       const win = window.open(url, '_blank');
       if (!win) window.location.href = url;
 
