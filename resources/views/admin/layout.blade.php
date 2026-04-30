@@ -194,6 +194,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-7m-1 0H4M16 11h-3M16 15h-2m-7 0H4m9-4H4"/><circle cx="20" cy="11" r="1.5"/><circle cx="20" cy="15" r="1.5"/></svg>
           Clients
         </a></li>
+        <li><a href="{{ route('admin.orders.index') }}" class="@if($is('orders')) active @endif">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Orders
+        </a></li>
       </ul>
 
       <div class="ad-section-label">Signals</div>

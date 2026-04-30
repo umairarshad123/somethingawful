@@ -253,10 +253,10 @@
                   </div>
                   <div class="price-note">{{ $item['timeline'] }}</div>
                   <div class="product-actions">
-                    <button type="button" class="product-cta js-add">
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
-                      <span class="js-add-label">Add to cart</span>
-                    </button>
+                    <a class="product-cta" href="{{ route('checkout.show', $item['slug']) }}" style="background:#4AAE18; text-decoration:none;">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                      Buy now
+                    </a>
                     <a class="product-link" href="{{ url('/shop/'.$item['slug']) }}">Details</a>
                   </div>
                 @else

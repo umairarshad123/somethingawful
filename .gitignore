@@ -53,3 +53,4 @@ yarn-error.log
 
 # Backup zips committed by accident
 *.zip
+vendor/stripe/stripe-php/README.md

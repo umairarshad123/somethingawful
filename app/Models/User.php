@@ -23,6 +23,7 @@ class User extends Authenticatable
         'last_login_ip',
         'status',
         'signup_source',
+        'stripe_customer_id',
     ];
 
     protected $hidden = [

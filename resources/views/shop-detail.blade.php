@@ -366,18 +366,13 @@
             <p class="price-note">{{ $cycleNote[$item['cycle']] ?? '' }}</p>
 
             <div class="pdp-actions">
-              <button type="button" class="btn-add" id="addBtn"
-                      data-sku="{{ $item['slug'] }}"
-                      data-name="{{ $item['name'] }}"
-                      data-price="{{ $item['price'] }}"
-                      data-cycle="{{ $item['cycle'] }}"
-                      data-cat="{{ $cat['title'] }}">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
-                <span id="addLabel">Add to cart</span>
-              </button>
-              <a class="btn-wa" id="waBtn" href="{{ route('contact') }}?cart=1#contact" style="background:linear-gradient(135deg,#3b82f6 0%,#1e3a8a 100%);">
+              <a class="btn-add" href="{{ route('checkout.show', $item['slug']) }}" style="background:#4AAE18; text-decoration:none;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Buy now · checkout
+              </a>
+              <a class="btn-wa" id="waBtn" href="{{ route('contact') }}#contact" style="background:linear-gradient(135deg,#3b82f6 0%,#1e3a8a 100%);">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                Submit order request
+                Talk to us first
               </a>
             </div>
 

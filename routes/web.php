@@ -1,9 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BillingPortalController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\LeadController as AdminLeadController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ClientController as AdminClientController;
 use App\Http\Controllers\Admin\ServiceRequestController as AdminServiceRequestController;
@@ -112,7 +116,29 @@ Route::get('/shop/{slug}', function (string $slug, Request $request) {
 */
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', fn () => view('dashboard'))->name('dashboard');
+    Route::get('/dashboard/billing', [BillingPortalController::class, 'open'])->name('billing.portal');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Stripe checkout
+|--------------------------------------------------------------------------
+*/
+Route::get('/checkout/success',    [CheckoutController::class, 'success'])->name('checkout.success');
+Route::get('/checkout/cancel',     [CheckoutController::class, 'cancel'])->name('checkout.cancel');
+Route::get('/checkout/status',     [CheckoutController::class, 'status'])->name('checkout.status');
+Route::get('/checkout/{slug}',     [CheckoutController::class, 'show'])->name('checkout.show');
+Route::post('/checkout/{slug}',    [CheckoutController::class, 'store'])->name('checkout.store');
+
+/*
+|--------------------------------------------------------------------------
+| Stripe webhook — CSRF-exempt because Stripe is not a browser session.
+| Signature is verified inside StripeWebhookController.
+|--------------------------------------------------------------------------
+*/
+Route::post('/webhooks/stripe', [StripeWebhookController::class, 'handle'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
+    ->name('webhooks.stripe');
 
 /*
 |--------------------------------------------------------------------------
@@ -142,6 +168,10 @@ Route::middleware(['auth', 'admin'])->prefix('thebestadmin')->name('admin.')->gr
 
     Route::get('/clients',          [AdminClientController::class, 'index'])->name('clients.index');
     Route::patch('/clients/{client}', [AdminClientController::class, 'update'])->name('clients.update');
+
+    Route::get('/orders',           [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}',   [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->name('orders.refund');
 
     Route::get('/service-requests', [AdminServiceRequestController::class, 'index'])->name('service-requests.index');
 

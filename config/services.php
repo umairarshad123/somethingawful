@@ -75,4 +75,24 @@ return [
         'redirect'      => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Stripe — payments, subscriptions, customer portal
+    |--------------------------------------------------------------------------
+    |
+    | All four values come from .env. Never hard-code keys.
+    |
+    |   STRIPE_KEY              publishable key (pk_test_... or pk_live_...)
+    |   STRIPE_SECRET           secret key     (sk_test_... or sk_live_...)
+    |   STRIPE_WEBHOOK_SECRET   whsec_...      (set after registering the
+    |                                          webhook endpoint in Stripe)
+    |   STRIPE_CURRENCY         3-letter ISO   (defaults to usd)
+    */
+    'stripe' => [
+        'key'             => env('STRIPE_KEY'),
+        'secret'          => env('STRIPE_SECRET'),
+        'webhook_secret'  => env('STRIPE_WEBHOOK_SECRET'),
+        'currency'        => env('STRIPE_CURRENCY', 'usd'),
+    ],
+
 ];

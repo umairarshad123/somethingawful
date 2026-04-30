@@ -97,7 +97,15 @@
       "Bash(curl -s -o /dev/null -w '%{http_code}\\\\n' http://127.0.0.1:8782/index.php__TRACKED_VAR__)",
       "Bash(curl -sI \"http://127.0.0.1:8782/index.php/thebestadmin\")",
       "Bash(curl -sI \"http://127.0.0.1:8782/index.php/thebestadmin/leads\")",
-      "Bash(curl -sI \"http://127.0.0.1:8782/index.php/dashboard\")"
+      "Bash(curl -sI \"http://127.0.0.1:8782/index.php/dashboard\")",
+      "Bash(curl -sf http://127.0.0.1:8784/index.php)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://127.0.0.1:8784/index.php/checkout/wp-portfolio\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://127.0.0.1:8784/index.php/checkout/cancel\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://127.0.0.1:8784/index.php/checkout/success\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -X POST \"http://127.0.0.1:8784/index.php/webhooks/stripe\" -d '{\"type\":\"test\"}')",
+      "Bash(curl -s \"http://127.0.0.1:8784/index.php/checkout/wp-portfolio\")",
+      "Bash(grep -oE \"WordPress Portfolio Site|Pay \\\\\\\\\\\\$300|Order summary|csrf-token|first_name|website|notes\")",
+      "Bash(grep -oE 'Pay \\\\$[0-9.]+ ?[a-z ]*')"
     ]
   }
 }

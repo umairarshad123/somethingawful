@@ -165,6 +165,11 @@
               <small>Custom scope, free 15-minute call</small>
               <span class="arr">Get in touch →</span>
             </a>
+            <a class="db-action" href="{{ route('billing.portal') }}" style="border-color: #4AAE18;">
+              <strong style="color:#3a8c12;">Manage billing</strong>
+              <small>Cards, invoices, cancel subscriptions</small>
+              <span class="arr" style="color:#3a8c12;">Open portal →</span>
+            </a>
           </div>
         </div>
 
