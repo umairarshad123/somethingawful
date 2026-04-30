@@ -11,12 +11,25 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Send unauthenticated visitors hitting "auth" middleware to /auth.
-        $middleware->redirectGuestsTo(fn () => route('auth.show'));
+        // Unauthenticated visitors hitting "auth" middleware get redirected:
+        //  - admin URLs → bespoke admin sign-in
+        //  - everything else → customer sign-in
+        $middleware->redirectGuestsTo(function (\Illuminate\Http\Request $request) {
+            return str_starts_with($request->path(), 'thebestadmin')
+                ? route('admin.login')
+                : route('auth.show');
+        });
 
-        // Register the admin gate as a route alias.
+        // Register middleware aliases.
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
+        ]);
+
+        // Bounce admins back to the admin panel from anywhere on the
+        // public site. Runs after session/auth so $request->user() is
+        // populated by the time we make the call.
+        $middleware->web(append: [
+            \App\Http\Middleware\RedirectAdminToPanel::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

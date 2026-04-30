@@ -90,7 +90,14 @@
       "Bash(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8780/index.php/admin__TRACKED_VAR__)",
       "Bash(curl -sb /tmp/dr-admin.cj http://127.0.0.1:8780/index.php/admin/)",
       "Bash(git check-ignore *)",
-      "Bash(git restore *)"
+      "Bash(git restore *)",
+      "Bash(curl -sf http://127.0.0.1:8782/index.php)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8782/index.php__TRACKED_VAR__)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://127.0.0.1:8782/index.php/thebestadmin/login\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}\\\\n' http://127.0.0.1:8782/index.php__TRACKED_VAR__)",
+      "Bash(curl -sI \"http://127.0.0.1:8782/index.php/thebestadmin\")",
+      "Bash(curl -sI \"http://127.0.0.1:8782/index.php/thebestadmin/leads\")",
+      "Bash(curl -sI \"http://127.0.0.1:8782/index.php/dashboard\")"
     ]
   }
 }

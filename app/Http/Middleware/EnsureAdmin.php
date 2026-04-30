@@ -18,10 +18,12 @@ class EnsureAdmin
         $user = $request->user();
 
         if (! $user) {
-            return redirect()->guest(route('auth.show'));
+            // Send anonymous visitors to the bespoke admin sign-in page,
+            // not the customer /auth screen.
+            return redirect()->guest(route('admin.login'));
         }
 
-        if (! $user->isAdmin()) {
+        if (! $user->isAdmin() || ($user->status ?? 'active') !== 'active') {
             abort(403, 'You do not have access to this area.');
         }
 

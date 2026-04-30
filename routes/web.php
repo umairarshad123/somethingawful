@@ -116,10 +116,19 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin area
+| Admin area — isolated under /thebestadmin
 |--------------------------------------------------------------------------
+| Admins use a separate sign-in page (/thebestadmin/login) and live
+| only inside this URL prefix. Once signed in as admin, the
+| RedirectAdminToPanel middleware bounces them off any public route.
 */
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+
+// Admin auth (no auth middleware on the GET / POST login pair, of course)
+Route::get('/thebestadmin/login',    [\App\Http\Controllers\Admin\AdminAuthController::class, 'show'])->name('admin.login');
+Route::post('/thebestadmin/login',   [\App\Http\Controllers\Admin\AdminAuthController::class, 'login'])->name('admin.login.attempt');
+Route::post('/thebestadmin/logout',  [\App\Http\Controllers\Admin\AdminAuthController::class, 'logout'])->name('admin.logout');
+
+Route::middleware(['auth', 'admin'])->prefix('thebestadmin')->name('admin.')->group(function () {
     Route::get('/',                 [AdminDashboardController::class, 'index'])->name('overview');
 
     Route::get('/leads',            [AdminLeadController::class, 'index'])->name('leads.index');

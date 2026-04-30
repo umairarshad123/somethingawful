@@ -754,9 +754,6 @@
               <small>{{ auth()->user()->email }}</small>
             </div>
             <a href="{{ route('dashboard') }}" class="dr-account-link" role="menuitem">Dashboard</a>
-            @if(auth()->user()->isAdmin())
-              <a href="{{ route('admin.overview') }}" class="dr-account-link" role="menuitem" style="color:#1d4ed8; font-weight:700;">Admin</a>
-            @endif
             <a href="{{ url('/shop') }}" class="dr-account-link" role="menuitem">Shop</a>
             <a href="{{ url('/services') }}" class="dr-account-link" role="menuitem">Browse services</a>
             <form method="POST" action="{{ route('auth.logout') }}" class="dr-account-form">
