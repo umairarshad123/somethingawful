@@ -20,7 +20,12 @@
       "Bash(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8765/services/__TRACKED_VAR__)",
       "Bash(curl -s http://127.0.0.1:8765/services/__TRACKED_VAR__)",
       "Bash(echo \"started PID $!\")",
-      "Bash(echo \"PID $!\")"
+      "Bash(echo \"PID $!\")",
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot -e \"SELECT VERSION\\(\\);\")",
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot -e \"SHOW DATABASES;\")",
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot -e \"SELECT VERSION\\(\\); SHOW DATABASES LIKE 'digirisers';\")",
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot -e \"CREATE DATABASE IF NOT EXISTS digirisers CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")",
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot -e \"SHOW DATABASES LIKE 'digirisers';\")"
     ]
   }
 }
