@@ -53,24 +53,30 @@ Route::post('/auth/logout', [AuthController::class, 'logout'])
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated area — Shop is gated behind login.
+| Public catalog — anyone can browse. Pricing is hidden in the views for
+| guests; signed-in users see prices + cart.
+|--------------------------------------------------------------------------
+*/
+Route::get('/shop', fn () => view('shop'))->name('shop');
+
+Route::get('/shop/{slug}', function (string $slug) {
+    foreach (config('catalog.categories', []) as $cat) {
+        foreach ($cat['items'] as $item) {
+            if (($item['slug'] ?? null) === $slug) {
+                return view('shop-detail', ['item' => $item, 'cat' => $cat]);
+            }
+        }
+    }
+    abort(404);
+})->name('shop.detail');
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated area — only the dashboard requires login.
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', fn () => view('dashboard'))->name('dashboard');
-
-    Route::get('/shop', fn () => view('shop'))->name('shop');
-
-    Route::get('/shop/{slug}', function (string $slug) {
-        foreach (config('catalog.categories', []) as $cat) {
-            foreach ($cat['items'] as $item) {
-                if (($item['slug'] ?? null) === $slug) {
-                    return view('shop-detail', ['item' => $item, 'cat' => $cat]);
-                }
-            }
-        }
-        abort(404);
-    })->name('shop.detail');
 });
 
 

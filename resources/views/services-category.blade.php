@@ -18,6 +18,19 @@
   $cycleLabel = ['project' => 'one-time', 'mo' => '/month', 'week' => '/week', 'per Zap' => 'per Zap', 'per script' => 'per script', 'per asset' => 'per asset'];
   $minPrice = collect($cat['items'])->min('price');
   $allCats = collect(config('catalog.categories', []))->sortBy('order')->values();
+
+  /* Curated Unsplash hero per catalog category. */
+  $categoryHero = [
+    'websites'        => 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1600&q=80&auto=format&fit=crop',
+    'seo'             => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1600&q=80&auto=format&fit=crop',
+    'paid-ads'        => 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=1600&q=80&auto=format&fit=crop',
+    'ai'              => 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1600&q=80&auto=format&fit=crop',
+    'crm-automation'  => 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=1600&q=80&auto=format&fit=crop',
+    'organic'         => 'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=1600&q=80&auto=format&fit=crop',
+    'hosting'         => 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&q=80&auto=format&fit=crop',
+    'branding'        => 'https://images.unsplash.com/photo-1561070791-2526d30994b8?w=1600&q=80&auto=format&fit=crop',
+  ];
+  $heroImage = $categoryHero[$cat['id']] ?? $categoryHero['websites'];
 @endphp
 
 @push('styles')
@@ -65,6 +78,28 @@
     }
     .cat-meta div { font-size: .82rem; color: var(--soft); }
     .cat-meta strong { color: var(--ink); font-weight: 700; }
+
+    /* Hero photo strip — full-bleed under the hero text. */
+    .cat-photo {
+      position: relative;
+      max-width: 1100px;
+      margin: 36px auto 0;
+      border-radius: 26px; overflow: hidden;
+      aspect-ratio: 24 / 9;
+      box-shadow: 0 40px 90px -40px rgba(11,16,32,.45);
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    }
+    .cat-photo img {
+      width: 100%; height: 100%; object-fit: cover;
+      mix-blend-mode: luminosity; opacity: .9;
+      transition: transform 1.2s ease, opacity .3s ease;
+    }
+    .cat-photo:hover img { transform: scale(1.04); opacity: 1; mix-blend-mode: normal; }
+    .cat-photo::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 50%, rgba(11,16,32,.35) 100%);
+      pointer-events: none;
+    }
 
     /* Process strip */
     .process-strip { background: #fff; border-bottom: 1px solid var(--line); padding: 56px 0; }
@@ -180,9 +215,18 @@
       <p class="hero-blurb">{{ $cat['hero'] }}</p>
       <div class="cat-meta">
         <div><strong>{{ count($cat['items']) }}</strong> services</div>
-        <div>From <strong>${{ number_format($minPrice) }}</strong></div>
+        @auth
+          <div>From <strong>${{ number_format($minPrice) }}</strong></div>
+        @else
+          <div><a href="{{ route('auth.show', ['tab' => 'signup']) }}" style="color:var(--blue-700); font-weight:600; text-decoration:none;">🔒 Sign in for pricing</a></div>
+        @endauth
         <div><strong>{{ ucfirst($cat['eyebrow']) }}</strong> module</div>
       </div>
+    </div>
+    <div class="container">
+      <figure class="cat-photo" aria-hidden="true">
+        <img src="{{ $heroImage }}" alt="" loading="lazy" decoding="async" />
+      </figure>
     </div>
   </section>
 
@@ -215,10 +259,19 @@
             @endif
             <h3>{{ $it['name'] }}</h3>
             <p class="blurb">{{ $it['blurb'] }}</p>
-            <div class="price-row">
-              <span class="price">${{ number_format($it['price']) }}</span>
-              <span class="cycle">{{ $cycleLabel[$it['cycle']] ?? '' }}</span>
-            </div>
+            @auth
+              <div class="price-row">
+                <span class="price">${{ number_format($it['price']) }}</span>
+                <span class="cycle">{{ $cycleLabel[$it['cycle']] ?? '' }}</span>
+              </div>
+            @else
+              <div class="price-row">
+                <span style="display:inline-flex; align-items:center; gap:6px; padding:7px 12px; background:#eff6ff; border-radius:999px; font-size:.78rem; font-weight:600; color:#1d4ed8;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Sign in to view pricing
+                </span>
+              </div>
+            @endauth
             <div class="row-foot">
               <span class="timeline">{{ $it['timeline'] }}</span>
               <span class="arrow">View details →</span>
@@ -251,7 +304,7 @@
       <p>Pick a package above to get started, or talk to us about a fully scoped engagement.</p>
       <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
         <a href="{{ url('/shop') }}" class="btn btn-primary btn-lg">Browse Shop →</a>
-        <a href="{{ url('/') }}#contact" class="btn btn-ghost btn-lg">Book a strategy call</a>
+        <a href="{{ route('contact') }}" class="btn btn-ghost btn-lg">Book a strategy call</a>
       </div>
     </div>
   </section>

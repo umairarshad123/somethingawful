@@ -17,6 +17,21 @@
   $related = collect($cat['items'])->where('slug', '!=', $item['slug'])->take(3)->values();
   $allCats = collect(config('catalog.categories', []))->sortBy('order')->values();
 
+  /* Curated Unsplash hero per catalog category. Used as a soft photographic
+     accent on the right of the hero. Falls back to a gradient if a category
+     is missing. */
+  $categoryHero = [
+    'websites'        => 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1400&q=80&auto=format&fit=crop',
+    'seo'             => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1400&q=80&auto=format&fit=crop',
+    'paid-ads'        => 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=1400&q=80&auto=format&fit=crop',
+    'ai'              => 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1400&q=80&auto=format&fit=crop',
+    'crm-automation'  => 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=1400&q=80&auto=format&fit=crop',
+    'organic'         => 'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=1400&q=80&auto=format&fit=crop',
+    'hosting'         => 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1400&q=80&auto=format&fit=crop',
+    'branding'        => 'https://images.unsplash.com/photo-1561070791-2526d30994b8?w=1400&q=80&auto=format&fit=crop',
+  ];
+  $heroImage = $categoryHero[$cat['id']] ?? $categoryHero['websites'];
+
   $faqs = [
     ['How does payment work?', 'No payment is taken on this site. After you submit an order request, we confirm scope on a 15-minute call, send a contract and invoice (Stripe or wire), and kick off when the deposit clears.'],
     ['What if my project is bigger than this package?', 'These are starting prices for the most common scope. If your project needs more — more pages, integrations, custom work — we adjust on the discovery call before any commitment. No surprise invoices.'],
@@ -86,6 +101,88 @@
     .pdp-meta { padding: 14px 16px; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
     .pdp-meta strong { display: block; font-size: .72rem; color: var(--soft); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-bottom: 4px; }
     .pdp-meta span { font-size: .92rem; color: var(--ink); font-weight: 600; }
+
+    /* Photographic hero accent (Unsplash). Below the meta grid on desktop,
+       full-width on mobile. */
+    .pdp-photo {
+      position: relative;
+      margin-top: 28px;
+      border-radius: 22px; overflow: hidden;
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      box-shadow: 0 30px 60px -25px rgba(11,16,32,.35);
+    }
+    .pdp-photo img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      mix-blend-mode: luminosity; opacity: .85;
+      transition: transform .8s ease, opacity .3s ease;
+    }
+    .pdp-photo:hover img { transform: scale(1.04); opacity: 1; mix-blend-mode: normal; }
+    .pdp-photo::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(30,58,138,.55) 0%, rgba(11,16,32,.15) 50%, transparent 100%);
+      pointer-events: none;
+    }
+    .pdp-photo-tag {
+      position: absolute; top: 18px; left: 18px;
+      z-index: 1;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(10px);
+      border-radius: 999px;
+      font-size: .72rem; font-weight: 700;
+      color: #0b1020; text-transform: uppercase; letter-spacing: .08em;
+    }
+    .pdp-photo-tag .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.25);
+    }
+
+    /* Locked-pricing card shown to guests in place of the buy panel. */
+    .pdp-locked {
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, #f5f8ff 0%, #eff6ff 100%);
+      border: 1.5px dashed #93c5fd;
+      border-radius: 22px;
+      padding: 28px;
+      text-align: center;
+    }
+    .pdp-locked::before {
+      content: ""; position: absolute; inset: -40% -10% auto auto;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(59,130,246,.25), transparent 70%);
+      pointer-events: none;
+    }
+    .pdp-locked-icon {
+      width: 56px; height: 56px;
+      margin: 0 auto 14px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+      color: #fff; border-radius: 16px;
+      box-shadow: 0 18px 40px -16px rgba(37,99,235,.6);
+      position: relative; z-index: 1;
+    }
+    .pdp-locked h3 {
+      font-size: 1.35rem; font-weight: 700; color: #0b1020;
+      margin: 0 0 8px; letter-spacing: -0.02em;
+      position: relative; z-index: 1;
+    }
+    .pdp-locked p {
+      font-size: .94rem; color: #475569; margin: 0 0 22px; line-height: 1.55;
+      position: relative; z-index: 1;
+    }
+    .pdp-locked .pdp-actions { position: relative; z-index: 1; }
+    .pdp-locked .price-blur {
+      filter: blur(6px); user-select: none;
+      font-size: 2.4rem; font-weight: 800; color: #0b1020;
+      letter-spacing: -0.03em; line-height: 1;
+      margin-bottom: 18px;
+      position: relative; z-index: 1;
+    }
 
     /* Buy card */
     .pdp-buy {
@@ -252,47 +349,88 @@
             <div class="pdp-meta"><strong>Timeline</strong><span>{{ $item['timeline'] }}</span></div>
             <div class="pdp-meta"><strong>Ideal for</strong><span>{{ $item['idealFor'] }}</span></div>
           </div>
+
+          <figure class="pdp-photo" aria-hidden="true">
+            <span class="pdp-photo-tag"><span class="dot"></span>{{ $cat['title'] }}</span>
+            <img src="{{ $heroImage }}" alt="" loading="lazy" decoding="async" />
+          </figure>
         </div>
 
-        <aside class="pdp-buy">
-          <span class="price-from">Starting at</span>
-          <div class="price-row">
-            <span class="price-amt">${{ number_format($item['price']) }}</span>
-            <span class="price-cycle">{{ $cycleLabel[$item['cycle']] ?? '' }}</span>
-          </div>
-          <p class="price-note">{{ $cycleNote[$item['cycle']] ?? '' }}</p>
+        @auth
+          <aside class="pdp-buy">
+            <span class="price-from">Starting at</span>
+            <div class="price-row">
+              <span class="price-amt">${{ number_format($item['price']) }}</span>
+              <span class="price-cycle">{{ $cycleLabel[$item['cycle']] ?? '' }}</span>
+            </div>
+            <p class="price-note">{{ $cycleNote[$item['cycle']] ?? '' }}</p>
 
-          <div class="pdp-actions">
-            <button type="button" class="btn-add" id="addBtn"
-                    data-sku="{{ $item['slug'] }}"
-                    data-name="{{ $item['name'] }}"
-                    data-price="{{ $item['price'] }}"
-                    data-cycle="{{ $item['cycle'] }}"
-                    data-cat="{{ $cat['title'] }}">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
-              <span id="addLabel">Add to cart</span>
-            </button>
-            <a class="btn-wa" id="waBtn" href="{{ route('contact') }}?cart=1#contact">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-              Submit order request
-            </a>
-          </div>
+            <div class="pdp-actions">
+              <button type="button" class="btn-add" id="addBtn"
+                      data-sku="{{ $item['slug'] }}"
+                      data-name="{{ $item['name'] }}"
+                      data-price="{{ $item['price'] }}"
+                      data-cycle="{{ $item['cycle'] }}"
+                      data-cat="{{ $cat['title'] }}">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+                <span id="addLabel">Add to cart</span>
+              </button>
+              <a class="btn-wa" id="waBtn" href="{{ route('contact') }}?cart=1#contact" style="background:linear-gradient(135deg,#3b82f6 0%,#1e3a8a 100%);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                Submit order request
+              </a>
+            </div>
 
-          <div class="pdp-trust">
-            <div>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>No payment taken on this site</span>
+            <div class="pdp-trust">
+              <div>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>No payment taken on this site</span>
+              </div>
+              <div>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Scope confirmed on a 15-min call</span>
+              </div>
+              <div>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>14-day satisfaction window</span>
+              </div>
             </div>
-            <div>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>Scope confirmed on a 15-min call</span>
+          </aside>
+        @else
+          <aside class="pdp-buy pdp-locked">
+            <div class="pdp-locked-icon">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
-            <div>
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>14-day satisfaction window</span>
+            <h3>Pricing for verified members</h3>
+            <p>We share full package pricing with signed-in customers so we can stay private about the rate card. Create a free account in 30 seconds to see this package's price.</p>
+            <div aria-hidden="true" class="price-blur">${{ number_format($item['price']) }}</div>
+
+            <div class="pdp-actions">
+              <a href="{{ route('auth.show', ['tab' => 'signup']) }}" class="btn-wa" style="background:linear-gradient(135deg,#3b82f6 0%,#1e3a8a 100%);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11V7a5 5 0 0 1 9.9-1"/><rect x="3" y="11" width="18" height="11" rx="2"/></svg>
+                Create account &amp; view pricing
+              </a>
+              <a href="{{ route('auth.show') }}" class="btn-add" style="background:transparent; color:#0b1020; border:1px solid #cbd5e1;">
+                Already have an account? Sign in
+              </a>
             </div>
-          </div>
-        </aside>
+
+            <div class="pdp-trust">
+              <div>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Free account, no payment info needed</span>
+              </div>
+              <div>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Save your cart across devices</span>
+              </div>
+              <div>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>14-day satisfaction window on every package</span>
+              </div>
+            </div>
+          </aside>
+        @endauth
       </div>
     </div>
   </section>
@@ -334,7 +472,7 @@
           <div class="pdp-side-card">
             <h3>Need something custom?</h3>
             <p>Bigger scope? Tighter timeline? Multi-region rollout? Tell us on the discovery call — we routinely scope custom engagements off these starting points.</p>
-            <a href="{{ url('/') }}#contact" style="display:inline-block; margin-top:12px; font-size:.88rem; font-weight:600; color:var(--blue-700);">Talk to a strategist →</a>
+            <a href="{{ route('contact') }}" style="display:inline-block; margin-top:12px; font-size:.88rem; font-weight:600; color:var(--blue-700);">Talk to a strategist →</a>
           </div>
           <div class="pdp-side-card">
             <h3>Bundle it</h3>
@@ -367,10 +505,17 @@
             <a class="related-card" href="{{ url('/shop/'.$r['slug']) }}">
               <h4>{{ $r['name'] }}</h4>
               <p class="blurb">{{ $r['blurb'] }}</p>
-              <div>
-                <span class="price">${{ number_format($r['price']) }}</span>
-                <span class="cycle">{{ $cycleLabel[$r['cycle']] ?? '' }}</span>
-              </div>
+              @auth
+                <div>
+                  <span class="price">${{ number_format($r['price']) }}</span>
+                  <span class="cycle">{{ $cycleLabel[$r['cycle']] ?? '' }}</span>
+                </div>
+              @else
+                <div style="display:inline-flex; align-items:center; gap:6px; padding:7px 12px; background:#eff6ff; border-radius:999px; font-size:.78rem; font-weight:600; color:#1d4ed8; align-self:flex-start;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Sign in to view pricing
+                </div>
+              @endauth
             </a>
           @endforeach
         </div>

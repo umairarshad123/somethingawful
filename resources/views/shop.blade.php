@@ -89,6 +89,35 @@
     .product-link:hover { border-color: var(--ink); color: var(--ink); }
     .product.featured .product-cta { background: var(--grad); box-shadow: 0 8px 22px -8px rgba(37,99,235,.5); }
 
+    /* Locked-pricing CTA shown to guests in place of the price + buttons. */
+    .price-locked {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px;
+      background: linear-gradient(135deg, #f5f8ff 0%, #eff6ff 100%);
+      border: 1px dashed var(--blue-300);
+      border-radius: 14px;
+      color: var(--blue-700);
+      font-size: .82rem; font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .price-locked svg { flex-shrink: 0; color: var(--blue-600); }
+    .price-locked-body { flex: 1; }
+    .price-locked-body strong { display: block; color: var(--ink); font-size: .92rem; margin-bottom: 1px; letter-spacing: -0.01em; }
+    .price-locked-body span { display: block; font-weight: 500; color: var(--soft); font-size: .76rem; line-height: 1.4; }
+    .product-actions-locked {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .price-unlock {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 11px 14px; border-radius: 12px;
+      font-size: .85rem; font-weight: 600;
+      background: var(--grad); color: #fff;
+      text-decoration: none;
+      box-shadow: 0 8px 22px -8px rgba(37,99,235,.5);
+      transition: transform .2s ease, box-shadow .25s ease;
+    }
+    .price-unlock:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -8px rgba(37,99,235,.55); color: #fff; }
+
     .empty-state { grid-column: 1 / -1; padding: 60px 20px; text-align: center; color: var(--soft); font-size: .95rem; border: 2px dashed var(--line); border-radius: 18px; }
 
     /* Floating cart */
@@ -159,8 +188,13 @@
       <h1>Pick services off the <span class="gradient-text">shelf.</span></h1>
       <p>Transparent pricing for every Digirisers service. Read the details, add what you need, send the order — we'll confirm scope and invoice separately. No payment charged on this site.</p>
       <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-        <button type="button" class="btn btn-primary btn-lg" id="openCartBtn">View cart</button>
-        <a href="{{ url('/services') }}" class="btn btn-ghost btn-lg">Browse modules</a>
+        @auth
+          <button type="button" class="btn btn-primary btn-lg" id="openCartBtn">View cart</button>
+          <a href="{{ url('/services') }}" class="btn btn-ghost btn-lg">Browse modules</a>
+        @else
+          <a href="{{ route('auth.show', ['tab' => 'signup']) }}" class="btn btn-primary btn-lg">Create account to see pricing</a>
+          <a href="{{ url('/services') }}" class="btn btn-ghost btn-lg">Browse modules</a>
+        @endauth
       </div>
     </div>
   </section>
@@ -211,19 +245,36 @@
                 @endif
                 <h3>{{ $item['name'] }}</h3>
                 <p class="blurb">{{ $item['blurb'] }}</p>
-                <div class="price-row">
-                  <span class="price-from">From</span>
-                  <span class="price-amt">${{ number_format($item['price']) }}</span>
-                  <span class="price-cycle">{{ $cycleLabel[$item['cycle']] ?? '' }}</span>
-                </div>
-                <div class="price-note">{{ $item['timeline'] }}</div>
-                <div class="product-actions">
-                  <button type="button" class="product-cta js-add">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
-                    <span class="js-add-label">Add to cart</span>
-                  </button>
-                  <a class="product-link" href="{{ url('/shop/'.$item['slug']) }}">Details</a>
-                </div>
+                @auth
+                  <div class="price-row">
+                    <span class="price-from">From</span>
+                    <span class="price-amt">${{ number_format($item['price']) }}</span>
+                    <span class="price-cycle">{{ $cycleLabel[$item['cycle']] ?? '' }}</span>
+                  </div>
+                  <div class="price-note">{{ $item['timeline'] }}</div>
+                  <div class="product-actions">
+                    <button type="button" class="product-cta js-add">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+                      <span class="js-add-label">Add to cart</span>
+                    </button>
+                    <a class="product-link" href="{{ url('/shop/'.$item['slug']) }}">Details</a>
+                  </div>
+                @else
+                  <div class="price-locked">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <div class="price-locked-body">
+                      <strong>Sign in to view pricing</strong>
+                      <span>{{ $item['timeline'] }}</span>
+                    </div>
+                  </div>
+                  <div class="product-actions-locked">
+                    <a href="{{ route('auth.show', ['tab' => 'signup']) }}" class="price-unlock">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11V7a5 5 0 0 1 9.9-1"/><rect x="3" y="11" width="18" height="11" rx="2"/></svg>
+                      View pricing
+                    </a>
+                    <a class="product-link" href="{{ url('/shop/'.$item['slug']) }}">Details →</a>
+                  </div>
+                @endauth
               </article>
             @endforeach
           </div>
@@ -258,12 +309,15 @@
     </div>
   </section>
 
+  @auth
   <button type="button" class="cart-fab" id="cartFab" aria-label="Open cart">
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
     <span>Cart</span>
     <span class="cart-count" id="cartCount">0</span>
   </button>
+  @endauth
 
+  @auth
   <div class="cart-overlay" id="cartOverlay"></div>
   <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart" aria-hidden="true">
     <div class="cart-head">
@@ -293,6 +347,7 @@
       <p class="cart-note">No payment is taken on this site. We'll review your scope, confirm pricing, and invoice you separately.</p>
     </div>
   </aside>
+  @endauth
 
   @include('partials.footer')
 
@@ -311,6 +366,7 @@
       const cartCountEl = document.getElementById('cartCount');
       const cartDrawer  = document.getElementById('cartDrawer');
       const cartOverlay = document.getElementById('cartOverlay');
+      const cartEnabled = !!cartFab; // Cart UI is rendered only for signed-in users.
       const cartClose   = document.getElementById('cartClose');
       const cartBody    = document.getElementById('cartBody');
       const cartEmpty   = document.getElementById('cartEmpty');
@@ -342,6 +398,8 @@
             if (lbl) lbl.textContent = 'Add to cart';
           }
         });
+
+        if (!cartEnabled) return; // Guests don't render the cart UI.
 
         cartCountEl.textContent = cart.length;
         if (cart.length > 0) cartFab.classList.add('show');
@@ -428,20 +486,22 @@
       }));
       searchInput.addEventListener('input', applyFilters);
 
-      const openCart = () => { cartDrawer.classList.add('open'); cartOverlay.classList.add('show'); cartDrawer.setAttribute('aria-hidden', 'false'); };
-      const closeCart = () => { cartDrawer.classList.remove('open'); cartOverlay.classList.remove('show'); cartDrawer.setAttribute('aria-hidden', 'true'); };
-      cartFab.addEventListener('click', openCart);
-      openCartBtn?.addEventListener('click', openCart);
-      cartClose.addEventListener('click', closeCart);
-      cartOverlay.addEventListener('click', closeCart);
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCart(); });
+      if (cartEnabled) {
+        const openCart = () => { cartDrawer.classList.add('open'); cartOverlay.classList.add('show'); cartDrawer.setAttribute('aria-hidden', 'false'); };
+        const closeCart = () => { cartDrawer.classList.remove('open'); cartOverlay.classList.remove('show'); cartDrawer.setAttribute('aria-hidden', 'true'); };
+        cartFab.addEventListener('click', openCart);
+        openCartBtn?.addEventListener('click', openCart);
+        cartClose.addEventListener('click', closeCart);
+        cartOverlay.addEventListener('click', closeCart);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCart(); });
 
-      cartCheckout.addEventListener('click', () => {
-        if (cart.length === 0) return;
-        // Cart contents persist in localStorage (digi_cart_v2). The contact
-        // page reads them via the ?cart=1 flag and prefills the message.
-        window.location.href = "{{ route('contact') }}?cart=1#contact";
-      });
+        cartCheckout.addEventListener('click', () => {
+          if (cart.length === 0) return;
+          // Cart contents persist in localStorage (digi_cart_v2). The contact
+          // page reads them via the ?cart=1 flag and prefills the message.
+          window.location.href = "{{ route('contact') }}?cart=1#contact";
+        });
+      }
 
       renderCart();
     })();

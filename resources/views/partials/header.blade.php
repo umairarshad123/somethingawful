@@ -35,21 +35,30 @@
       100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
     }
 
-    /* Header shell — sticky, full-width, the positioning anchor for the mega panel */
+    /* Header shell — sticky, full-width, the positioning anchor for the mega panel.
+       Uses a glassy backdrop blur and a thin animated gradient line under the bar
+       once the user scrolls. */
     .dr-nav {
       position: sticky; top: 0; z-index: 100;
       width: 100%;
-      background: rgba(255,255,255,.85);
-      backdrop-filter: saturate(180%) blur(16px);
-      -webkit-backdrop-filter: saturate(180%) blur(16px);
+      background: rgba(255,255,255,.78);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
       border-bottom: 1px solid transparent;
       transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
     }
-    .dr-nav.dr-scrolled {
-      background: rgba(255,255,255,.94);
-      border-bottom-color: #e5e7eb;
-      box-shadow: 0 4px 24px -12px rgba(11,16,32,.12);
+    .dr-nav::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -1px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,.45) 30%, rgba(30,58,138,.45) 70%, transparent 100%);
+      opacity: 0; transition: opacity .35s ease;
+      pointer-events: none;
     }
+    .dr-nav.dr-scrolled {
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 6px 28px -14px rgba(11,16,32,.16);
+    }
+    .dr-nav.dr-scrolled::after { opacity: 1; }
     /* Inner row spans the viewport. Desktop padding is wide so the logo
        hugs the left edge and the right cluster hugs the right edge,
        matching the nexvato.com layout. */
@@ -67,16 +76,32 @@
       display: inline-flex; align-items: center; gap: 10px;
       font-weight: 700; font-size: 1.18rem; letter-spacing: -0.02em;
       color: #0b1020; text-decoration: none; flex-shrink: 0;
+      position: relative;
     }
     .dr-logo:hover { color: #0b1020; }
-    .dr-logo svg { display: block; transition: transform .35s ease; }
-    .dr-logo:hover svg { transform: rotate(-6deg) scale(1.05); }
-    .dr-logo-dot { color: #2563eb; }
+    .dr-logo svg {
+      display: block;
+      transition: transform .4s cubic-bezier(.34,1.56,.64,1), filter .4s ease;
+      filter: drop-shadow(0 4px 14px rgba(37,99,235,.22));
+    }
+    .dr-logo:hover svg {
+      transform: rotate(-8deg) scale(1.08);
+      filter: drop-shadow(0 8px 22px rgba(37,99,235,.45));
+    }
+    .dr-logo-dot {
+      color: #2563eb;
+      animation: dr-logo-pulse 3s ease-in-out infinite;
+    }
+    @keyframes dr-logo-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .55; }
+    }
 
     /* Primary nav list */
     .dr-nav-list {
       list-style: none; margin: 0; padding: 0;
       display: flex; align-items: center; gap: 22px;
+      flex-wrap: nowrap;
     }
     .dr-nav-list > li {
       /* Default: items behave as static so the wide mega panel can position
@@ -85,6 +110,12 @@
       position: static;
     }
     .dr-nav-list > li.dr-has-mini { position: relative; }
+    /* Slightly tighter at <1280px so 8 items don't wrap. */
+    @media (min-width: 981px) and (max-width: 1280px) {
+      .dr-nav-inner { padding: 14px 32px; gap: 16px; }
+      .dr-nav-list { gap: 16px; }
+      .dr-nav-link, .dr-nav-trigger { font-size: .88rem; }
+    }
     .dr-nav-link,
     .dr-nav-trigger {
       display: inline-flex; align-items: center; gap: 5px;
@@ -106,9 +137,11 @@
     .dr-nav-trigger::after {
       content: "";
       position: absolute; left: 0; right: 0; bottom: 2px;
-      height: 2px; background: #2563eb;
+      height: 2px;
+      background: linear-gradient(90deg, #3b82f6 0%, #1e3a8a 100%);
+      border-radius: 2px;
       transform: scaleX(0); transform-origin: left;
-      transition: transform .25s ease;
+      transition: transform .3s cubic-bezier(.65,0,.35,1);
     }
     .dr-nav-link:hover::after,
     .dr-nav-trigger:hover::after,
@@ -140,10 +173,26 @@
       color: #fff; text-decoration: none;
       background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
       box-shadow: 0 8px 22px -10px rgba(37,99,235,.6), inset 0 1px 0 rgba(255,255,255,.2);
-      transition: transform .2s ease, box-shadow .25s ease;
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background-position .4s ease;
       white-space: nowrap;
+      position: relative; overflow: hidden;
+      background-size: 200% 200%;
+      background-position: 0% 0%;
     }
-    .dr-cta:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -10px rgba(37,99,235,.65); color: #fff; }
+    .dr-cta::before {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+      transform: translateX(-100%);
+      transition: transform .9s ease;
+      pointer-events: none;
+    }
+    .dr-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 32px -10px rgba(37,99,235,.7);
+      background-position: 100% 100%;
+      color: #fff;
+    }
+    .dr-cta:hover::before { transform: translateX(100%); }
 
     /* Sign-in (ghost) button shown to guests */
     .dr-signin {

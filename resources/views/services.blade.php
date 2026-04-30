@@ -191,7 +191,14 @@
               @endif
             </ul>
             <div class="module-foot">
-              <span class="module-from">From <strong>${{ number_format($minPrice) }}</strong></span>
+              @auth
+                <span class="module-from">From <strong>${{ number_format($minPrice) }}</strong></span>
+              @else
+                <span class="module-from" style="color:var(--blue-700); font-weight:600;">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; margin-right:3px;" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Sign in for pricing
+                </span>
+              @endauth
               <span class="module-cta">Explore →</span>
             </div>
           </a>
@@ -206,7 +213,7 @@
       <p>Pick services off the shelf in our Shop, or talk to us about a custom growth engagement.</p>
       <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
         <a href="{{ url('/shop') }}" class="btn btn-primary btn-lg">Shop services →</a>
-        <a href="{{ url('/') }}#contact" class="btn btn-ghost btn-lg">Book a strategy call</a>
+        <a href="{{ route('contact') }}" class="btn btn-ghost btn-lg">Book a strategy call</a>
       </div>
     </div>
   </section>

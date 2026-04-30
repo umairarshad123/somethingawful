@@ -74,7 +74,13 @@
       "Bash(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8770/index.php__TRACKED_VAR__)",
       "Bash(curl -s http://127.0.0.1:8770/index.php/contact)",
       "Bash(curl -s -L http://127.0.0.1:8770/index.php/contact)",
-      "Bash(curl -s http://127.0.0.1:8770/index.php/index.php/shop -o /tmp/shop.html)"
+      "Bash(curl -s http://127.0.0.1:8770/index.php/index.php/shop -o /tmp/shop.html)",
+      "Bash(curl -sf http://127.0.0.1:8771/index.php)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8771/index.php__TRACKED_VAR__)",
+      "Bash(curl -s http://127.0.0.1:8771/index.php/shop/wp-portfolio)",
+      "Bash(curl -s http://127.0.0.1:8771/index.php/shop)",
+      "Bash(curl -s http://127.0.0.1:8771/index.php/contact)",
+      "Bash(curl -s http://127.0.0.1:8771/index.php/auth)"
     ]
   }
 }
