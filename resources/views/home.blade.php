@@ -892,21 +892,21 @@
       <div class="hero-copy">
         <span class="eyebrow">
           <span class="dot"></span>
-          <span>Full-service growth, built for serious brands</span>
+          <span>The growth operating system for ambitious businesses</span>
         </span>
         <h1>
-          Digital marketing <br class="hide-sm"/>
-          <span class="serif-italic">that actually</span> <span class="gradient-text">rises.</span>
+          Run every system <br class="hide-sm"/>
+          your business needs <span class="serif-italic">from</span> <span class="gradient-text">one platform.</span>
         </h1>
         <p class="lede">
-          Strategy, SEO, paid media, AI, ecommerce, content, and conversion-first web design — one senior team, one operating system, one line of accountability.
+          Websites, funnels, ads, SEO, automation, AI agents, and brand — built, deployed, and managed by Digirisers. Stop stitching tools together. Start compounding.
         </p>
         <div class="hero-ctas">
-          <a href="#contact" class="btn btn-primary btn-lg">
-            Get a free growth plan
+          <a href="{{ url('/shop') }}" class="btn btn-primary btn-lg">
+            Explore the platform
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </a>
-          <a href="#services" class="btn btn-ghost btn-lg">Explore what we do</a>
+          <a href="{{ url('/services') }}" class="btn btn-ghost btn-lg">View all 57 services</a>
         </div>
 
         <div class="hero-meta">
@@ -1041,133 +1041,52 @@
   <section class="services" id="services">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow"><span class="dot"></span> What We Do</span>
-        <h2>Every growth lever you need, <span class="serif-italic">under one roof.</span></h2>
-        <p class="section-sub">Eight discipline areas. One integrated team. Pick a channel or build a full-funnel engine — we'll handle the rest.</p>
+        <span class="eyebrow"><span class="dot"></span> The Platform</span>
+        <h2>Every system. <span class="serif-italic">One platform.</span></h2>
+        <p class="section-sub">Eight modules of the Digirisers platform. Use one. Use all eight. Each ships with transparent pricing and a senior team that owns the outcome.</p>
       </div>
 
       <div class="service-grid">
 
-        <article class="service-card" style="--i:1">
-          <div class="card-num">01</div>
-          <div class="card-head">
-            <div class="icon-wrap"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
-            <h3>Core Digital Marketing</h3>
-          </div>
-          <p class="card-blurb">Drive discovery, clicks, and qualified traffic across every major channel.</p>
-          <ul class="service-list">
-            <li>Digital Marketing Strategy</li><li>SEO Services</li><li>Local SEO</li><li>Enterprise SEO</li>
-            <li>SEO Audits</li><li>Custom SEO Reporting</li><li>Page Speed Optimization</li>
-            <li>Voice Search Optimization</li><li>Generative Engine / LLM SEO</li><li>Enterprise GEO Services</li>
-            <li>PPC Management</li><li>Enterprise PPC Management</li><li>Programmatic Advertising</li>
-            <li>Google Local Services Ads</li><li>Competitor Geofencing Ads</li><li>Employment &amp; Recruiting Marketing</li>
-          </ul>
-          <a class="card-link" href="#contact">Talk to a strategist <span aria-hidden="true">→</span></a>
-        </article>
+        @php
+          $platformCats = collect(config('catalog.categories', []))->sortBy('order')->values();
+          $platformIconMap = [
+            'monitor'  => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="18" x2="12" y2="20"/></svg>',
+            'brain'    => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3 3 3 0 0 0 3-3V7a3 3 0 0 0-3-3z"/><path d="M15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3 3 3 0 0 1-3-3"/></svg>',
+            'search'   => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+            'target'   => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+            'workflow' => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><path d="M6.5 10v4a3 3 0 0 0 3 3H14"/></svg>',
+            'megaphone'=> '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-8v18l-18-8v-2z"/><path d="M11 13v6a2 2 0 0 0 4 0v-3"/></svg>',
+            'shield'   => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+            'sparkle'  => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>',
+          ];
+          $cycleShort = ['project' => '', 'mo' => '/mo', 'week' => '/wk', 'per Zap' => '/zap', 'per script' => '/script', 'per asset' => '/asset'];
+        @endphp
 
-        <article class="service-card" style="--i:2">
-          <div class="card-num">02</div>
-          <div class="card-head">
-            <div class="icon-wrap"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></div>
-            <h3>Content &amp; Analytics</h3>
-          </div>
-          <p class="card-blurb">Words, visuals, and data that actually move the metrics that matter.</p>
-          <ul class="service-list">
-            <li>Content Marketing</li><li>Website SEO Copywriting</li><li>Personalized Web Content</li>
-            <li>Infographics &amp; Motion Graphics</li><li>Web Video Production</li>
-            <li>Email Marketing Management</li><li>Email Design &amp; Testing</li><li>Lead Nurture Programs</li>
-            <li>Social Media Management</li><li>Social Media Design</li><li>Online Review Management</li>
-          </ul>
-          <a class="card-link" href="#contact">Talk to a strategist <span aria-hidden="true">→</span></a>
-        </article>
-
-        <article class="service-card" style="--i:3">
-          <div class="card-num">03</div>
-          <div class="card-head">
-            <div class="icon-wrap"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div>
-            <h3>Creative &amp; UX</h3>
-          </div>
-          <p class="card-blurb">Beautiful, conversion-focused websites built to win — and built to last.</p>
-          <ul class="service-list">
-            <li>Web Design Services</li><li>Website Redesign</li><li>30-Day Web Design</li>
-            <li>Ecommerce Development</li><li>Shopping Feed Management</li><li>User Experience Testing</li>
-            <li>ADA Compliance Services</li><li>Website Maintenance</li>
-          </ul>
-          <a class="card-link" href="#contact">Talk to a strategist <span aria-hidden="true">→</span></a>
-        </article>
-
-        <article class="service-card" style="--i:4">
-          <div class="card-num">04</div>
-          <div class="card-head">
-            <div class="icon-wrap"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-            <h3>Revenue &amp; CRO</h3>
-          </div>
-          <p class="card-blurb">Turn more of your existing traffic into pipeline, calls, and closed revenue.</p>
-          <ul class="service-list">
-            <li>Conversion Rate Optimization</li><li>Web Channel Call Tracking</li><li>Media Mix Modeling</li>
-            <li>Channel Attribution &amp; Forecasting</li><li>Competitor Analysis</li><li>Private Equity Due Diligence</li>
-            <li>Revenue Operations</li><li>Landing Pages &amp; Funnels</li><li>Channel Partner Sales Pipeline</li>
-            <li>Website Personalization</li><li>Account-Based Marketing</li>
-            <li>Salesforce Marketing Automation</li><li>Microsoft Dynamics Automation</li>
-          </ul>
-          <a class="card-link" href="#contact">Talk to a strategist <span aria-hidden="true">→</span></a>
-        </article>
-
-        <article class="service-card" style="--i:5">
-          <div class="card-num">05</div>
-          <div class="card-head">
-            <div class="icon-wrap"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg></div>
-            <h3>Commerce Platforms</h3>
-          </div>
-          <p class="card-blurb">Sell more on Amazon, Shopify, Walmart — and every marketplace in between.</p>
-          <ul class="service-list">
-            <li>Amazon SEO</li><li>Amazon Advertising Management</li><li>Amazon Optimization Management</li>
-            <li>Shopify Optimization</li><li>Shopify Ecommerce Development</li>
-            <li>Walmart Marketplace Advertising</li><li>Influencer Marketing</li>
-          </ul>
-          <a class="card-link" href="#contact">Talk to a strategist <span aria-hidden="true">→</span></a>
-        </article>
-
-        <article class="service-card" style="--i:6">
-          <div class="card-num">06</div>
-          <div class="card-head">
-            <div class="icon-wrap"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
-            <h3>Development</h3>
-          </div>
-          <p class="card-blurb">Fast, secure, scalable digital infrastructure you can actually grow on.</p>
-          <ul class="service-list">
-            <li>Digital Experience Development</li><li>WordPress Development</li>
-            <li>Web Infrastructure &amp; Maintenance</li><li>Content Management Systems</li>
-          </ul>
-          <a class="card-link" href="#contact">Talk to a strategist <span aria-hidden="true">→</span></a>
-        </article>
-
-        <article class="service-card" style="--i:7">
-          <div class="card-num">07</div>
-          <div class="card-head">
-            <div class="icon-wrap"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg></div>
-            <h3>Social &amp; Advertising</h3>
-          </div>
-          <p class="card-blurb">Scroll-stopping creative across every feed, screen, and stream.</p>
-          <ul class="service-list">
-            <li>Social Media Advertising</li><li>Enterprise Social Media Advertising</li><li>Connected TV &amp; OTT</li>
-          </ul>
-          <a class="card-link" href="#contact">Talk to a strategist <span aria-hidden="true">→</span></a>
-        </article>
-
-        <article class="service-card highlight" style="--i:8">
-          <div class="card-num">08</div>
-          <div class="card-head">
-            <div class="icon-wrap"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="m16.24 7.76 2.83-2.83"/></svg></div>
-            <h3>AI Services <span class="badge">New</span></h3>
-          </div>
-          <p class="card-blurb">Deploy AI where it actually moves revenue — not just where it sounds cool.</p>
-          <ul class="service-list">
-            <li>AI Consulting</li><li>AI Digital Marketing</li><li>ChatGPT Optimization</li>
-            <li>AI Agent Development</li><li>AI &amp; GPT Integration</li>
-          </ul>
-          <a class="card-link" href="#contact">Talk to a strategist <span aria-hidden="true">→</span></a>
-        </article>
+        @foreach ($platformCats as $i => $pc)
+          @php
+            $idx = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
+            $minPrice = collect($pc['items'])->min('price');
+            $featured = $i === 0 || $i === 1; // highlight first two visually
+          @endphp
+          <article class="service-card @if($featured) highlight @endif">
+            <div class="card-num">{{ $idx }}</div>
+            <div class="card-head">
+              <div class="icon-wrap">{!! $platformIconMap[$pc['icon']] ?? $platformIconMap['sparkle'] !!}</div>
+              <h3>{{ $pc['title'] }}</h3>
+            </div>
+            <p class="card-blurb">{{ $pc['blurb'] }}</p>
+            <ul class="service-list">
+              @foreach (array_slice($pc['items'], 0, 5) as $it)
+                <li>{{ Str::limit($it['name'], 38) }}</li>
+              @endforeach
+            </ul>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:6px;">
+              <span style="font-size:.78rem; color:var(--soft); font-family:var(--font-mono);">From <strong style="color:var(--ink); font-weight:700;">${{ number_format($minPrice) }}</strong></span>
+              <a class="card-link" href="{{ url('/services/'.$pc['id']) }}">Explore <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        @endforeach
 
       </div>
     </div>

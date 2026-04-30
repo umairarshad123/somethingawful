@@ -1,17 +1,30 @@
 @extends('layouts.app')
 
 @section('title', 'Services — Digirisers')
-@section('description', 'Explore Digirisers services — full-stack web development, SEO & marketing, design & CRO, AI & automation, and brand strategy. Everything you need to scale.')
+@section('description', 'Every service in the Digirisers platform — websites, AI agents, SEO, paid ads, CRM automation, organic marketing, hosting, and brand. Transparent pricing.')
 @section('robots', 'index,follow')
+
+@php
+  $cats = collect(config('catalog.categories', []))->sortBy('order')->values();
+  $totalItems = $cats->sum(fn ($c) => count($c['items']));
+  $iconMap = [
+    'monitor'  => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="18" x2="12" y2="20"/></svg>',
+    'brain'    => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3 3 3 0 0 0 3-3V7a3 3 0 0 0-3-3z"/><path d="M15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3 3 3 0 0 1-3-3"/></svg>',
+    'search'   => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+    'target'   => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    'workflow' => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><path d="M6.5 10v4a3 3 0 0 0 3 3H14"/></svg>',
+    'megaphone'=> '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-8v18l-18-8v-2z"/><path d="M11 13v6a2 2 0 0 0 4 0v-3"/></svg>',
+    'shield'   => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    'sparkle'  => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>',
+  ];
+@endphp
 
 @push('styles')
   <link rel="stylesheet" href="{{ asset('assets/css/legal.css') }}" />
   <style>
-    /* Services-specific (extends legal.css) */
     section { padding: 100px 0; position: relative; }
     .container { max-width: 1240px; }
 
-    /* Hero */
     .svc-hero {
       position: relative; overflow: hidden;
       background: var(--grad-soft);
@@ -36,179 +49,103 @@
     }
     .svc-hero-inner { position: relative; z-index: 1; max-width: 820px; text-align: center; margin: 0 auto; }
     .svc-hero h1 { margin-bottom: 18px; }
-    .svc-hero h1 .gradient-text { display: inline-block; }
-    .svc-hero p {
-      font-size: 1.15rem; color: var(--muted);
-      max-width: 660px; margin: 0 auto 32px;
-    }
-    .svc-hero-actions {
-      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
-    }
+    .svc-hero p { font-size: 1.15rem; color: var(--muted); max-width: 660px; margin: 0 auto 32px; }
+    .svc-stats { display: inline-flex; gap: 32px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+    .svc-stat strong { display: block; font-size: 1.6rem; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+    .svc-stat small { font-size: .8rem; color: var(--soft); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
 
-    /* 5 main boxes grid */
-    .pillars { background: #fff; padding: 90px 0; }
-    .pillar-grid {
+    /* Modules grid */
+    .modules { background: #fff; padding: 90px 0; }
+    .module-grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 18px;
     }
-    .pillar {
+    .module {
       background: #fff;
       border: 1px solid var(--line);
-      border-radius: var(--r-lg);
-      padding: 30px 26px 28px;
+      border-radius: 22px;
+      padding: 28px 24px 24px;
       display: flex; flex-direction: column;
       position: relative; overflow: hidden;
-      transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+      transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+      text-decoration: none;
+      color: inherit;
     }
-    .pillar::before {
+    .module::before {
       content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
       background: var(--grad);
       transform: scaleX(0); transform-origin: left;
       transition: transform .5s ease;
     }
-    .pillar:hover { transform: translateY(-6px); border-color: var(--blue-300); box-shadow: var(--shadow-lg); }
-    .pillar:hover::before { transform: scaleX(1); }
-    .pillar-num {
-      position: absolute; top: 22px; right: 26px;
+    .module:hover { transform: translateY(-4px); border-color: var(--blue-300); box-shadow: var(--shadow-lg); color: inherit; }
+    .module:hover::before { transform: scaleX(1); }
+    .module-num {
+      position: absolute; top: 22px; right: 24px;
       font-family: var(--font-mono); font-size: .72rem;
-      color: var(--soft-2); letter-spacing: .1em; font-weight: 500;
+      color: var(--soft-2); letter-spacing: .08em; font-weight: 600;
     }
-    .pillar-icon {
-      width: 52px; height: 52px; border-radius: 14px;
+    .module-icon {
+      width: 48px; height: 48px; border-radius: 12px;
       background: var(--blue-50); color: var(--blue-700);
       display: grid; place-items: center;
-      margin-bottom: 18px;
-      transition: background .35s ease, color .35s ease, transform .4s ease;
+      margin-bottom: 16px;
+      transition: background .3s ease, color .3s ease, transform .3s ease;
     }
-    .pillar:hover .pillar-icon { background: var(--ink); color: #fff; transform: rotate(-6deg) scale(1.05); }
-    .pillar h3 {
-      font-size: 1.1rem; font-weight: 700; color: var(--ink);
-      margin: 0 0 10px; letter-spacing: -0.015em;
+    .module:hover .module-icon { background: var(--ink); color: #fff; transform: rotate(-6deg) scale(1.05); }
+    .module h3 {
+      font-size: 1.05rem; font-weight: 700; color: var(--ink);
+      margin: 0 0 6px; letter-spacing: -0.015em;
     }
-    .pillar p { font-size: .9rem; color: var(--soft); margin: 0 0 18px; line-height: 1.5; }
-    .pillar ul {
-      list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 7px; flex: 1;
-    }
-    .pillar ul li {
-      position: relative; padding-left: 18px;
+    .module .tagline { font-size: .82rem; color: var(--blue-700); font-weight: 600; margin: 0 0 12px; letter-spacing: -0.005em; }
+    .module p.blurb { font-size: .9rem; color: var(--soft); margin: 0 0 16px; line-height: 1.5; }
+    .module ul { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 6px; flex: 1; }
+    .module ul li {
+      position: relative; padding-left: 16px;
       font-size: .82rem; color: var(--muted); line-height: 1.4;
     }
-    .pillar ul li::before {
+    .module ul li::before {
       content: ""; position: absolute; left: 0; top: 7px;
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--blue-100); border: 2px solid var(--blue-500);
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--blue-200); border: 1.5px solid var(--blue-500);
     }
-    .pillar-cta {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 10px 16px;
+    .module-foot {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 14px; border-top: 1px dashed var(--line);
+      gap: 10px;
+    }
+    .module-from { font-size: .78rem; color: var(--soft); font-family: var(--font-mono); }
+    .module-from strong { color: var(--ink); font-weight: 700; }
+    .module-cta {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 7px 12px; border-radius: 999px;
+      font-size: .78rem; font-weight: 600;
       background: var(--bg-soft);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      font-size: .82rem; font-weight: 600;
       color: var(--ink);
-      transition: all .25s ease;
-      margin-top: auto;
+      transition: background .2s ease, color .2s ease;
     }
-    .pillar-cta:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
-
-    /* Detailed sections */
-    .svc-section { background: var(--bg-soft); border-top: 1px solid var(--line); }
-    .svc-section:nth-of-type(odd) { background: #fff; }
-    .svc-head {
-      display: grid; grid-template-columns: 1fr 1.4fr; gap: 60px;
-      align-items: end; margin-bottom: 48px;
-    }
-    .svc-head .svc-tag {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-size: .72rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .14em;
-      color: var(--blue-700);
-      background: var(--blue-50);
-      border: 1px solid var(--blue-100);
-      padding: 6px 12px;
-      border-radius: 999px;
-      margin-bottom: 18px;
-    }
-    .svc-head h2 {
-      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-      margin: 0 0 4px; letter-spacing: -0.03em;
-    }
-    .svc-head p { margin: 0; font-size: 1rem; color: var(--muted); line-height: 1.65; }
-
-    .svc-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 12px;
-    }
-    .svc-item {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 16px 18px;
-      display: flex; align-items: flex-start; gap: 12px;
-      transition: border-color .25s ease, transform .25s ease, box-shadow .25s ease;
-    }
-    .svc-section:nth-of-type(odd) .svc-item { background: var(--bg-soft); }
-    .svc-item:hover {
-      border-color: var(--blue-300);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-sm);
-    }
-    .svc-item-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--blue-500); margin-top: 7px;
-      flex-shrink: 0;
-      box-shadow: 0 0 0 3px var(--blue-100);
-    }
-    .svc-item span { font-size: .9rem; color: var(--ink); font-weight: 500; line-height: 1.4; }
-
-    .svc-foot {
-      margin-top: 36px;
-      display: flex; gap: 12px; flex-wrap: wrap;
-    }
-    .svc-foot .btn { font-size: .9rem; }
+    .module:hover .module-cta { background: var(--ink); color: #fff; }
 
     /* Bottom CTA */
-    .svc-bottom {
-      background: var(--ink);
-      color: #fff;
-      padding: 90px 0;
-      position: relative;
-      overflow: hidden;
-    }
-    .svc-bottom::before {
-      content: ""; position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
-      width: 1100px; height: 600px;
-      background: radial-gradient(ellipse at center, rgba(59,130,246,.28) 0%, transparent 55%);
-      pointer-events: none;
-    }
-    .svc-bottom-inner {
-      position: relative; z-index: 1;
-      max-width: 720px; margin: 0 auto; text-align: center;
-    }
+    .svc-bottom { background: var(--ink); color: #fff; padding: 90px 0; position: relative; overflow: hidden; }
+    .svc-bottom::before { content: ""; position: absolute; top: -200px; left: 50%; transform: translateX(-50%); width: 1100px; height: 600px; background: radial-gradient(ellipse at center, rgba(59,130,246,.28) 0%, transparent 55%); pointer-events: none; }
+    .svc-bottom-inner { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; text-align: center; }
     .svc-bottom h2 { color: #fff; margin: 0 0 16px; }
     .svc-bottom h2 .serif-italic { color: var(--blue-300); }
     .svc-bottom p { color: rgba(255,255,255,.7); font-size: 1.1rem; margin: 0 0 28px; }
     .svc-bottom .btn-primary { background: #fff; color: var(--ink); }
     .svc-bottom .btn-primary:hover { background: var(--blue-100); color: var(--ink); }
-    .svc-bottom .btn-ghost {
-      background: transparent; color: #fff;
-      border: 1px solid rgba(255,255,255,.2);
-    }
-    .svc-bottom .btn-ghost:hover {
-      background: rgba(255,255,255,.08); border-color: #fff; color: #fff;
-    }
+    .svc-bottom .btn-ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.2); }
+    .svc-bottom .btn-ghost:hover { background: rgba(255,255,255,.08); border-color: #fff; color: #fff; }
 
-    @media (max-width: 980px) {
-      .pillar-grid { grid-template-columns: repeat(2, 1fr); }
-      .svc-head { grid-template-columns: 1fr; gap: 16px; align-items: start; }
+    @media (max-width: 1080px) {
+      .module-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 640px) {
       section { padding: 70px 0; }
-      .pillar-grid { grid-template-columns: 1fr; }
-      .svc-list { grid-template-columns: 1fr; }
+      .module-grid { grid-template-columns: 1fr; }
       .svc-hero { padding: 70px 0 50px; }
+      .svc-stats { gap: 20px; }
     }
   </style>
 @endpush
@@ -219,346 +156,46 @@
 
   <section class="svc-hero">
     <div class="container svc-hero-inner">
-      <span class="eyebrow"><span class="dot"></span><span>Services Catalog</span></span>
-      <h1>Everything you need to <span class="gradient-text">grow online.</span></h1>
-      <p>From full-stack engineering and security to SEO, AI agents, and revenue-focused design — Digirisers is a SaaS-style growth platform with one team for the entire stack.</p>
-      <div class="svc-hero-actions">
-        <a href="{{ url('/shop') }}" class="btn btn-primary btn-lg">Visit the Shop →</a>
-        <a href="#pillars" class="btn btn-ghost btn-lg">Browse 5 Pillars</a>
+      <span class="eyebrow"><span class="dot"></span><span>Platform Catalog</span></span>
+      <h1>Every system. <span class="gradient-text">One platform.</span></h1>
+      <p>The full Digirisers platform — eight modules, {{ $totalItems }} priced services. Pick what you need, or hire the whole stack. Real prices. Real timelines. No bloated agency retainers.</p>
+      <div class="svc-stats">
+        <div class="svc-stat"><strong>{{ count($cats) }}</strong><small>Modules</small></div>
+        <div class="svc-stat"><strong>{{ $totalItems }}</strong><small>Services</small></div>
+        <div class="svc-stat"><strong>From $25</strong><small>Starting price</small></div>
+        <div class="svc-stat"><strong>1–3 wks</strong><small>Avg. delivery</small></div>
       </div>
     </div>
   </section>
 
-  {{-- 5 Main Boxes --}}
-  <section class="pillars" id="pillars">
+  <section class="modules">
     <div class="container">
-      <div class="section-head centered" style="text-align:center; max-width:680px; margin:0 auto 56px;">
-        <span class="eyebrow"><span class="dot"></span><span>5 Service Pillars</span></span>
-        <h2>One platform. <span class="serif-italic">Five superpowers.</span></h2>
-        <p class="section-sub" style="font-size:1.08rem; color:var(--soft); margin-top:8px;">Each pillar is a complete discipline — choose what you need, or hire the whole stack.</p>
-      </div>
-
-      <div class="pillar-grid">
-
-        <article class="pillar">
-          <span class="pillar-num">01 / 05</span>
-          <div class="pillar-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-          </div>
-          <h3>Web Development & Engineering</h3>
-          <p>Secure, scalable, full-stack builds — from WordPress to custom Laravel SaaS.</p>
-          <ul>
-            <li>Full-Stack Web Development</li>
-            <li>Laravel, Python, JavaScript</li>
-            <li>WordPress & Elementor</li>
-            <li>API & Microservices Architecture</li>
-            <li>Web Application Security</li>
-          </ul>
-          <a href="#web-dev" class="pillar-cta">Explore →</a>
-        </article>
-
-        <article class="pillar">
-          <span class="pillar-num">02 / 05</span>
-          <div class="pillar-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          </div>
-          <h3>SEO & Digital Marketing</h3>
-          <p>Organic, paid, and AI-search visibility that drives qualified traffic.</p>
-          <ul>
-            <li>Technical, On-Page, Local SEO</li>
-            <li>AI Search Optimization (AEO)</li>
-            <li>Google PPC, Meta, TikTok, X Ads</li>
-            <li>Email & SMS Automation</li>
-            <li>Backlinks & Authority Building</li>
-          </ul>
-          <a href="#seo-marketing" class="pillar-cta">Explore →</a>
-        </article>
-
-        <article class="pillar">
-          <span class="pillar-num">03 / 05</span>
-          <div class="pillar-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><circle cx="11" cy="11" r="2"/></svg>
-          </div>
-          <h3>Web Design & CRO</h3>
-          <p>Revenue-focused design, funnel architecture, and conversion systems.</p>
-          <ul>
-            <li>Web Design & UX Engineering</li>
-            <li>Ecommerce & Landing Pages</li>
-            <li>Funnel Architecture</li>
-            <li>Conversion Rate Optimization</li>
-            <li>CRM-Driven Personalization</li>
-          </ul>
-          <a href="#design-cro" class="pillar-cta">Explore →</a>
-        </article>
-
-        <article class="pillar">
-          <span class="pillar-num">04 / 05</span>
-          <div class="pillar-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
-          </div>
-          <h3>AI, Automation & CRM</h3>
-          <p>AI employees, agentic systems, and end-to-end CRM automation.</p>
-          <ul>
-            <li>AI Employees & Assistants</li>
-            <li>AI Sales, Support & Admin Agents</li>
-            <li>GoHighLevel, Zoho, Zapier</li>
-            <li>Lead Management & Webhooks</li>
-            <li>Prompt Engineering</li>
-          </ul>
-          <a href="#ai-automation" class="pillar-cta">Explore →</a>
-        </article>
-
-        <article class="pillar">
-          <span class="pillar-num">05 / 05</span>
-          <div class="pillar-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
-          </div>
-          <h3>Brand & Business Strategy</h3>
-          <p>Brand systems, video, and growth strategy built around revenue.</p>
-          <ul>
-            <li>Brand Strategy & Logo Design</li>
-            <li>Custom Video & Short-Form</li>
-            <li>Canva & CapCut Editing</li>
-            <li>Digital & Growth Strategy</li>
-            <li>Scalable Automation Design</li>
-          </ul>
-          <a href="#brand-strategy" class="pillar-cta">Explore →</a>
-        </article>
-
-      </div>
-    </div>
-  </section>
-
-  {{-- 1. Web Development --}}
-  <section class="svc-section" id="web-dev">
-    <div class="container">
-      <div class="svc-head">
-        <div>
-          <span class="svc-tag">Pillar 01 — Build</span>
-          <h2>Web Development & Engineering</h2>
-        </div>
-        <p>Full-stack builds, secure architecture, and scalable APIs. Every site we ship follows OWASP best practices, hardened authentication, and modern infrastructure standards.</p>
-      </div>
-
-      <div class="svc-list">
-        @foreach ([
-          'Full-Stack Web Development',
-          'Secure Web Architecture',
-          'WordPress Development',
-          'Elementor Custom Development',
-          'Laravel Development',
-          'Python Development',
-          'JavaScript Development',
-          'Custom HTML/CSS/JavaScript',
-          'API Development & Integration',
-          'Microservices Architecture',
-          'Payment Gateway Integration',
-          'Subscription & Billing Systems',
-          'Hosting & VPS Management',
-          'DNS & SSL Configuration',
-          'Infrastructure Security',
-          'Website Security Implementation',
-          'Role-Based Access Control (RBAC)',
-          'Two-Factor Authentication (2FA)',
-          'Secure Authentication Systems',
-          'Data Encryption Practices',
-          'Web Application Security',
-          'API Security',
-          'OWASP Best Practices',
-          'Malware Prevention & Threat Mitigation',
-        ] as $svc)
-          <div class="svc-item">
-            <span class="svc-item-dot" aria-hidden="true"></span>
-            <span>{{ $svc }}</span>
-          </div>
+      <div class="module-grid">
+        @foreach ($cats as $i => $c)
+          @php
+            $idx = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
+            $minPrice = collect($c['items'])->min('price');
+          @endphp
+          <a class="module" href="{{ url('/services/'.$c['id']) }}">
+            <span class="module-num">{{ $idx }} / 08</span>
+            <div class="module-icon">{!! $iconMap[$c['icon']] ?? $iconMap['sparkle'] !!}</div>
+            <h3>{{ $c['title'] }}</h3>
+            <p class="tagline">{{ $c['tagline'] }}</p>
+            <p class="blurb">{{ $c['blurb'] }}</p>
+            <ul>
+              @foreach (array_slice($c['items'], 0, 4) as $it)
+                <li>{{ Str::limit($it['name'], 38) }}</li>
+              @endforeach
+              @if (count($c['items']) > 4)
+                <li style="color:var(--blue-700); font-weight:600;">+ {{ count($c['items']) - 4 }} more</li>
+              @endif
+            </ul>
+            <div class="module-foot">
+              <span class="module-from">From <strong>${{ number_format($minPrice) }}</strong></span>
+              <span class="module-cta">Explore →</span>
+            </div>
+          </a>
         @endforeach
-      </div>
-
-      <div class="svc-foot">
-        <a href="{{ url('/shop') }}#cat-web-dev" class="btn btn-primary">See pricing →</a>
-        <a href="{{ url('/') }}#contact" class="btn btn-ghost">Custom quote</a>
-      </div>
-    </div>
-  </section>
-
-  {{-- 2. SEO & Marketing --}}
-  <section class="svc-section" id="seo-marketing">
-    <div class="container">
-      <div class="svc-head">
-        <div>
-          <span class="svc-tag">Pillar 02 — Grow</span>
-          <h2>SEO & Digital Marketing</h2>
-        </div>
-        <p>Organic, paid, and AI-search visibility working together. We build search systems that rank in Google, ChatGPT, Gemini, and Grok — plus the paid and lifecycle channels that compound your pipeline.</p>
-      </div>
-
-      <div class="svc-list">
-        @foreach ([
-          'Search Engine Optimization (SEO)',
-          'Technical SEO',
-          'On-Page SEO',
-          'Local SEO (Google Maps Optimization)',
-          'Programmatic SEO',
-          'AI Search Optimization (AI-SEO / AEO)',
-          'ChatGPT Optimization',
-          'Gemini Optimization',
-          'Grok Optimization',
-          'Search Intent Mapping',
-          'Keyword Research & Strategy',
-          'SEO Content Creation',
-          'Backlink Strategy & Authority Building',
-          'Core Web Vitals Optimization',
-          'Website Performance Optimization',
-          'Competitor & SERP Analysis',
-          'Paid Advertising Strategy',
-          'Google PPC Campaigns',
-          'Meta Ads (Facebook & Instagram)',
-          'X (Twitter) Ad Campaigns',
-          'TikTok Ad Campaigns',
-          'Streaming & Display Advertising',
-          'Conversion Tracking & Attribution',
-          'Organic Marketing Strategy',
-          'Social Media Marketing',
-          'AI Influencer Systems',
-          'Email Marketing Automation',
-          'SMS Marketing Automation',
-          'LinkedIn DM Outreach',
-        ] as $svc)
-          <div class="svc-item">
-            <span class="svc-item-dot" aria-hidden="true"></span>
-            <span>{{ $svc }}</span>
-          </div>
-        @endforeach
-      </div>
-
-      <div class="svc-foot">
-        <a href="{{ url('/shop') }}#cat-seo-marketing" class="btn btn-primary">See pricing →</a>
-        <a href="{{ url('/') }}#contact" class="btn btn-ghost">Custom quote</a>
-      </div>
-    </div>
-  </section>
-
-  {{-- 3. Design & CRO --}}
-  <section class="svc-section" id="design-cro">
-    <div class="container">
-      <div class="svc-head">
-        <div>
-          <span class="svc-tag">Pillar 03 — Convert</span>
-          <h2>Web Design & Conversion (CRO)</h2>
-        </div>
-        <p>Beautiful sites are nice — converting sites are the goal. We design every page around revenue: clear hierarchy, persuasive copy, conversion-tested patterns, and CRM-driven personalization.</p>
-      </div>
-
-      <div class="svc-list">
-        @foreach ([
-          'Web Design & UX Engineering',
-          'Revenue-Focused Web Design',
-          'Ecommerce Web Design',
-          'Landing Pages & Funnels',
-          'Conversion Rate Optimization (CRO)',
-          'Funnel Architecture & Optimization',
-          'CRM-Driven Personalization',
-        ] as $svc)
-          <div class="svc-item">
-            <span class="svc-item-dot" aria-hidden="true"></span>
-            <span>{{ $svc }}</span>
-          </div>
-        @endforeach
-      </div>
-
-      <div class="svc-foot">
-        <a href="{{ url('/shop') }}#cat-design-cro" class="btn btn-primary">See pricing →</a>
-        <a href="{{ url('/') }}#contact" class="btn btn-ghost">Custom quote</a>
-      </div>
-    </div>
-  </section>
-
-  {{-- 4. AI & Automation --}}
-  <section class="svc-section" id="ai-automation">
-    <div class="container">
-      <div class="svc-head">
-        <div>
-          <span class="svc-tag">Pillar 04 — Automate</span>
-          <h2>AI, Automation & CRM Systems</h2>
-        </div>
-        <p>Hire an AI workforce that handles support, sales, admin, and data — wired into your CRM, calendar, and inbox. We build agents and workflows that compound your team's output without compounding payroll.</p>
-      </div>
-
-      <div class="svc-list">
-        @foreach ([
-          'Marketing Automation & CRM Systems',
-          'GoHighLevel Automation',
-          'Credit Repair Cloud Automation',
-          'Dispute Fox Automation',
-          'Zoho CRM Automation',
-          'Zapier Automation',
-          'Webhook Architecture',
-          'Lead Management Systems',
-          'Appointment & Calendar Automation',
-          'Referral & Affiliate System Setup',
-          'AI Infrastructure & Agentic AI Systems',
-          'AI Employees & Assistants',
-          'AI Customer Support Agents',
-          'AI Sales & Appointment Setters',
-          'AI Admin & Task Assistants',
-          'AI Data Processing Bots',
-          'AI Web Chat & Knowledge Bases',
-          'Predictive Automation & Personalization',
-          'Prompt Engineering',
-          'AI Workflow Orchestration',
-        ] as $svc)
-          <div class="svc-item">
-            <span class="svc-item-dot" aria-hidden="true"></span>
-            <span>{{ $svc }}</span>
-          </div>
-        @endforeach
-      </div>
-
-      <div class="svc-foot">
-        <a href="{{ url('/shop') }}#cat-ai-automation" class="btn btn-primary">See pricing →</a>
-        <a href="{{ url('/') }}#contact" class="btn btn-ghost">Custom quote</a>
-      </div>
-    </div>
-  </section>
-
-  {{-- 5. Brand & Strategy --}}
-  <section class="svc-section" id="brand-strategy">
-    <div class="container">
-      <div class="svc-head">
-        <div>
-          <span class="svc-tag">Pillar 05 — Brand</span>
-          <h2>Branding & Business Strategy</h2>
-        </div>
-        <p>From a sharper logo to a full growth blueprint — we build brands and systems that scale revenue, not just impressions. Strategy, video, and creative under one roof.</p>
-      </div>
-
-      <div class="svc-list">
-        @foreach ([
-          'Branding & Creative Systems',
-          'Brand Strategy & Consultation',
-          'Logo Design',
-          'Video Editing',
-          'Custom Video Production',
-          'Short-Form Video Scriptwriting',
-          'Canva Creative Design',
-          'CapCut Video Editing',
-          'Digital Marketing Collateral',
-          'Business Systems Engineering',
-          'Digital Strategy',
-          'Growth Systems Architecture',
-          'Revenue-Focused Digital Strategy',
-          'Scalable Automation Design',
-        ] as $svc)
-          <div class="svc-item">
-            <span class="svc-item-dot" aria-hidden="true"></span>
-            <span>{{ $svc }}</span>
-          </div>
-        @endforeach
-      </div>
-
-      <div class="svc-foot">
-        <a href="{{ url('/shop') }}#cat-brand-strategy" class="btn btn-primary">See pricing →</a>
-        <a href="{{ url('/') }}#contact" class="btn btn-ghost">Custom quote</a>
       </div>
     </div>
   </section>

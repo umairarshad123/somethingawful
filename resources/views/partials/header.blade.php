@@ -382,74 +382,60 @@
   $isHome  = $current === '' || $current === '/';
   $home    = url('/');
 
-  // Service categories shared by desktop mega + mobile accordion
-  $cats = [
+  // Pull mega-menu structure from the catalog (config/catalog.php) so the header
+  // never drifts from the actual catalog. Visual layout: 5 columns grouping the
+  // 8 underlying categories.
+  $catalog = config('catalog.categories', []);
+  $previewLinks = function (string $catId, int $n = 5) use ($catalog) {
+    $items = $catalog[$catId]['items'] ?? [];
+    return array_slice($items, 0, $n);
+  };
+
+  $megaCols = [
     [
-      'id'    => 'web-dev',
-      'title' => 'Web Development',
-      'icon'  => 'code',
-      'links' => [
-        'Full-Stack Development',
-        'Laravel & Python',
-        'WordPress & Elementor',
-        'API & Microservices',
-        'Web App Security',
-        'VPS & DNS Management',
-      ],
+      'title'   => 'Build',
+      'tagline' => 'Sites & funnels',
+      'icon'    => 'monitor',
+      'href'    => url('/services/websites'),
+      'items'   => $previewLinks('websites'),
+      'catId'   => 'websites',
     ],
     [
-      'id'    => 'seo-marketing',
-      'title' => 'SEO & Marketing',
-      'icon'  => 'search',
-      'links' => [
-        'Technical & On-Page SEO',
-        'AI Search (ChatGPT/Gemini/Grok)',
-        'Google PPC & Meta Ads',
-        'TikTok & X Ad Campaigns',
-        'Email & SMS Automation',
-        'Backlink & Authority',
-      ],
+      'title'   => 'Grow',
+      'tagline' => 'SEO + ads + organic',
+      'icon'    => 'search',
+      'href'    => url('/services/seo'),
+      'items'   => array_merge($previewLinks('seo', 2), $previewLinks('paid-ads', 2), $previewLinks('organic', 1)),
+      'catId'   => 'seo',
     ],
     [
-      'id'    => 'design-cro',
-      'title' => 'Design & CRO',
-      'icon'  => 'sparkle',
-      'links' => [
-        'Web Design & UX',
-        'Ecommerce Design',
-        'Landing Pages & Funnels',
-        'Conversion Rate Optimization',
-        'Funnel Architecture',
-        'CRM Personalization',
-      ],
+      'title'   => 'Automate',
+      'tagline' => 'AI + CRM',
+      'icon'    => 'brain',
+      'href'    => url('/services/ai'),
+      'items'   => array_merge($previewLinks('ai', 3), $previewLinks('crm-automation', 2)),
+      'catId'   => 'ai',
     ],
     [
-      'id'    => 'ai-automation',
-      'title' => 'AI & Automation',
-      'icon'  => 'robot',
-      'links' => [
-        'AI Employees & Assistants',
-        'AI Sales & Support Agents',
-        'GoHighLevel Automation',
-        'Zoho & Zapier Workflows',
-        'Lead Management',
-        'Prompt Engineering',
-      ],
+      'title'   => 'Secure',
+      'tagline' => 'Hosting & infrastructure',
+      'icon'    => 'shield',
+      'href'    => url('/services/hosting'),
+      'items'   => $previewLinks('hosting'),
+      'catId'   => 'hosting',
     ],
     [
-      'id'    => 'brand-strategy',
-      'title' => 'Brand & Strategy',
-      'icon'  => 'eye',
-      'links' => [
-        'Brand Strategy & Logo',
-        'Custom Video Production',
-        'Short-Form Scriptwriting',
-        'Canva & CapCut Editing',
-        'Digital Strategy',
-        'Growth Architecture',
-      ],
+      'title'   => 'Brand',
+      'tagline' => 'Identity & creative',
+      'icon'    => 'sparkle',
+      'href'    => url('/services/branding'),
+      'items'   => $previewLinks('branding'),
+      'catId'   => 'branding',
     ],
   ];
+
+  // Mobile accordion: one section per real catalog category (8 sections).
+  $mobileCats = collect($catalog)->sortBy('order')->all();
 @endphp
 
 <div class="dr-announce">
@@ -491,41 +477,41 @@
 
         <div class="dr-mega-panel" role="menu">
           <div class="dr-mega-grid">
-            @foreach ($cats as $cat)
+            @foreach ($megaCols as $col)
               <div class="dr-mega-col">
                 <div class="dr-mega-icon" aria-hidden="true">
-                  @switch($cat['icon'])
-                    @case('code')
-                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                  @switch($col['icon'])
+                    @case('monitor')
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="18" x2="12" y2="20"/></svg>
                       @break
                     @case('search')
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
                       @break
+                    @case('brain')
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3 3 3 0 0 0 3-3V7a3 3 0 0 0-3-3z"/><path d="M15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3 3 3 0 0 1-3-3"/></svg>
+                      @break
+                    @case('shield')
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      @break
                     @case('sparkle')
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>
                       @break
-                    @case('robot')
-                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
-                      @break
-                    @case('eye')
-                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
-                      @break
                   @endswitch
                 </div>
-                <h6>{{ $cat['title'] }}</h6>
+                <h6>{{ $col['title'] }} <span style="color:#64748b; font-weight:500; font-size:.7rem; letter-spacing:0; text-transform:none;">— {{ $col['tagline'] }}</span></h6>
                 <ul>
-                  @foreach ($cat['links'] as $link)
-                    <li><a href="{{ url('/services') }}#{{ $cat['id'] }}">{{ $link }}</a></li>
+                  @foreach ($col['items'] as $item)
+                    <li><a href="{{ url('/shop/'.$item['slug']) }}">{{ Str::limit($item['name'], 36) }}</a></li>
                   @endforeach
                 </ul>
-                <a href="{{ url('/services') }}#{{ $cat['id'] }}" class="dr-mega-foot-link">Browse all →</a>
+                <a href="{{ $col['href'] }}" class="dr-mega-foot-link">Browse all →</a>
               </div>
             @endforeach
           </div>
           <div class="dr-mega-footer">
-            <p><strong>SaaS-style ordering.</strong> Browse the full catalog or shop priced packages.</p>
+            <p><strong>SaaS-style ordering.</strong> 57 services, transparent pricing, no payment required to inquire.</p>
             <div class="dr-mega-footer-actions">
-              <a href="{{ url('/services') }}" class="dr-mega-pill">View all services</a>
+              <a href="{{ url('/services') }}" class="dr-mega-pill">All services</a>
               <a href="{{ url('/shop') }}" class="dr-mega-pill dr-primary">Visit Shop →</a>
             </div>
           </div>
@@ -567,12 +553,12 @@
           </button>
           <div class="dr-mobile-mega">
             <div class="dr-mobile-mega-inner">
-              @foreach ($cats as $cat)
+              @foreach ($mobileCats as $mc)
                 <div class="dr-mobile-cat">
-                  <h6>{{ $cat['title'] }}</h6>
+                  <h6><a href="{{ url('/services/'.$mc['id']) }}" style="color:inherit;">{{ $mc['title'] }} →</a></h6>
                   <ul>
-                    @foreach ($cat['links'] as $link)
-                      <li><a href="{{ url('/services') }}#{{ $cat['id'] }}">{{ $link }}</a></li>
+                    @foreach (array_slice($mc['items'], 0, 4) as $it)
+                      <li><a href="{{ url('/shop/'.$it['slug']) }}">{{ Str::limit($it['name'], 32) }}</a></li>
                     @endforeach
                   </ul>
                 </div>
