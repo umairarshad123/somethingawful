@@ -11,7 +11,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Send unauthenticated visitors hitting "auth" middleware to /auth.
+        $middleware->redirectGuestsTo(fn () => route('auth.show'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

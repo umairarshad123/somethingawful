@@ -136,6 +136,80 @@
     }
     .dr-cta:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -10px rgba(37,99,235,.65); color: #fff; }
 
+    /* Sign-in (ghost) button shown to guests */
+    .dr-signin {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 9px 14px; border-radius: 999px;
+      font: inherit; font-size: .88rem; font-weight: 600;
+      color: #0b1020; background: transparent;
+      border: 1px solid #e5e7eb;
+      text-decoration: none;
+      transition: all .2s ease;
+      white-space: nowrap;
+    }
+    .dr-signin:hover { background: #0b1020; color: #fff; border-color: #0b1020; }
+
+    /* Account menu (auth state) */
+    .dr-account { position: relative; }
+    .dr-account-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 10px 5px 5px;
+      border: 1px solid #e5e7eb; border-radius: 999px;
+      background: #fff; font: inherit; cursor: pointer;
+      transition: border-color .2s ease, background .2s ease;
+    }
+    .dr-account-btn:hover { border-color: #0b1020; }
+    .dr-account-name { font-size: .85rem; font-weight: 600; color: #0b1020; }
+    .dr-account .dr-caret { color: #475569; opacity: .7; }
+    .dr-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, #3b82f6, #1e3a8a);
+      color: #fff; font-size: .72rem; font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .dr-account-menu {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      min-width: 220px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      box-shadow: 0 24px 50px -16px rgba(11, 16, 32, .25);
+      padding: 6px;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transform: translateY(6px);
+      transition: opacity .2s ease, transform .2s ease, visibility .2s;
+      z-index: 200;
+    }
+    .dr-account.dr-open .dr-account-menu {
+      opacity: 1; visibility: visible; pointer-events: auto;
+      transform: translateY(0);
+    }
+    .dr-account-head {
+      padding: 10px 12px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 4px;
+    }
+    .dr-account-head strong { display: block; font-size: .92rem; color: #0b1020; font-weight: 700; }
+    .dr-account-head small  { display: block; font-size: .76rem; color: #64748b; word-break: break-all; }
+    .dr-account-link {
+      display: block; width: 100%; text-align: left;
+      padding: 9px 12px;
+      font: inherit; font-size: .88rem; font-weight: 500;
+      color: #0b1020; background: transparent; border: 0;
+      border-radius: 8px;
+      text-decoration: none; cursor: pointer;
+      transition: background .15s ease, color .15s ease;
+    }
+    .dr-account-link::after { display: none; }
+    .dr-account-link:hover { background: #f1f5f9; }
+    .dr-account-signout {
+      color: #b91c1c; border-top: 1px solid #f1f5f9; margin-top: 4px; padding-top: 10px;
+    }
+    .dr-account-signout:hover { background: #fef2f2; color: #b91c1c; }
+    .dr-account-form { margin: 0; }
+
     /* Hamburger toggle (mobile only) */
     .dr-toggle {
       display: none;
@@ -517,13 +591,38 @@
       <li><a href="{{ $home }}#contact" class="dr-nav-link">Contact</a></li>
     </ul>
 
-    {{-- Right cluster (phone + CTA) --}}
+    {{-- Right cluster — context-aware: guest sees Sign in / Sign up, auth sees account menu --}}
     <div class="dr-nav-right">
       <a href="tel:+14019987807" class="dr-nav-phone" aria-label="Call Digirisers">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1L6.6 10.8z"/></svg>
         <span>+1 (401) 998-7807</span>
       </a>
-      <a href="{{ $home }}#contact" class="dr-cta">Start a project</a>
+
+      @auth
+        <div class="dr-account" data-account>
+          <button type="button" class="dr-account-btn" aria-haspopup="true" aria-expanded="false" aria-label="Account menu">
+            <span class="dr-avatar">{{ auth()->user()->initials }}</span>
+            <span class="dr-account-name">{{ auth()->user()->first_name }}</span>
+            <svg class="dr-caret" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 4.5 L6 7.5 L9 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="dr-account-menu" role="menu">
+            <div class="dr-account-head">
+              <strong>{{ auth()->user()->name }}</strong>
+              <small>{{ auth()->user()->email }}</small>
+            </div>
+            <a href="{{ route('dashboard') }}" class="dr-account-link" role="menuitem">Dashboard</a>
+            <a href="{{ url('/shop') }}" class="dr-account-link" role="menuitem">Shop</a>
+            <a href="{{ url('/services') }}" class="dr-account-link" role="menuitem">Browse services</a>
+            <form method="POST" action="{{ route('auth.logout') }}" class="dr-account-form">
+              @csrf
+              <button type="submit" class="dr-account-link dr-account-signout">Sign out</button>
+            </form>
+          </div>
+        </div>
+      @else
+        <a href="{{ route('auth.show') }}" class="dr-signin">Sign in</a>
+        <a href="{{ route('auth.show', ['tab' => 'signup']) }}" class="dr-cta">Create account</a>
+      @endauth
     </div>
 
     {{-- Hamburger (mobile only) --}}
@@ -571,7 +670,16 @@
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1L6.6 10.8z"/></svg>
           <span>+1 (401) 998-7807</span>
         </a>
-        <a href="{{ $home }}#contact" class="dr-cta">Start a project</a>
+        @auth
+          <a href="{{ route('dashboard') }}" class="dr-cta">Dashboard ({{ auth()->user()->first_name }})</a>
+          <form method="POST" action="{{ route('auth.logout') }}" style="margin:0;">
+            @csrf
+            <button type="submit" class="dr-signin" style="width:100%; cursor:pointer; font:inherit;">Sign out</button>
+          </form>
+        @else
+          <a href="{{ route('auth.show') }}" class="dr-signin">Sign in</a>
+          <a href="{{ route('auth.show', ['tab' => 'signup']) }}" class="dr-cta">Create account</a>
+        @endauth
       </div>
     </div>
   </div>
@@ -671,6 +779,30 @@
 
       // Close mega when switching from mobile->desktop or vice versa
       mqMobile.addEventListener?.('change', closeDrawer);
+
+      // Account dropdown (auth state)
+      const account = document.querySelector('[data-account]');
+      if (account) {
+        const btn  = account.querySelector('.dr-account-btn');
+        btn?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const open = !account.classList.contains('dr-open');
+          account.classList.toggle('dr-open', open);
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('[data-account]')) {
+            account.classList.remove('dr-open');
+            btn?.setAttribute('aria-expanded', 'false');
+          }
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            account.classList.remove('dr-open');
+            btn?.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
     })();
   </script>
 @endpush

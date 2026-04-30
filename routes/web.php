@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -10,18 +11,9 @@ use Illuminate\Validation\Rule;
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Catalog data lives in config/catalog.php and feeds:
-|   - /services            (index)
-|   - /services/{slug}     (category sub-page)
-|   - /shop                (catalog with cart)
-|   - /shop/{slug}         (product detail)
-|
-| Lead capture endpoints proxy form submissions to Google Sheets via
-| Apps Script web-app URLs configured in .env (see config/services.php).
-|
 */
 
+// Public marketing pages
 Route::get('/', fn () => view('home'))->name('home');
 
 Route::get('/services', fn () => view('services'))->name('services');
@@ -32,19 +24,6 @@ Route::get('/services/{slug}', function (string $slug) {
     return view('services-category', ['cat' => $cat]);
 })->name('services.category');
 
-Route::get('/shop', fn () => view('shop'))->name('shop');
-
-Route::get('/shop/{slug}', function (string $slug) {
-    foreach (config('catalog.categories', []) as $cat) {
-        foreach ($cat['items'] as $item) {
-            if (($item['slug'] ?? null) === $slug) {
-                return view('shop-detail', ['item' => $item, 'cat' => $cat]);
-            }
-        }
-    }
-    abort(404);
-})->name('shop.detail');
-
 Route::get('/pricing', fn () => view('pricing'))->name('pricing');
 Route::get('/privacy', fn () => view('privacy'))->name('privacy');
 Route::get('/refund',  fn () => view('refund'))->name('refund');
@@ -53,17 +32,48 @@ Route::get('/terms',   fn () => view('terms'))->name('terms');
 
 /*
 |--------------------------------------------------------------------------
+| Auth (login + signup on one page)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('guest')->group(function () {
+    Route::get('/auth',           [AuthController::class, 'show'])->name('auth.show');
+    Route::post('/auth/login',    [AuthController::class, 'login'])->name('auth.login');
+    Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
+});
+
+Route::post('/auth/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('auth.logout');
+
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated area — Shop is gated behind login.
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', fn () => view('dashboard'))->name('dashboard');
+
+    Route::get('/shop', fn () => view('shop'))->name('shop');
+
+    Route::get('/shop/{slug}', function (string $slug) {
+        foreach (config('catalog.categories', []) as $cat) {
+            foreach ($cat['items'] as $item) {
+                if (($item['slug'] ?? null) === $slug) {
+                    return view('shop-detail', ['item' => $item, 'cat' => $cat]);
+                }
+            }
+        }
+        abort(404);
+    })->name('shop.detail');
+});
+
+
+/*
+|--------------------------------------------------------------------------
 | Lead Capture — Google Sheets
 |--------------------------------------------------------------------------
-|
-| forwardLead() validates form payload and POSTs to the Apps Script
-| webhook configured in .env. The user-facing JS treats a 200 as success
-| (and proceeds to its WhatsApp / thank-you flow). If the webhook URL is
-| missing or fails, we log + return ok:false but the JS can still proceed
-| so we never block a genuine inquiry on infrastructure issues.
-|
 */
-
 if (! function_exists('digirisers_forward_lead')) {
     function digirisers_forward_lead(string $configKey, array $payload, Request $request): array
     {
@@ -89,8 +99,8 @@ if (! function_exists('digirisers_forward_lead')) {
             return ['ok' => $resp->successful(), 'status' => $resp->status()];
         } catch (\Throwable $e) {
             Log::warning('[lead] webhook post failed', [
-                'key'  => $configKey,
-                'err'  => $e->getMessage(),
+                'key' => $configKey,
+                'err' => $e->getMessage(),
             ]);
             return ['ok' => false, 'reason' => 'webhook_error'];
         }
@@ -109,11 +119,7 @@ Route::post('/lead/submit', function (Request $request) {
     ]);
 
     $result = digirisers_forward_lead('lead_url', $data, $request);
-
-    return response()->json([
-        'ok'      => true,
-        'synced'  => $result['ok'] ?? false,
-    ]);
+    return response()->json(['ok' => true, 'synced' => $result['ok'] ?? false]);
 })->name('lead.submit');
 
 Route::post('/lead/popup', function (Request $request) {
@@ -125,9 +131,5 @@ Route::post('/lead/popup', function (Request $request) {
     ]);
 
     $result = digirisers_forward_lead('popup_url', $data, $request);
-
-    return response()->json([
-        'ok'      => true,
-        'synced'  => $result['ok'] ?? false,
-    ]);
+    return response()->json(['ok' => true, 'synced' => $result['ok'] ?? false]);
 })->name('lead.popup');
