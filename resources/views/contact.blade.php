@@ -4,6 +4,10 @@
 @section('description', 'Talk to a senior strategist at Digirisers. Tell us where you want to grow and we will reach out with next steps.')
 
 @push('styles')
+  {{-- legal.css is the shared base layer (CSS variables, .btn, .container,
+       footer styles). Every other page links it; the contact page was missing
+       it, which is what made the header/footer look misaligned. --}}
+  <link rel="stylesheet" href="{{ asset('assets/css/legal.css') }}" />
   <style>
     /* Contact page — scoped (.cp-*). Reuses the same field names + IDs as
        the homepage hero lead form (#leadForm) so both submit the same
@@ -21,7 +25,7 @@
     }
     .cp-wrap {
       position: relative; z-index: 1;
-      max-width: 1180px; margin: 0 auto;
+      max-width: 1240px; margin: 0 auto;
       padding: 0 24px;
       display: grid; grid-template-columns: 1fr 520px;
       gap: 48px;
