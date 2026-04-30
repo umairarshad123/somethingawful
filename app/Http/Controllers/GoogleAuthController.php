@@ -26,9 +26,12 @@ class GoogleAuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
         } catch (\Throwable $e) {
-            Log::warning('[google-oauth] callback failed', ['err' => $e->getMessage()]);
+            Log::error('[google-oauth] retrieving user from Google failed', [
+                'err'   => $e->getMessage(),
+                'class' => $e::class,
+            ]);
             return redirect()->route('auth.show')
-                ->withErrors(['email' => 'Google sign-in failed. Please try again or use email + password.']);
+                ->withErrors(['email' => 'Google sign-in failed: ' . $e->getMessage()]);
         }
 
         $email = $googleUser->getEmail();
@@ -37,30 +40,42 @@ class GoogleAuthController extends Controller
                 ->withErrors(['email' => 'Google did not return an email address. Please use email + password.']);
         }
 
-        // Match by email first to avoid duplicates.
-        $user = User::where('email', $email)->first();
+        try {
+            // Match by email first to avoid duplicates.
+            $user = User::where('email', $email)->first();
 
-        if ($user) {
-            // Existing account — link the Google ID and mark verified if not already.
-            $user->forceFill([
-                'google_id'         => $user->google_id ?: $googleUser->getId(),
-                'email_verified_at' => $user->email_verified_at ?: now(),
-            ])->save();
-        } else {
-            // New account — split Google's name into first / last.
-            $raw   = (array) ($googleUser->user ?? []);
-            $first = $raw['given_name']  ?? Str::before((string) $googleUser->getName(), ' ');
-            $last  = $raw['family_name'] ?? Str::after((string) $googleUser->getName(), ' ');
+            if ($user) {
+                // Existing account — link the Google ID and mark verified if not already.
+                $user->forceFill([
+                    'google_id'         => $user->google_id ?: $googleUser->getId(),
+                    'email_verified_at' => $user->email_verified_at ?: now(),
+                ])->save();
+            } else {
+                // New account — split Google's name into first / last.
+                $raw   = (array) ($googleUser->user ?? []);
+                $first = $raw['given_name']  ?? Str::before((string) $googleUser->getName(), ' ');
+                $last  = $raw['family_name'] ?? Str::after((string) $googleUser->getName(), ' ');
 
-            $user = User::create([
-                'first_name'        => $first ?: 'Google',
-                'last_name'         => $last  ?: 'User',
-                'email'             => $email,
-                'google_id'         => $googleUser->getId(),
-                'password'          => Hash::make(Str::random(40)),
-                'email_verified_at' => now(),
-                'role'              => 'customer',
+                $user = User::create([
+                    'first_name'        => $first ?: 'Google',
+                    'last_name'         => $last  ?: 'User',
+                    'email'             => $email,
+                    'google_id'         => $googleUser->getId(),
+                    'password'          => Hash::make(Str::random(40)),
+                    'email_verified_at' => now(),
+                    'role'              => 'customer',
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // Most common cause: `users.google_id` column doesn't exist yet
+            // (run database/digirisers_install.sql ALTER TABLE on production).
+            Log::error('[google-oauth] persisting user failed', [
+                'email' => $email,
+                'err'   => $e->getMessage(),
+                'class' => $e::class,
             ]);
+            return redirect()->route('auth.show')
+                ->withErrors(['email' => 'Could not finalize your Google sign-in: ' . $e->getMessage()]);
         }
 
         Auth::login($user, remember: true);

@@ -24,11 +24,13 @@ CREATE TABLE `users` (
   `email_verified_at` timestamp    NULL DEFAULT NULL,
   `password`          varchar(255) NOT NULL,
   `remember_token`    varchar(100) DEFAULT NULL,
+  `google_id`         varchar(255) DEFAULT NULL,
   `role`              varchar(20)  NOT NULL DEFAULT 'customer',
   `created_at`        timestamp    NULL DEFAULT NULL,
   `updated_at`        timestamp    NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_email_unique` (`email`),
+  UNIQUE KEY `users_google_id_unique` (`google_id`),
   KEY `users_role_index` (`role`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -119,7 +121,8 @@ CREATE TABLE `migrations` (
 INSERT INTO `migrations` (`migration`, `batch`) VALUES
   ('0001_01_01_000000_create_users_table', 1),
   ('0001_01_01_000001_create_cache_table', 1),
-  ('0001_01_01_000002_create_jobs_table',  1);
+  ('0001_01_01_000002_create_jobs_table',  1),
+  ('2026_05_01_000000_add_google_id_to_users_table', 1);
 
 -- -------------------------------------------------------------
 -- Seed: test customer + admin
