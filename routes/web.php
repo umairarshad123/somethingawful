@@ -11,8 +11,10 @@ use App\Http\Controllers\Admin\ActivityLogController as AdminActivityLogControll
 use App\Models\ActivityLog;
 use App\Models\Lead;
 use App\Models\ServiceRequest;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -189,6 +191,78 @@ Route::post('/track/service-view', function (Request $request) {
 
     return response()->json(['ok' => true]);
 })->name('track.service-view');
+
+/*
+|--------------------------------------------------------------------------
+| One-shot admin bootstrap
+|--------------------------------------------------------------------------
+| Hit this URL once on production to create the admin from .env without
+| needing CLI/SSH access. Token-protected via ADMIN_BOOTSTRAP_TOKEN so
+| it can't be triggered by random visitors. Reads ADMIN_EMAIL,
+| ADMIN_PASSWORD, ADMIN_FIRST_NAME, ADMIN_LAST_NAME from .env.
+|
+| Usage:
+|   GET /bootstrap-admin?token=<ADMIN_BOOTSTRAP_TOKEN>
+|
+| Idempotent: calling it again with the same email simply re-syncs the
+| password + role + status. Remove the env vars (or change the token)
+| once you're done.
+*/
+Route::get('/bootstrap-admin', function (Request $request) {
+    $expected = (string) env('ADMIN_BOOTSTRAP_TOKEN', '');
+    $supplied = (string) $request->query('token', '');
+
+    if ($expected === '' || ! hash_equals($expected, $supplied)) {
+        abort(404);
+    }
+
+    $email    = (string) env('ADMIN_EMAIL', '');
+    $password = (string) env('ADMIN_PASSWORD', '');
+    if ($email === '' || $password === '') {
+        return response('ADMIN_EMAIL or ADMIN_PASSWORD missing in .env', 500)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $first = (string) env('ADMIN_FIRST_NAME', 'Admin');
+    $last  = (string) env('ADMIN_LAST_NAME', 'User');
+
+    $user = User::where('email', $email)->first();
+
+    if ($user) {
+        $user->forceFill([
+            'role'              => 'admin',
+            'status'            => 'active',
+            'password'          => Hash::make($password),
+            'email_verified_at' => $user->email_verified_at ?: now(),
+        ])->save();
+        $msg = "Updated existing user {$email} → admin (password reset).";
+    } else {
+        $user = User::create([
+            'first_name'        => $first,
+            'last_name'         => $last,
+            'email'             => $email,
+            'password'          => $password, // hashed via cast
+            'role'              => 'admin',
+            'status'            => 'active',
+            'email_verified_at' => now(),
+            'signup_source'     => 'bootstrap',
+        ]);
+        $msg = "Created admin user {$email}.";
+    }
+
+    ActivityLog::record(
+        event: 'admin.bootstrapped',
+        label: $msg,
+        subject: $user,
+        userId: $user->id,
+        request: $request,
+    );
+
+    return response(
+        "{$msg}\n\nNow:\n  1. Sign in at /auth using {$email}\n  2. Remove ADMIN_BOOTSTRAP_TOKEN from .env (or rotate it) so this URL goes inert.",
+        200
+    )->header('Content-Type', 'text/plain');
+})->name('bootstrap.admin');
 
 
 /*
