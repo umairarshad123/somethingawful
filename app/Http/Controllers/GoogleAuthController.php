@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,11 +45,15 @@ class GoogleAuthController extends Controller
             // Match by email first to avoid duplicates.
             $user = User::where('email', $email)->first();
 
+            $isNew = false;
+
             if ($user) {
                 // Existing account — link the Google ID and mark verified if not already.
                 $user->forceFill([
                     'google_id'         => $user->google_id ?: $googleUser->getId(),
                     'email_verified_at' => $user->email_verified_at ?: now(),
+                    'last_login_at'     => now(),
+                    'last_login_ip'     => $request->ip(),
                 ])->save();
             } else {
                 // New account — split Google's name into first / last.
@@ -64,8 +69,21 @@ class GoogleAuthController extends Controller
                     'password'          => Hash::make(Str::random(40)),
                     'email_verified_at' => now(),
                     'role'              => 'customer',
+                    'signup_source'     => 'google',
+                    'last_login_at'     => now(),
+                    'last_login_ip'     => $request->ip(),
                 ]);
+                $isNew = true;
             }
+
+            ActivityLog::record(
+                event: $isNew ? 'account.created' : 'account.signed_in',
+                label: $isNew ? "Google account created for {$user->email}" : "{$user->email} signed in via Google",
+                subject: $user,
+                userId: $user->id,
+                payload: ['provider' => 'google'],
+                request: $request,
+            );
         } catch (\Throwable $e) {
             // Most common cause: `users.google_id` column doesn't exist yet
             // (run database/digirisers_install.sql ALTER TABLE on production).

@@ -80,7 +80,15 @@
       "Bash(curl -s http://127.0.0.1:8771/index.php/shop/wp-portfolio)",
       "Bash(curl -s http://127.0.0.1:8771/index.php/shop)",
       "Bash(curl -s http://127.0.0.1:8771/index.php/contact)",
-      "Bash(curl -s http://127.0.0.1:8771/index.php/auth)"
+      "Bash(curl -s http://127.0.0.1:8771/index.php/auth)",
+      "Bash(curl -s \"http://127.0.0.1:8773/index.php/shop/ghl-snapshot\")",
+      "Bash(grep -oE \"\\(syntax error|ParseError|Fatal error|Undefined|Class.*not found\\)[^<]{0,200}\")",
+      "Bash(curl -s -o /dev/null -w \"ghl-snapshot: %{http_code}\\\\n\" \"http://127.0.0.1:8773/index.php/shop/ghl-snapshot\")",
+      "Bash(curl -s -o /dev/null -w \"backlink: %{http_code}\\\\nreferral: %{http_code}\\\\n\" \"http://127.0.0.1:8773/index.php/shop/backlink-outreach\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://127.0.0.1:8773/index.php/shop/referral-system\")",
+      "Bash(curl -sf http://127.0.0.1:8780/index.php)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8780/index.php/admin__TRACKED_VAR__)",
+      "Bash(curl -sb /tmp/dr-admin.cj http://127.0.0.1:8780/index.php/admin/)"
     ]
   }
 }

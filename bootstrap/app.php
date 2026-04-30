@@ -13,6 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Send unauthenticated visitors hitting "auth" middleware to /auth.
         $middleware->redirectGuestsTo(fn () => route('auth.show'));
+
+        // Register the admin gate as a route alias.
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\EnsureAdmin::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

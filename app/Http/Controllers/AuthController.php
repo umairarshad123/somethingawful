@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,14 +40,26 @@ class AuthController extends Controller
         ]);
 
         $user = User::create([
-            'first_name' => $data['first_name'],
-            'last_name'  => $data['last_name'],
-            'email'      => $data['email'],
-            'phone'      => $data['phone'],
-            'company'    => $data['company'] ?? null,
-            'password'   => $data['password'],   // hashed via cast
-            'role'       => 'customer',
+            'first_name'    => $data['first_name'],
+            'last_name'     => $data['last_name'],
+            'email'         => $data['email'],
+            'phone'         => $data['phone'],
+            'company'       => $data['company'] ?? null,
+            'password'      => $data['password'],   // hashed via cast
+            'role'          => 'customer',
+            'signup_source' => 'email',
+            'last_login_at' => now(),
+            'last_login_ip' => $request->ip(),
         ]);
+
+        ActivityLog::record(
+            event: 'account.created',
+            label: "Account created for {$user->email}",
+            subject: $user,
+            userId: $user->id,
+            payload: ['source' => 'email'],
+            request: $request,
+        );
 
         Auth::login($user, remember: true);
         $request->session()->regenerate();
@@ -76,6 +89,20 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
+
+        $user = Auth::user();
+        $user->forceFill([
+            'last_login_at' => now(),
+            'last_login_ip' => $request->ip(),
+        ])->save();
+
+        ActivityLog::record(
+            event: 'account.signed_in',
+            label: "{$user->email} signed in",
+            subject: $user,
+            userId: $user->id,
+            request: $request,
+        );
 
         return redirect()->intended(route('dashboard'))
             ->with('flash', 'Welcome back!');

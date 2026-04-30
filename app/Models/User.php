@@ -19,6 +19,10 @@ class User extends Authenticatable
         'password',
         'role',
         'google_id',
+        'last_login_at',
+        'last_login_ip',
+        'status',
+        'signup_source',
     ];
 
     protected $hidden = [
@@ -30,8 +34,24 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at'     => 'datetime',
             'password'          => 'hashed',
         ];
+    }
+
+    public function leads(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
+    public function serviceRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ServiceRequest::class);
+    }
+
+    public function activityLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ActivityLog::class, 'user_id');
     }
 
     /** Convenience: full name. */
