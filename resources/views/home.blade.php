@@ -373,8 +373,27 @@
     .hero-form .consent .cbox { width: 16px; height: 16px; margin-top: 1px; }
     .hero-form .consent .cbox::after { width: 8px; height: 5px; }
     .hero-form .consent .req, .hero-form .consent .opt { font-size: .62rem; padding: 1px 6px; }
-    .hero-form .btn-wa { padding: 12px 18px; font-size: .92rem; }
-    .hero-form .form-note { font-size: .82rem; padding-top: 4px; }
+    .hero-form .btn-primary { padding: 12px 18px; font-size: .92rem; }
+
+    /* Inline success state shown after submit (replaces the form area) */
+    .hf-success {
+      text-align: center;
+      padding: 18px 6px 8px;
+      animation: hf-success-in .4s ease both;
+    }
+    @keyframes hf-success-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hf-success-icon {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: #dcfce7; color: #16a34a;
+      display: grid; place-items: center;
+      margin: 0 auto 14px;
+    }
+    .hf-success h4 { font-size: 1.1rem; font-weight: 700; color: var(--ink); margin: 0 0 6px; letter-spacing: -0.01em; }
+    .hf-success p  { font-size: .92rem; color: var(--soft); margin: 0; line-height: 1.5; }
 
     /* Floating trust badges around form */
     .hf-badge {
@@ -1086,12 +1105,8 @@
         <span class="hf-glow" aria-hidden="true"></span>
 
         <div class="hf-head">
-          <span class="wa-pill">
-            <svg viewBox="0 0 32 32" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3z"/></svg>
-            WhatsApp · instant reply
-          </span>
           <h3>Start your <span class="serif-italic">growth plan.</span></h3>
-          <p>Tell us where you want to grow. A senior strategist replies — usually within 30 minutes.</p>
+          <p>Tell us where you want to grow. A senior strategist will reach out shortly.</p>
         </div>
 
         <form id="leadForm" novalidate>
@@ -1147,12 +1162,19 @@
             </label>
           </div>
 
-          <button type="submit" class="btn btn-wa btn-lg btn-block">
-            <svg viewBox="0 0 32 32" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3z"/></svg>
-            Send to WhatsApp
+          <button type="submit" class="btn btn-primary btn-lg btn-block" id="leadSubmit">
+            Submit
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </button>
-          <p class="form-note" id="formNote" hidden>Opening WhatsApp — your message is ready to send.</p>
         </form>
+
+        <div class="hf-success" id="leadSuccess" role="status" aria-live="polite" hidden>
+          <div class="hf-success-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h4>Thanks — we got it.</h4>
+          <p>A senior strategist will reach out shortly to book your discovery call.</p>
+        </div>
       </aside>
     </div>
   </section>
@@ -1444,31 +1466,11 @@
       });
     });
 
-    // Contact form → Google Sheets + WhatsApp
-    const WA_NUMBER  = '14019987807'; // +1 (401) 998-7807
+    // Contact form → Google Sheets, then inline success state
     const LEAD_URL   = "{{ route('lead.submit') }}";
     const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    const form     = document.getElementById('leadForm');
-    const formNote = document.getElementById('formNote');
-
-    async function syncLeadToSheet(payload) {
-      try {
-        const res = await fetch(LEAD_URL, {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'Accept':         'application/json',
-            'X-CSRF-TOKEN':   CSRF_TOKEN,
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-          body: payload,
-        });
-        return res.ok;
-      } catch (e) {
-        console.warn('Lead sync failed', e);
-        return false;
-      }
-    }
+    const form    = document.getElementById('leadForm');
+    const success = document.getElementById('leadSuccess');
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1500,9 +1502,9 @@
       const btn = form.querySelector('button[type="submit"]');
       btn.disabled = true;
       const originalHTML = btn.innerHTML;
-      btn.innerHTML = 'Sending…';
+      btn.innerHTML = 'Submitting…';
 
-      // 1) Push to Google Sheets via Laravel proxy (non-blocking on failure).
+      // Push to Google Sheets via Laravel proxy.
       const sheetPayload = new FormData();
       sheetPayload.append('name',       name);
       sheetPayload.append('email',      email);
@@ -1512,35 +1514,27 @@
       sheetPayload.append('consent_tx', 'yes');
       sheetPayload.append('consent_mk', 'yes');
       sheetPayload.append('page',       window.location.pathname);
-      await syncLeadToSheet(sheetPayload);
+      try {
+        await fetch(LEAD_URL, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Accept':           'application/json',
+            'X-CSRF-TOKEN':     CSRF_TOKEN,
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: sheetPayload,
+        });
+      } catch (err) {
+        console.warn('Lead sync failed', err);
+      }
 
-      // 2) Open WhatsApp pre-filled (existing behaviour).
-      const lines = [
-        '*New inquiry from Digirisers website*', '',
-        `*Name:* ${name}`,
-        `*Email:* ${email}`,
-        `*Phone:* ${phone}`,
-        `*Primary interest:* ${service}`,
-      ];
-      if (message) lines.push('', '*Goals / message:*', message);
-      lines.push(
-        '', '— Consents —',
-        `Non-marketing texts (Digirisers): ${consentTx ? 'Yes' : 'No'}`,
-        `Marketing / promotional texts (Digirisers): ${consentMk ? 'Yes' : 'No'}`,
-        '', `Submitted: ${new Date().toLocaleString()}`
-      );
-      const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`;
-      btn.innerHTML = 'Opening WhatsApp…';
-      const win = window.open(url, '_blank');
-      if (!win) window.location.href = url;
-
-      formNote.hidden = false;
-      setTimeout(() => {
-        btn.disabled = false;
-        btn.innerHTML = originalHTML;
-        form.reset();
-        setTimeout(() => { formNote.hidden = true; }, 6000);
-      }, 1200);
+      // Show inline success state, hide the form.
+      form.hidden = true;
+      if (success) success.hidden = false;
+      // Restore button state in case the form is re-shown later.
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
     });
   </script>
 @endpush

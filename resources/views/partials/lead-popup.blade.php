@@ -208,10 +208,10 @@
 @push('scripts')
   <script>
     (function () {
-      const STORAGE_KEY = 'drPopupSeen';
-      const COOLDOWN_DAYS = 7;
-      const SCROLL_TRIGGER = 0.5;          // % of scroll height
-      const TIME_TRIGGER_MS = 25000;       // 25 s
+      // Session-scoped cooldown: clears when the browser/tab is closed.
+      // Set after a successful submit, so the popup never re-shows in the same session.
+      const SUBMITTED_KEY   = 'drPopupSubmitted';
+      const TIME_TRIGGER_MS = 5000; // 5 s after page load
       const POPUP_URL  = "{{ route('lead.popup') }}";
       const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
@@ -224,24 +224,18 @@
       const success = document.getElementById('drPopupSuccess');
       if (!popup) return;
 
-      const recentlySeen = () => {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return false;
-          const ts = parseInt(raw, 10);
-          if (!ts) return false;
-          return (Date.now() - ts) < COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
-        } catch (e) { return false; }
+      const alreadySubmitted = () => {
+        try { return sessionStorage.getItem(SUBMITTED_KEY) === '1'; }
+        catch (e) { return false; }
       };
-      const markSeen = () => {
-        try { localStorage.setItem(STORAGE_KEY, String(Date.now())); } catch (e) {}
+      const markSubmitted = () => {
+        try { sessionStorage.setItem(SUBMITTED_KEY, '1'); } catch (e) {}
       };
 
       let opened = false;
       const open = () => {
-        if (opened || recentlySeen()) return;
+        if (opened || alreadySubmitted()) return;
         opened = true;
-        markSeen();
         overlay.classList.add('dr-show');
         popup.classList.add('dr-show');
         overlay.setAttribute('aria-hidden', 'false');
@@ -258,27 +252,9 @@
         document.body.style.overflow = '';
       };
 
-      // Triggers — only attach if user hasn't seen recently
-      if (!recentlySeen()) {
-        // 1) Scroll trigger
-        const onScroll = () => {
-          const max = document.documentElement.scrollHeight - window.innerHeight;
-          if (max > 0 && (window.scrollY / max) >= SCROLL_TRIGGER) open();
-        };
-        window.addEventListener('scroll', onScroll, { passive: true });
-
-        // 2) Timer trigger
+      // Single trigger: 5 s after page load, only if not already submitted in this session.
+      if (!alreadySubmitted()) {
         setTimeout(open, TIME_TRIGGER_MS);
-
-        // 3) Exit-intent (desktop only)
-        if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-          let armed = false;
-          setTimeout(() => { armed = true; }, 5000); // ignore initial bounces
-          document.addEventListener('mouseout', (e) => {
-            if (!armed) return;
-            if (!e.relatedTarget && e.clientY <= 8) open();
-          });
-        }
       }
 
       closeBtn.addEventListener('click', close);
@@ -297,7 +273,7 @@
 
         submit.disabled = true;
         const originalText = submit.innerHTML;
-        submit.innerHTML = 'Sending…';
+        submit.innerHTML = 'Submitting…';
 
         try {
           fd.append('page', window.location.pathname);
@@ -315,12 +291,14 @@
           console.warn('Popup submit failed', e);
         }
 
-        // Show success state regardless of network failure (we still want to thank user).
+        // Mark as submitted for this session so the popup never re-shows until next visit.
+        markSubmitted();
+
+        // Show success state regardless of network failure.
         body.style.display = 'none';
         success.classList.add('dr-show');
         submit.disabled = false;
         submit.innerHTML = originalText;
-        setTimeout(close, 2400);
       });
     })();
   </script>
