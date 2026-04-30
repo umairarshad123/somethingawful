@@ -2,6 +2,18 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home2/digirise/public_html/
+
+    # ── 1. Purge any stale Laravel caches on the server BEFORE copying.
+    #    These compiled files reference packages by class name and crash
+    #    if the package is no longer in vendor/ (e.g. after switching to
+    #    --no-dev). They are always safe to delete; Laravel rebuilds them.
+    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/packages.php
+    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/services.php
+    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/config.php
+    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/routes-v7.php
+    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/events.php
+
+    # ── 2. Copy fresh code.
     - /bin/cp -R app $DEPLOYPATH
     - /bin/cp -R assets $DEPLOYPATH
     - /bin/cp -R bootstrap $DEPLOYPATH
@@ -11,7 +23,8 @@ deployment:
     - /bin/cp -R routes $DEPLOYPATH
     - /bin/cp -R storage $DEPLOYPATH
     - /bin/cp -R vendor $DEPLOYPATH
-    - /bin/cp .env $DEPLOYPATH
+    # NOTE: .env is intentionally NOT copied. It lives only on the server
+    #       (managed via cPanel File Manager) so secrets never enter git.
     - /bin/cp .htaccess $DEPLOYPATH
     - /bin/cp artisan $DEPLOYPATH
     - /bin/cp composer.json $DEPLOYPATH
@@ -19,3 +32,16 @@ deployment:
     - /bin/cp favicon.ico $DEPLOYPATH
     - /bin/cp index.php $DEPLOYPATH
     - /bin/cp robots.txt $DEPLOYPATH
+
+    # ── 3. Force-purge caches AGAIN after copy (in case the local copy
+    #    contained a stale cache snapshot too).
+    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/packages.php
+    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/services.php
+    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/config.php
+    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/routes-v7.php
+    - /bin/rm -f $DEPLOYPATH/bootstrap/cache/events.php
+
+    # ── 4. Make storage + bootstrap/cache writable so Laravel can
+    #    rebuild caches and write logs/sessions on the next request.
+    - /bin/chmod -R 775 $DEPLOYPATH/storage
+    - /bin/chmod -R 775 $DEPLOYPATH/bootstrap/cache
