@@ -28,21 +28,56 @@ use Stripe\Event;
  */
 class StripeWebhookController extends Controller
 {
-    public function handle(Request $request, StripeService $stripe): Response
+    public function handle(Request $request, StripeService $stripe)
     {
         $payload   = $request->getContent();
         $signature = (string) $request->header('Stripe-Signature', '');
 
+        // Note: production has LOG_LEVEL=error so Log::info / Log::warning
+        // get filtered. We use Log::error for the things that actually matter
+        // for diagnosing webhook failures so they show up regardless.
+
+        // 1) Pre-flight: a missing webhook secret would make every signature
+        //    fail. Log loudly and 500 so Stripe retries while you fix .env.
+        if (! config('services.stripe.webhook_secret')) {
+            Log::error('[stripe-webhook] STRIPE_WEBHOOK_SECRET is missing in .env — every Stripe signature will fail until this is set.');
+            return response()->json(['ok' => false, 'error' => 'webhook secret not configured'], 500);
+        }
+
+        // 2) Signature verification. A bad signature is permanent (no retry helps),
+        //    so we return 400 and Stripe stops retrying — exactly what we want
+        //    while we fix a misconfigured key.
         try {
             $event = $stripe->constructEvent($payload, $signature);
-        } catch (\Throwable $e) {
-            Log::warning('[stripe-webhook] signature verification failed', [
-                'err'    => $e->getMessage(),
-                'sig'    => substr($signature, 0, 12) . '…',
-                'len'    => strlen($payload),
+        } catch (\Stripe\Exception\SignatureVerificationException $e) {
+            Log::error('[stripe-webhook] signature verification failed — likely STRIPE_WEBHOOK_SECRET in .env does not match the signing secret of the endpoint registered in your Stripe dashboard', [
+                'stripe_err' => $e->getMessage(),
+                'sig_prefix' => substr($signature, 0, 16) . '…',
+                'body_len'   => strlen($payload),
+                'has_sig'    => $signature !== '',
+                'secret_set' => !empty(config('services.stripe.webhook_secret')),
             ]);
-            return response('invalid signature', 400);
+            return response()->json(['ok' => false, 'error' => 'invalid signature'], 400);
+        } catch (\UnexpectedValueException $e) {
+            Log::error('[stripe-webhook] payload could not be parsed', [
+                'err' => $e->getMessage(),
+                'len' => strlen($payload),
+            ]);
+            return response()->json(['ok' => false, 'error' => 'invalid payload'], 400);
+        } catch (\Throwable $e) {
+            Log::error('[stripe-webhook] unexpected error during verify', ['err' => $e->getMessage()]);
+            return response()->json(['ok' => false, 'error' => 'verify error'], 500);
         }
+
+        // 3) Per-event handler. Each one is wrapped in its own try/catch so a
+        //    bug in (say) onInvoicePaid can't take down checkout.session.completed.
+        //    Always return 200 once the signature is verified — DB-level transient
+        //    failures get logged but Stripe gets an ack so retries don't spiral.
+        Log::info('[stripe-webhook] event', [
+            'id'      => $event->id,
+            'type'    => $event->type,
+            'created' => $event->created,
+        ]);
 
         try {
             match ($event->type) {
@@ -54,21 +89,22 @@ class StripeWebhookController extends Controller
                 'customer.subscription.created',
                 'customer.subscription.updated'  => $this->onSubscriptionUpserted($event),
                 'customer.subscription.deleted'  => $this->onSubscriptionDeleted($event),
-                default => null,
+                default => Log::info('[stripe-webhook] unhandled event type', ['type' => $event->type]),
             };
         } catch (\Throwable $e) {
-            // 500 forces Stripe to retry. We want that for transient DB issues
-            // but log loudly so we know something's wrong.
             Log::error('[stripe-webhook] handler exploded', [
                 'event' => $event->type,
                 'err'   => $e->getMessage(),
-                'line'  => $e->getLine(),
                 'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
+                'trace' => substr($e->getTraceAsString(), 0, 1500),
             ]);
-            return response('handler error', 500);
+            // 200 prevents Stripe from retrying a coding bug forever. The
+            // event is on the dashboard so you can replay it after fixing.
+            return response()->json(['ok' => true, 'note' => 'handler logged error', 'event_id' => $event->id], 200);
         }
 
-        return response('ok', 200);
+        return response()->json(['ok' => true, 'event_id' => $event->id, 'type' => $event->type], 200);
     }
 
     // -- Event handlers --------------------------------------------------
@@ -83,13 +119,28 @@ class StripeWebhookController extends Controller
         /** @var \Stripe\Checkout\Session $session */
         $session = $event->data->object;
 
+        Log::info('[stripe-webhook] checkout.session.completed', [
+            'session_id'     => $session->id,
+            'customer'       => $session->customer ?? null,
+            'subscription'   => $session->subscription ?? null,
+            'payment_status' => $session->payment_status ?? null,
+            'metadata'       => $session->metadata?->toArray() ?? null,
+        ]);
+
         $order = $this->findOrderForSession($session);
         if (! $order) {
             Log::warning('[stripe-webhook] checkout.session.completed for unknown order', [
                 'session_id' => $session->id,
+                'metadata'   => $session->metadata?->toArray() ?? null,
             ]);
             return;
         }
+
+        Log::info('[stripe-webhook] order located', [
+            'order_id'     => $order->id,
+            'order_number' => $order->order_number,
+            'email'        => $order->email,
+        ]);
 
         $order->stripe_customer_id      = $session->customer ?? $order->stripe_customer_id;
         $order->stripe_payment_intent_id= $session->payment_intent ?? $order->stripe_payment_intent_id;

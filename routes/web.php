@@ -130,15 +130,9 @@ Route::get('/checkout/status',     [CheckoutController::class, 'status'])->name(
 Route::get('/checkout/{slug}',     [CheckoutController::class, 'show'])->name('checkout.show');
 Route::post('/checkout/{slug}',    [CheckoutController::class, 'store'])->name('checkout.store');
 
-/*
-|--------------------------------------------------------------------------
-| Stripe webhook — CSRF-exempt because Stripe is not a browser session.
-| Signature is verified inside StripeWebhookController.
-|--------------------------------------------------------------------------
-*/
-Route::post('/webhooks/stripe', [StripeWebhookController::class, 'handle'])
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
-    ->name('webhooks.stripe');
+// Stripe webhook is registered in routes/webhooks.php (loaded with NO
+// middleware) so the entire web group cannot interfere with the raw
+// POST body or the response. See bootstrap/app.php → withRouting(then:).
 
 /*
 |--------------------------------------------------------------------------

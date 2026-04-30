@@ -105,7 +105,15 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -X POST \"http://127.0.0.1:8784/index.php/webhooks/stripe\" -d '{\"type\":\"test\"}')",
       "Bash(curl -s \"http://127.0.0.1:8784/index.php/checkout/wp-portfolio\")",
       "Bash(grep -oE \"WordPress Portfolio Site|Pay \\\\\\\\\\\\$300|Order summary|csrf-token|first_name|website|notes\")",
-      "Bash(grep -oE 'Pay \\\\$[0-9.]+ ?[a-z ]*')"
+      "Bash(grep -oE 'Pay \\\\$[0-9.]+ ?[a-z ]*')",
+      "Bash(git commit *)",
+      "Bash(curl -sf http://127.0.0.1:8788/index.php)",
+      "Bash(curl -s -o /tmp/wh.out -w \"HTTP %{http_code}\\\\n\" -X POST -H \"Content-Type: application/json\" -d '{\"type\":\"ping\",\"id\":\"evt_test\"}' \"http://127.0.0.1:8788/index.php/webhooks/stripe\")",
+      "Bash(curl -s -o /tmp/wh2.out -w \"HTTP %{http_code}\\\\n\" -X POST -H \"Content-Type: application/json\" -H \"Stripe-Signature: t=1700000000,v1=fake\" -d '{\"id\":\"evt_test\",\"type\":\"ping\"}' \"http://127.0.0.1:8788/index.php/webhooks/stripe\")",
+      "Bash(curl -s -o /tmp/wh3.out -w \"HTTP %{http_code}\\\\n\" \"http://127.0.0.1:8788/index.php/webhooks/stripe\")",
+      "Bash(curl -s -o /tmp/wh.out -w \"HTTP %{http_code}  Content-Type: %{content_type}\\\\n\" -X POST -H \"Content-Type: application/json\" -d '{\"id\":\"evt_test\",\"type\":\"ping\"}' \"http://127.0.0.1:8788/index.php/webhooks/stripe\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" -X POST -H \"Content-Type: application/json\" -H \"Stripe-Signature: t=1700000000,v1=fake\" -d '{\"id\":\"evt_test\",\"type\":\"ping\"}' \"http://127.0.0.1:8788/index.php/webhooks/stripe\")",
+      "Bash(curl -s -o /tmp/wh.out -w \"HTTP %{http_code}  body: \" -X POST -H \"Content-Type: application/json\" -H \"Stripe-Signature: t=1700000000,v1=garbage\" -d '{\"id\":\"evt_smoke\",\"type\":\"ping\"}' \"http://127.0.0.1:8788/index.php/webhooks/stripe\")"
     ]
   }
 }
