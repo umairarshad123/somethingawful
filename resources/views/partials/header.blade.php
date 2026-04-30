@@ -38,6 +38,7 @@
     /* Header shell — sticky, full-width, the positioning anchor for the mega panel */
     .dr-nav {
       position: sticky; top: 0; z-index: 100;
+      width: 100%;
       background: rgba(255,255,255,.85);
       backdrop-filter: saturate(180%) blur(16px);
       -webkit-backdrop-filter: saturate(180%) blur(16px);
@@ -49,9 +50,14 @@
       border-bottom-color: #e5e7eb;
       box-shadow: 0 4px 24px -12px rgba(11,16,32,.12);
     }
+    /* Inner row spans the viewport. Desktop padding is wide so the logo
+       hugs the left edge and the right cluster hugs the right edge,
+       matching the nexvato.com layout. */
     .dr-nav-inner {
-      max-width: 1240px; margin: 0 auto;
-      padding: 14px 24px;
+      width: 100%;
+      max-width: none;
+      margin: 0 auto;
+      padding: 14px 56px;
       display: flex; align-items: center; justify-content: space-between;
       gap: 24px;
     }
@@ -362,7 +368,8 @@
        Mobile (≤980px) — drawer + services accordion
        ============================================================ */
     @media (max-width: 980px) {
-      .dr-nav-inner { padding: 12px 18px; }
+      /* Tablet: tighter side padding so the hamburger sits closer to the edge. */
+      .dr-nav-inner { padding: 12px 24px; }
 
       /* Hide desktop links / right cluster, show hamburger */
       .dr-nav-list { display: none; }
@@ -440,6 +447,7 @@
     }
 
     @media (max-width: 480px) {
+      .dr-nav-inner { padding: 12px 16px; }
       .dr-logo { font-size: 1.05rem; }
       .dr-mobile-cat ul { grid-template-columns: 1fr; }
     }
