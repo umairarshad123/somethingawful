@@ -18,7 +18,7 @@
   $allCats = collect(config('catalog.categories', []))->sortBy('order')->values();
 
   $faqs = [
-    ['How does payment work?', 'No payment is taken on this site. After you send your order via WhatsApp, we confirm scope on a 15-minute call, send a contract and invoice (Stripe or wire), and kick off when the deposit clears.'],
+    ['How does payment work?', 'No payment is taken on this site. After you submit an order request, we confirm scope on a 15-minute call, send a contract and invoice (Stripe or wire), and kick off when the deposit clears.'],
     ['What if my project is bigger than this package?', 'These are starting prices for the most common scope. If your project needs more — more pages, integrations, custom work — we adjust on the discovery call before any commitment. No surprise invoices.'],
     ['Can I bundle multiple services?', 'Yes — most clients order 2–4 services together. Add everything to your cart and we\'ll quote the bundle (often with a discount) on the confirmation call.'],
     ['How do revisions work?', 'Each package includes the revision rounds noted in "What\'s included". Additional rounds are billed hourly at $95/hr.'],
@@ -272,9 +272,9 @@
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
               <span id="addLabel">Add to cart</span>
             </button>
-            <a class="btn-wa" id="waBtn" href="#" target="_blank" rel="noopener">
-              <svg viewBox="0 0 32 32" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3z"/></svg>
-              Order on WhatsApp
+            <a class="btn-wa" id="waBtn" href="{{ route('contact') }}?cart=1#contact">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              Submit order request
             </a>
           </div>
 
@@ -381,10 +381,10 @@
   <section class="pdp-bottom">
     <div class="container pdp-bottom-inner">
       <h2>Ready to <span class="serif-italic">start?</span></h2>
-      <p>Add this to your cart, browse for more, or send the order directly via WhatsApp. We'll confirm scope and pricing before any commitment.</p>
+      <p>Add this to your cart, browse for more, or submit your order request directly. We'll confirm scope and pricing before any commitment.</p>
       <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
         <a href="{{ url('/shop') }}" class="btn btn-primary btn-lg">Browse all services →</a>
-        <a href="{{ url('/') }}#contact" class="btn btn-ghost btn-lg">Book a strategy call</a>
+        <a href="{{ route('contact') }}" class="btn btn-ghost btn-lg">Book a strategy call</a>
       </div>
     </div>
   </section>
@@ -397,13 +397,9 @@
   <script>
     (function () {
       const STORAGE_KEY = 'digi_cart_v2';
-      const WA_NUMBER   = '14019987807';
       const addBtn   = document.getElementById('addBtn');
       const addLabel = document.getElementById('addLabel');
-      const waBtn    = document.getElementById('waBtn');
       if (!addBtn) return;
-
-      const cycleLabel = { project: 'one-time', mo: '/month', week: '/week', 'per Zap': 'per Zap', 'per script': 'per script', 'per asset': 'per asset' };
 
       const loadCart = () => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch (e) { return []; } };
       const saveCart = (cart) => localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
@@ -435,20 +431,6 @@
         saveCart(cart);
         refresh();
       });
-
-      // Build WhatsApp link for this single item
-      const price = Number(addBtn.dataset.price);
-      const fmt = '$' + price.toLocaleString('en-US');
-      const lines = [
-        '*Digirisers — order inquiry*',
-        '',
-        `*${addBtn.dataset.name}*`,
-        `${fmt} ${cycleLabel[addBtn.dataset.cycle] || ''}`,
-        `Category: ${addBtn.dataset.cat}`,
-        '',
-        'I\'d like to learn more / get started.',
-      ];
-      waBtn.href = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`;
     })();
   </script>
 @endpush

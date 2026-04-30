@@ -180,7 +180,7 @@
           <p>We aim to respond to all privacy inquiries within five business days.</p>
           <div class="lc-row">
             <span>Email <a href="mailto:info@digirisers.com">info@digirisers.com</a></span>
-            <span>Phone <a href="tel:+14019987807">+1 (401) 998-7807</a></span>
+            <span>Web <a href="{{ route('contact') }}">{{ url('/contact') }}</a></span>
           </div>
         </div>
 

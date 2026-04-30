@@ -76,12 +76,15 @@
     /* Primary nav list */
     .dr-nav-list {
       list-style: none; margin: 0; padding: 0;
-      display: flex; align-items: center; gap: 28px;
+      display: flex; align-items: center; gap: 22px;
     }
     .dr-nav-list > li {
-      /* IMPORTANT: must be static so the mega panel can position relative to the header. */
+      /* Default: items behave as static so the wide mega panel can position
+         relative to the .dr-nav element. Narrow per-category dropdowns
+         override this with .dr-has-mini below. */
       position: static;
     }
+    .dr-nav-list > li.dr-has-mini { position: relative; }
     .dr-nav-link,
     .dr-nav-trigger {
       display: inline-flex; align-items: center; gap: 5px;
@@ -353,6 +356,55 @@
     }
     .dr-mega-pill.dr-primary:hover { transform: translateY(-1px); color: #fff; }
 
+    /* ============================================================
+       Mini Panel — per-category dropdown anchored to its trigger
+       ============================================================ */
+    .dr-mini-panel {
+      position: absolute;
+      top: 100%; left: 0;
+      width: 320px;
+      margin-top: 8px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      box-shadow: 0 24px 60px -18px rgba(11,16,32,.25),
+                  0 6px 18px -10px rgba(11,16,32,.08);
+      padding: 10px;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity .2s ease, transform .25s ease, visibility .2s;
+      z-index: 200;
+    }
+    .dr-has-mini:hover .dr-mini-panel,
+    .dr-has-mini:focus-within .dr-mini-panel,
+    .dr-has-mini.dr-open .dr-mini-panel {
+      opacity: 1; visibility: visible; pointer-events: auto;
+      transform: translateY(0);
+    }
+    .dr-mini-list {
+      list-style: none; margin: 0; padding: 0;
+      display: grid; gap: 1px;
+    }
+    .dr-mini-list a {
+      display: block;
+      padding: 10px 12px;
+      font-size: .88rem; line-height: 1.35;
+      color: #0b1020; text-decoration: none;
+      border-radius: 10px;
+      transition: background .15s ease, color .15s ease;
+    }
+    .dr-mini-list a::after { display: none; }
+    .dr-mini-list a:hover { background: #eff6ff; color: #1d4ed8; }
+    .dr-mini-foot {
+      margin-top: 6px; padding: 10px 12px;
+      border-top: 1px dashed #e5e7eb;
+      font-size: .78rem; font-weight: 600; color: #1d4ed8;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .dr-mini-foot::after { display: none; }
+    .dr-mini-foot:hover { color: #1e3a8a; }
+
     /* Backdrop */
     .dr-backdrop {
       position: fixed; inset: 0;
@@ -464,60 +516,81 @@
   $isHome  = $current === '' || $current === '/';
   $home    = url('/');
 
-  // Pull mega-menu structure from the catalog (config/catalog.php) so the header
-  // never drifts from the actual catalog. Visual layout: 5 columns grouping the
-  // 8 underlying categories.
-  $catalog = config('catalog.categories', []);
-  $previewLinks = function (string $catId, int $n = 5) use ($catalog) {
-    $items = $catalog[$catId]['items'] ?? [];
-    return array_slice($items, 0, $n);
-  };
-
-  $megaCols = [
+  // Each top-level category is its own dropdown. The 5 visible items match
+  // the user-curated catalog list shown in the request brief — slugs map to
+  // entries in config/catalog.php so /shop/{slug} resolves cleanly.
+  $categories = [
     [
-      'title'   => 'Build',
+      'key'     => 'development',
+      'label'   => 'Development',
       'tagline' => 'Sites & funnels',
       'icon'    => 'monitor',
       'href'    => url('/services/websites'),
-      'items'   => $previewLinks('websites'),
-      'catId'   => 'websites',
+      'items'   => [
+        ['name' => 'WordPress Portfolio Site',                 'slug' => 'wp-portfolio'],
+        ['name' => 'WordPress Business Site',                  'slug' => 'wp-business'],
+        ['name' => 'Custom Designed Website / Sales Funnel',   'slug' => 'custom-site'],
+        ['name' => 'Custom Site / Funnel + Integrations',      'slug' => 'custom-site-integrations'],
+        ['name' => 'E-commerce Store',                         'slug' => 'ecommerce'],
+      ],
     ],
     [
-      'title'   => 'Grow',
-      'tagline' => 'SEO + ads + organic',
+      'key'     => 'grow',
+      'label'   => 'Grow',
+      'tagline' => 'SEO, ads & social',
       'icon'    => 'search',
       'href'    => url('/services/seo'),
-      'items'   => array_merge($previewLinks('seo', 2), $previewLinks('paid-ads', 2), $previewLinks('organic', 1)),
-      'catId'   => 'seo',
+      'items'   => [
+        ['name' => 'Local SEO Setup',          'slug' => 'local-seo'],
+        ['name' => 'Technical SEO Audit',      'slug' => 'technical-seo'],
+        ['name' => 'Ads Setup',                'slug' => 'ads-setup'],
+        ['name' => 'Ads Management',           'slug' => 'ads-management'],
+        ['name' => 'Social Media Management',  'slug' => 'social-management'],
+      ],
     ],
     [
-      'title'   => 'Automate',
-      'tagline' => 'AI + CRM',
+      'key'     => 'automations',
+      'label'   => 'Automations',
+      'tagline' => 'AI & CRM',
       'icon'    => 'brain',
       'href'    => url('/services/ai'),
-      'items'   => array_merge($previewLinks('ai', 3), $previewLinks('crm-automation', 2)),
-      'catId'   => 'ai',
+      'items'   => [
+        ['name' => 'AI Web Chatbot / Knowledge Base', 'slug' => 'ai-chatbot'],
+        ['name' => 'AI Customer Support Agent',       'slug' => 'ai-support-agent'],
+        ['name' => 'AI Sales & Appointment Setter',   'slug' => 'ai-sales-agent'],
+        ['name' => 'GoHighLevel Full Setup',          'slug' => 'ghl-full-setup'],
+        ['name' => 'GHL Snapshot Customization',      'slug' => 'ghl-snapshot'],
+      ],
     ],
     [
-      'title'   => 'Secure',
+      'key'     => 'security',
+      'label'   => 'Security',
       'tagline' => 'Hosting & infrastructure',
       'icon'    => 'shield',
       'href'    => url('/services/hosting'),
-      'items'   => $previewLinks('hosting'),
-      'catId'   => 'hosting',
+      'items'   => [
+        ['name' => 'VPS Setup & Hardening',        'slug' => 'vps-setup'],
+        ['name' => 'DNS & SSL Configuration',      'slug' => 'dns-ssl'],
+        ['name' => 'Website Security Implementation', 'slug' => 'security-implementation'],
+        ['name' => '2FA + RBAC Setup',             'slug' => '2fa-rbac'],
+        ['name' => 'API Security Hardening',       'slug' => 'api-security'],
+      ],
     ],
     [
-      'title'   => 'Brand',
+      'key'     => 'branding',
+      'label'   => 'Branding',
       'tagline' => 'Identity & creative',
       'icon'    => 'sparkle',
       'href'    => url('/services/branding'),
-      'items'   => $previewLinks('branding'),
-      'catId'   => 'branding',
+      'items'   => [
+        ['name' => 'Logo Design',                          'slug' => 'logo-design'],
+        ['name' => 'Full Brand Identity Kit',              'slug' => 'brand-kit'],
+        ['name' => 'Short-Form Video Scriptwriting',       'slug' => 'short-form-script'],
+        ['name' => 'Canva Creative Design',                'slug' => 'canva-design'],
+        ['name' => 'Digital Marketing Collateral Pack',    'slug' => 'collateral-pack'],
+      ],
     ],
   ];
-
-  // Mobile accordion: one section per real catalog category (8 sections).
-  $mobileCats = collect($catalog)->sortBy('order')->all();
 @endphp
 
 <header class="dr-nav" id="drNav">
@@ -538,10 +611,11 @@
       <span>Digirisers<span class="dr-logo-dot">.</span></span>
     </a>
 
-    {{-- Nav (center) --}}
+    {{-- Nav (center) — eight items: Home, Services overview, 5 categories, Contact --}}
     <ul class="dr-nav-list" aria-label="Primary">
       <li><a href="{{ $home }}" class="dr-nav-link @if($isHome) dr-active @endif">Home</a></li>
 
+      {{-- Services overview: wide centered mega panel listing all 5 categories --}}
       <li class="dr-has-mega" data-mega>
         <button type="button" class="dr-nav-trigger" aria-haspopup="true" aria-expanded="false">
           Services
@@ -552,10 +626,10 @@
 
         <div class="dr-mega-panel" role="menu">
           <div class="dr-mega-grid">
-            @foreach ($megaCols as $col)
-              <div class="dr-mega-col">
+            @foreach ($categories as $cat)
+              <a href="{{ $cat['href'] }}" class="dr-mega-col" style="text-decoration:none; color:inherit;">
                 <div class="dr-mega-icon" aria-hidden="true">
-                  @switch($col['icon'])
+                  @switch($cat['icon'])
                     @case('monitor')
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="18" x2="12" y2="20"/></svg>
                       @break
@@ -573,18 +647,18 @@
                       @break
                   @endswitch
                 </div>
-                <h6>{{ $col['title'] }} <span style="color:#64748b; font-weight:500; font-size:.7rem; letter-spacing:0; text-transform:none;">— {{ $col['tagline'] }}</span></h6>
+                <h6>{{ $cat['label'] }} <span style="color:#64748b; font-weight:500; font-size:.7rem; letter-spacing:0; text-transform:none;">— {{ $cat['tagline'] }}</span></h6>
                 <ul>
-                  @foreach ($col['items'] as $item)
-                    <li><a href="{{ url('/shop/'.$item['slug']) }}">{{ Str::limit($item['name'], 36) }}</a></li>
+                  @foreach ($cat['items'] as $item)
+                    <li>{{ Str::limit($item['name'], 36) }}</li>
                   @endforeach
                 </ul>
-                <a href="{{ $col['href'] }}" class="dr-mega-foot-link">Browse all →</a>
-              </div>
+                <span class="dr-mega-foot-link">Browse {{ strtolower($cat['label']) }} →</span>
+              </a>
             @endforeach
           </div>
           <div class="dr-mega-footer">
-            <p><strong>SaaS-style ordering.</strong> 57 services, transparent pricing, no payment required to inquire.</p>
+            <p><strong>SaaS-style ordering.</strong> Senior team owns the outcome — no payment required to inquire.</p>
             <div class="dr-mega-footer-actions">
               <a href="{{ url('/services') }}" class="dr-mega-pill">All services</a>
               <a href="{{ url('/shop') }}" class="dr-mega-pill dr-primary">Visit Shop →</a>
@@ -593,19 +667,31 @@
         </div>
       </li>
 
-      <li><a href="{{ url('/shop') }}" class="dr-nav-link @if($current === 'shop') dr-active @endif">Shop</a></li>
-      <li><a href="{{ url('/pricing') }}" class="dr-nav-link @if($current === 'pricing') dr-active @endif">Pricing</a></li>
-      <li><a href="{{ $home }}#results" class="dr-nav-link">Results</a></li>
-      <li><a href="{{ $home }}#contact" class="dr-nav-link">Contact</a></li>
+      {{-- One narrow dropdown per category --}}
+      @foreach ($categories as $cat)
+        <li class="dr-has-mega dr-has-mini" data-mega>
+          <button type="button" class="dr-nav-trigger" aria-haspopup="true" aria-expanded="false">
+            {{ $cat['label'] }}
+            <svg class="dr-caret" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M3 4.5 L6 7.5 L9 4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="dr-mini-panel" role="menu">
+            <ul class="dr-mini-list">
+              @foreach ($cat['items'] as $item)
+                <li><a href="{{ url('/shop/'.$item['slug']) }}" role="menuitem">{{ $item['name'] }}</a></li>
+              @endforeach
+            </ul>
+            <a href="{{ $cat['href'] }}" class="dr-mini-foot">View all in {{ $cat['label'] }} →</a>
+          </div>
+        </li>
+      @endforeach
+
+      <li><a href="{{ route('contact') }}" class="dr-nav-link @if($current === 'contact') dr-active @endif">Contact</a></li>
     </ul>
 
     {{-- Right cluster — context-aware: guest sees Sign in / Sign up, auth sees account menu --}}
     <div class="dr-nav-right">
-      <a href="tel:+14019987807" class="dr-nav-phone" aria-label="Call Digirisers">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1L6.6 10.8z"/></svg>
-        <span>+1 (401) 998-7807</span>
-      </a>
-
       @auth
         <div class="dr-account" data-account>
           <button type="button" class="dr-account-btn" aria-haspopup="true" aria-expanded="false" aria-label="Account menu">
@@ -644,6 +730,8 @@
     <div class="dr-drawer-inner">
       <ul class="dr-mobile-list">
         <li><a href="{{ $home }}" class="dr-mobile-link">Home</a></li>
+
+        {{-- Services overview accordion: links to each category overview --}}
         <li class="dr-has-mega" data-mega-mobile>
           <button type="button" class="dr-mobile-trigger" aria-expanded="false">
             Services
@@ -653,31 +741,44 @@
           </button>
           <div class="dr-mobile-mega">
             <div class="dr-mobile-mega-inner">
-              @foreach ($mobileCats as $mc)
+              @foreach ($categories as $cat)
                 <div class="dr-mobile-cat">
-                  <h6><a href="{{ url('/services/'.$mc['id']) }}" style="color:inherit;">{{ $mc['title'] }} →</a></h6>
-                  <ul>
-                    @foreach (array_slice($mc['items'], 0, 4) as $it)
-                      <li><a href="{{ url('/shop/'.$it['slug']) }}">{{ Str::limit($it['name'], 32) }}</a></li>
-                    @endforeach
-                  </ul>
+                  <h6><a href="{{ $cat['href'] }}" style="color:inherit;">{{ $cat['label'] }} →</a></h6>
                 </div>
               @endforeach
               <a href="{{ url('/services') }}" class="dr-mega-pill" style="align-self:flex-start;">View all services →</a>
             </div>
           </div>
         </li>
-        <li><a href="{{ url('/shop') }}" class="dr-mobile-link">Shop</a></li>
-        <li><a href="{{ url('/pricing') }}" class="dr-mobile-link">Pricing</a></li>
-        <li><a href="{{ $home }}#results" class="dr-mobile-link">Results</a></li>
-        <li><a href="{{ $home }}#contact" class="dr-mobile-link">Contact</a></li>
+
+        {{-- One accordion per category, exact items from the desktop dropdown --}}
+        @foreach ($categories as $cat)
+          <li class="dr-has-mega" data-mega-mobile>
+            <button type="button" class="dr-mobile-trigger" aria-expanded="false">
+              {{ $cat['label'] }}
+              <svg class="dr-caret" viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M3 4.5 L6 7.5 L9 4.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="dr-mobile-mega">
+              <div class="dr-mobile-mega-inner">
+                <div class="dr-mobile-cat">
+                  <ul>
+                    @foreach ($cat['items'] as $item)
+                      <li><a href="{{ url('/shop/'.$item['slug']) }}">{{ $item['name'] }}</a></li>
+                    @endforeach
+                  </ul>
+                </div>
+                <a href="{{ $cat['href'] }}" class="dr-mega-pill" style="align-self:flex-start;">View all {{ strtolower($cat['label']) }} →</a>
+              </div>
+            </div>
+          </li>
+        @endforeach
+
+        <li><a href="{{ route('contact') }}" class="dr-mobile-link">Contact</a></li>
       </ul>
 
       <div class="dr-mobile-actions">
-        <a href="tel:+14019987807" class="dr-nav-phone">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1L6.6 10.8z"/></svg>
-          <span>+1 (401) 998-7807</span>
-        </a>
         @auth
           <a href="{{ route('dashboard') }}" class="dr-cta">Dashboard ({{ auth()->user()->first_name }})</a>
           <form method="POST" action="{{ route('auth.logout') }}" style="margin:0;">

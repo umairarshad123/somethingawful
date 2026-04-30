@@ -25,7 +25,7 @@ Route::get('/services/{slug}', function (string $slug) {
     return view('services-category', ['cat' => $cat]);
 })->name('services.category');
 
-Route::get('/pricing', fn () => view('pricing'))->name('pricing');
+Route::get('/contact', fn () => view('contact'))->name('contact');
 Route::get('/privacy', fn () => view('privacy'))->name('privacy');
 Route::get('/refund',  fn () => view('refund'))->name('refund');
 Route::get('/terms',   fn () => view('terms'))->name('terms');

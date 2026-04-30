@@ -160,12 +160,7 @@
               <small>Read the full platform catalog</small>
               <span class="arr">Explore →</span>
             </a>
-            <a class="db-action" href="{{ url('/pricing') }}">
-              <strong>View pricing</strong>
-              <small>Retainer + project rate cards</small>
-              <span class="arr">See plans →</span>
-            </a>
-            <a class="db-action" href="{{ url('/') }}#contact">
+            <a class="db-action" href="{{ route('contact') }}">
               <strong>Talk to a strategist</strong>
               <small>Custom scope, free 15-minute call</small>
               <span class="arr">Get in touch →</span>

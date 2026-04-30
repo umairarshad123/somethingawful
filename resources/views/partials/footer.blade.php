@@ -91,7 +91,7 @@
           <span class="logo-text">Digirisers<span class="logo-dot">.</span></span>
         </a>
         <p>Digital marketing that rises above. Strategy, creative, and engineering under one roof.</p>
-        <a href="tel:+14019987807" class="footer-phone">+1 (401) 998-7807</a>
+        <a href="{{ route('contact') }}" class="footer-phone">Contact us →</a>
       </div>
 
       <div class="footer-cols">
@@ -140,7 +140,7 @@
           <ul>
             <li><a href="{{ url('/services') }}">All Services</a></li>
             <li><a href="{{ url('/shop') }}">Shop</a></li>
-            <li><a href="{{ url('/pricing') }}">Pricing</a></li>
+            <li><a href="{{ route('contact') }}">Contact</a></li>
             <li><a href="{{ url('/privacy') }}">Privacy</a></li>
             <li><a href="{{ url('/terms') }}">Terms</a></li>
             <li><a href="{{ url('/refund') }}">Refund</a></li>
@@ -154,10 +154,10 @@
       <small class="footer-links">
         <a href="{{ url('/services') }}">Services</a> <span>&bull;</span>
         <a href="{{ url('/shop') }}">Shop</a> <span>&bull;</span>
-        <a href="{{ url('/pricing') }}">Pricing</a> <span>&bull;</span>
+        <a href="{{ route('contact') }}">Contact</a> <span>&bull;</span>
         <a href="{{ url('/privacy') }}">Privacy</a> <span>&bull;</span>
         <a href="{{ url('/terms') }}">Terms</a> <span>&bull;</span>
-        <a href="tel:+14019987807">+1 (401) 998-7807</a>
+        <a href="{{ url('/refund') }}">Refund</a>
       </small>
     </div>
   </div>

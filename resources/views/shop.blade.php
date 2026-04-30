@@ -287,8 +287,8 @@
         <div class="row grand"><span>Subtotal due upfront</span><strong id="totalUpfront">$0</strong></div>
       </div>
       <button type="button" class="cart-checkout" id="cartCheckout">
-        <svg viewBox="0 0 32 32" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3z"/></svg>
-        Send order via WhatsApp
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        Submit order request
       </button>
       <p class="cart-note">No payment is taken on this site. We'll review your scope, confirm pricing, and invoice you separately.</p>
     </div>
@@ -302,7 +302,6 @@
   <script>
     (function () {
       const STORAGE_KEY = 'digi_cart_v2';
-      const WA_NUMBER   = '14019987807';
       const products    = document.querySelectorAll('.product');
       const filterPills = document.querySelectorAll('.filter-pill');
       const searchInput = document.getElementById('shopSearch');
@@ -439,23 +438,9 @@
 
       cartCheckout.addEventListener('click', () => {
         if (cart.length === 0) return;
-        const lines = ['*Digirisers — new order*', ''];
-        cart.forEach((item, i) => {
-          lines.push(`${i + 1}. *${item.name}* — ${fmt(item.price)} ${cycleLabel[item.cycle] || ''}`);
-          if (item.cat) lines.push(`   _${item.cat}_`);
-        });
-        const tp = cart.filter(i => i.cycle === 'project').reduce((s, i) => s + i.price, 0);
-        const tm = cart.filter(i => i.cycle === 'mo').reduce((s, i) => s + i.price, 0);
-        const to = cart.filter(i => i.cycle !== 'project' && i.cycle !== 'mo').reduce((s, i) => s + i.price, 0);
-        lines.push('', '— Totals —');
-        lines.push(`One-time projects: ${fmt(tp)}`);
-        lines.push(`Monthly retainers: ${fmt(tm)}/mo`);
-        lines.push(`Other (weekly / per-unit): ${fmt(to)}`);
-        lines.push(`*Subtotal upfront: ${fmt(tp + to)}*`);
-        lines.push('', `Submitted: ${new Date().toLocaleString()}`);
-        const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`;
-        const win = window.open(url, '_blank');
-        if (!win) window.location.href = url;
+        // Cart contents persist in localStorage (digi_cart_v2). The contact
+        // page reads them via the ?cart=1 flag and prefills the message.
+        window.location.href = "{{ route('contact') }}?cart=1#contact";
       });
 
       renderCart();
