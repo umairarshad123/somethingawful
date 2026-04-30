@@ -215,41 +215,194 @@
     .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--ink); margin: 6px auto; border-radius: 2px; transition: .3s; }
 
     /* Hero */
-    .hero { padding: 80px 0 60px; position: relative; overflow: hidden; background: var(--grad-soft); }
+    /* =========================================
+       Hero — above-the-fold 2-column with form
+       ========================================= */
+    .hero {
+      position: relative; overflow: hidden;
+      background: var(--grad-soft);
+      min-height: calc(100svh - 100px);
+      display: flex; align-items: center;
+      padding: 36px 0 44px;
+    }
     .hero-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
     .grid-overlay {
       position: absolute; inset: 0;
       background-image:
-        linear-gradient(rgba(148,163,184,.15) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148,163,184,.15) 1px, transparent 1px);
+        linear-gradient(rgba(148,163,184,.13) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,.13) 1px, transparent 1px);
       background-size: 56px 56px;
       mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, #000 20%, transparent 80%);
       -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, #000 20%, transparent 80%);
+      animation: grid-drift 60s linear infinite;
+    }
+    @keyframes grid-drift {
+      from { background-position: 0 0; }
+      to   { background-position: 56px 56px; }
     }
     .spotlight {
       position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
       width: 1200px; height: 800px;
-      background: radial-gradient(ellipse at center, rgba(59,130,246,.25) 0%, transparent 55%);
+      background: radial-gradient(ellipse at center, rgba(59,130,246,.22) 0%, transparent 55%);
       pointer-events: none;
     }
-    .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .5; }
-    .blob-1 { width: 500px; height: 500px; background: var(--blue-300); top: -180px; right: -120px; }
-    .blob-2 { width: 440px; height: 440px; background: var(--blue-200); bottom: -240px; left: -160px; opacity: .4; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .5; will-change: transform; }
+    .blob-1 {
+      width: 460px; height: 460px; background: var(--blue-300);
+      top: -160px; right: -100px;
+      animation: blob-float-a 14s ease-in-out infinite;
+    }
+    .blob-2 {
+      width: 400px; height: 400px; background: var(--blue-200);
+      bottom: -200px; left: -140px; opacity: .4;
+      animation: blob-float-b 18s ease-in-out infinite;
+    }
+    @keyframes blob-float-a {
+      0%, 100% { transform: translate(0, 0); }
+      50%      { transform: translate(-30px, 30px); }
+    }
+    @keyframes blob-float-b {
+      0%, 100% { transform: translate(0, 0); }
+      50%      { transform: translate(40px, -20px); }
+    }
 
     .hero-inner {
       position: relative; z-index: 1;
-      display: grid; grid-template-columns: 1.08fr .92fr; gap: 72px;
-      align-items: center; padding-top: 40px;
+      display: grid; grid-template-columns: 1.22fr .98fr;
+      gap: 56px; align-items: center;
+      width: 100%;
     }
-    .hero-copy h1 { margin-bottom: 24px; }
-    .hero-copy .lede { font-size: 1.18rem; color: var(--muted); max-width: 540px; margin: 0 0 36px; line-height: 1.6; }
-    .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 42px; }
-    .hero-meta { display: flex; align-items: center; gap: 16px; padding-top: 28px; border-top: 1px solid var(--line); }
-    .avatars { display: flex; }
-    .avatars span { width: 34px; height: 34px; border-radius: 50%; border: 2.5px solid #fff; box-shadow: var(--shadow-xs); margin-left: -10px; }
-    .avatars span:first-child { margin-left: 0; }
-    .hero-meta .stars { color: #f59e0b; font-size: .95rem; letter-spacing: 3px; margin-bottom: 2px; }
-    .hero-meta small { color: var(--soft); font-size: .82rem; }
+
+    /* Hero copy (left column) */
+    .hero-copy { animation: hc-rise .7s ease both; }
+    @keyframes hc-rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-copy h1 {
+      font-size: clamp(2rem, 4.4vw, 3.4rem);
+      line-height: 1.04;
+      letter-spacing: -0.035em;
+      margin-bottom: 18px;
+    }
+    .hero-copy .lede {
+      font-size: 1.05rem; color: var(--muted);
+      max-width: 480px; margin: 0 0 26px;
+      line-height: 1.55;
+    }
+    .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
+
+    /* Stat tiles replacing avatars/stars */
+    .hero-stats {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 12px; padding-top: 22px;
+      border-top: 1px solid var(--line);
+      max-width: 480px;
+    }
+    .hero-stat {
+      display: flex; flex-direction: column; gap: 2px;
+      transition: transform .25s ease;
+    }
+    .hero-stat:hover { transform: translateY(-2px); }
+    .hero-stat strong {
+      font-size: 1.4rem; font-weight: 800; color: var(--ink);
+      letter-spacing: -0.025em; line-height: 1;
+    }
+    .hero-stat small {
+      font-size: .72rem; color: var(--soft);
+      text-transform: uppercase; letter-spacing: .08em;
+      font-weight: 600;
+    }
+
+    /* =========================================
+       Hero form card (right column)
+       ========================================= */
+    .hero-form {
+      position: relative;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 26px 26px 24px;
+      box-shadow:
+        0 30px 70px -28px rgba(11, 16, 32, .25),
+        0 6px 18px -10px rgba(11, 16, 32, .08);
+      display: grid; gap: 12px;
+      animation: hf-rise .8s ease both .1s;
+    }
+    @keyframes hf-rise {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-form::before {
+      content: ""; position: absolute; inset: -1px;
+      border-radius: inherit; pointer-events: none;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(96,165,250,.6), rgba(255,255,255,0) 40%, rgba(30,58,138,.5));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      opacity: .6;
+    }
+    .hf-glow {
+      position: absolute; inset: -40px; z-index: -1;
+      background: radial-gradient(ellipse at 30% 0%, rgba(96,165,250,.25), transparent 60%),
+                  radial-gradient(ellipse at 100% 100%, rgba(30,58,138,.18), transparent 65%);
+      filter: blur(20px);
+      pointer-events: none;
+    }
+
+    .hf-head { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
+    .hf-head .wa-pill { align-self: flex-start; }
+    .hf-head h3 {
+      font-size: 1.3rem; font-weight: 700; margin: 0;
+      letter-spacing: -0.02em; color: var(--ink);
+    }
+    .hf-head p { margin: 0; font-size: .85rem; color: var(--soft); }
+
+    /* Compact field overrides scoped to .hero-form */
+    .hero-form .field { gap: 4px; }
+    .hero-form .field label { font-size: .74rem; font-weight: 600; color: var(--muted); letter-spacing: .005em; }
+    .hero-form .field input,
+    .hero-form .field select,
+    .hero-form .field textarea {
+      padding: 10px 12px; font-size: .9rem; border-radius: 9px; border-width: 1.5px;
+    }
+    .hero-form .field-row { gap: 10px; }
+    .hero-form .field textarea { min-height: 64px; }
+    .hero-form .consents { padding: 12px 14px; gap: 10px; border-radius: 10px; }
+    .hero-form .consent { font-size: .72rem; line-height: 1.45; }
+    .hero-form .consent .cbox { width: 16px; height: 16px; margin-top: 1px; }
+    .hero-form .consent .cbox::after { width: 8px; height: 5px; }
+    .hero-form .consent .req, .hero-form .consent .opt { font-size: .62rem; padding: 1px 6px; }
+    .hero-form .btn-wa { padding: 12px 18px; font-size: .92rem; }
+    .hero-form .form-note { font-size: .82rem; padding-top: 4px; }
+
+    /* Floating trust badges around form */
+    .hf-badge {
+      position: absolute;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 9px 13px;
+      box-shadow: 0 14px 32px -16px rgba(11, 16, 32, .25);
+      display: flex; align-items: center; gap: 9px;
+      font-size: .78rem;
+      z-index: 3;
+      animation: hf-badge-float 6s ease-in-out infinite;
+    }
+    .hf-badge-1 { top: -18px; left: -22px; animation-delay: 0s; }
+    .hf-badge-2 { bottom: 24px; right: -22px; animation-delay: 1.5s; }
+    @keyframes hf-badge-float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+    .hf-badge-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: grid; place-items: center; flex-shrink: 0;
+      background: #dcfce7; color: #15803d;
+    }
+    .hf-badge-icon.alt { background: var(--blue-50); color: var(--blue-700); }
+    .hf-badge small { display: block; font-size: .68rem; color: var(--soft); }
+    .hf-badge strong { font-size: .82rem; color: var(--ink); font-weight: 700; }
 
     /* Dashboard mockup */
     .hero-visual { position: relative; display: grid; place-items: center; perspective: 1400px; }
@@ -320,11 +473,11 @@
     .bc-icon.alt { background: var(--blue-50); color: var(--blue-700); }
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-    /* Marquee */
+    /* Marquee — slim strip outside the hero */
     .marquee {
-      margin-top: 80px; overflow: hidden;
+      overflow: hidden;
       border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,.6); padding: 22px 0;
+      background: rgba(255,255,255,.6); padding: 18px 0;
       position: relative; z-index: 1;
       mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
       -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
@@ -340,7 +493,7 @@
     @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
     /* Results */
-    .results { background: #fff; padding-top: 140px; }
+    .results { background: #fff; padding-top: 100px; }
     .stat-grid {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
       border: 1px solid var(--line); border-radius: var(--r-lg);
@@ -624,7 +777,12 @@
     /* Tablet landscape & down — 1080px */
     @media (max-width: 1080px) {
       section { padding: 100px 0; }
-      .hero-inner { grid-template-columns: 1fr; gap: 56px; padding-top: 20px; }
+      .hero { min-height: 0; padding: 56px 0 64px; }
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; padding-top: 0; }
+      .hero-form { order: 2; max-width: 540px; margin: 0 auto; width: 100%; }
+      .hero-stats { max-width: 100%; }
+      .hf-badge-1 { top: -16px; left: 8px; }
+      .hf-badge-2 { bottom: -16px; right: 8px; }
       .hero-visual { order: -1; max-width: 520px; margin: 0 auto; width: 100%; }
       .badge-card-1 { left: -2%; }
       .badge-card-2 { right: -2%; }
@@ -708,14 +866,17 @@
       .container { padding: 0 18px; }
 
       /* Hero */
-      .hero { padding: 40px 0 30px; }
-      .hero-inner { gap: 44px; padding-top: 8px; }
-      .hero-copy .lede { font-size: 1rem; margin-bottom: 26px; max-width: none; }
-      .hero-ctas { gap: 10px; margin-bottom: 32px; }
+      .hero { padding: 36px 0 36px; min-height: 0; }
+      .hero-inner { gap: 28px; padding-top: 0; }
+      .hero-copy .lede { font-size: 1rem; margin-bottom: 22px; max-width: none; }
+      .hero-ctas { gap: 10px; margin-bottom: 24px; }
       .hero-ctas .btn { flex: 1 1 auto; min-width: 0; padding: 13px 18px; font-size: .92rem; }
-      .hero-meta { flex-wrap: wrap; gap: 14px; padding-top: 22px; }
-      .hero-meta small { font-size: .78rem; }
-      .avatars span { width: 30px; height: 30px; }
+      .hero-stats { grid-template-columns: repeat(4, 1fr); gap: 10px; padding-top: 18px; }
+      .hero-stat strong { font-size: 1.15rem; }
+      .hero-stat small { font-size: .65rem; }
+      .hero-form { padding: 22px 20px 20px; border-radius: 18px; }
+      .hf-head h3 { font-size: 1.15rem; }
+      .hf-badge { display: none; }
 
       /* Dashboard — flatten on mobile */
       .dash {
@@ -745,7 +906,7 @@
       .bc-icon svg { width: 14px; height: 14px; }
 
       /* Marquee */
-      .marquee { padding: 16px 0; margin-top: 48px; }
+      .marquee { padding: 14px 0; }
       .marquee-track { font-size: .9rem; gap: 28px; }
 
       /* Headings */
@@ -899,107 +1060,141 @@
           your business needs <span class="serif-italic">from</span> <span class="gradient-text">one platform.</span>
         </h1>
         <p class="lede">
-          Websites, funnels, ads, SEO, automation, AI agents, and brand — built, deployed, and managed by Digirisers. Stop stitching tools together. Start compounding.
+          Websites, funnels, ads, SEO, automation, AI agents, and brand — built, deployed, and managed by Digirisers. One senior team, one operating system.
         </p>
         <div class="hero-ctas">
           <a href="{{ url('/shop') }}" class="btn btn-primary btn-lg">
             Explore the platform
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </a>
-          <a href="{{ url('/services') }}" class="btn btn-ghost btn-lg">View all 57 services</a>
+          <a href="{{ url('/services') }}" class="btn btn-ghost btn-lg">View 57 services</a>
         </div>
 
-        <div class="hero-meta">
-          <div class="avatars" aria-hidden="true">
-            <span style="background:linear-gradient(135deg,#3b82f6,#1e3a8a)"></span>
-            <span style="background:linear-gradient(135deg,#0f172a,#334155)"></span>
-            <span style="background:linear-gradient(135deg,#60a5fa,#2563eb)"></span>
-            <span style="background:linear-gradient(135deg,#1e3a8a,#0f172a)"></span>
-          </div>
-          <div>
-            <div class="stars" aria-hidden="true">★ ★ ★ ★ ★</div>
-            <small>Rated 4.9 / 5 by growth teams at SaaS, DTC, and B2B brands</small>
-          </div>
+        <div class="hero-stats" aria-label="Platform highlights">
+          <div class="hero-stat"><strong>57</strong><small>services</small></div>
+          <div class="hero-stat"><strong>4.9★</strong><small>rated</small></div>
+          <div class="hero-stat"><strong>48 h</strong><small>kickoff</small></div>
+          <div class="hero-stat"><strong>14 d</strong><small>guarantee</small></div>
         </div>
       </div>
 
-      <div class="hero-visual" aria-hidden="true">
-        <div class="dash">
-          <div class="dash-top">
-            <div class="dash-dots"><i></i><i></i><i></i></div>
-            <span class="dash-url">app.digirisers.com / growth</span>
+      <aside class="hero-form" id="contact" aria-label="Start your growth plan">
+        <span class="hf-glow" aria-hidden="true"></span>
+
+        <div class="hf-badge hf-badge-1" aria-hidden="true">
+          <span class="hf-badge-icon">
+            <svg viewBox="0 0 32 32" width="14" height="14" fill="currentColor"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3z"/></svg>
+          </span>
+          <div><small>Avg reply</small><strong>&lt; 30 min</strong></div>
+        </div>
+        <div class="hf-badge hf-badge-2" aria-hidden="true">
+          <span class="hf-badge-icon alt">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <div><small>Trusted by</small><strong>120+ teams</strong></div>
+        </div>
+
+        <div class="hf-head">
+          <span class="wa-pill">
+            <svg viewBox="0 0 32 32" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3z"/></svg>
+            WhatsApp · instant reply
+          </span>
+          <h3>Start your <span class="serif-italic">growth plan.</span></h3>
+          <p>Tell us where you want to grow. A senior strategist replies — usually within 30 minutes.</p>
+        </div>
+
+        <form id="leadForm" novalidate>
+          <div class="field">
+            <label for="name">Your name</label>
+            <input type="text" id="name" name="name" placeholder="Jane Doe" required />
           </div>
-          <div class="dash-body">
-            <div class="dash-head">
-              <div>
-                <small>Monthly revenue impact</small>
-                <strong>$1,284,720</strong>
-                <span class="trend">▲ 32.8% vs last period</span>
-              </div>
-              <div class="pill">Live</div>
+          <div class="field-row">
+            <div class="field">
+              <label for="email">Work email</label>
+              <input type="email" id="email" name="email" placeholder="jane@company.com" required />
             </div>
-
-            <div class="dash-chart">
-              <svg viewBox="0 0 400 140" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stop-color="#3b82f6" stop-opacity=".45"/>
-                    <stop offset="1" stop-color="#3b82f6" stop-opacity="0"/>
-                  </linearGradient>
-                </defs>
-                <path class="chart-area" d="M0,110 L30,95 L60,100 L90,80 L120,85 L150,60 L180,68 L210,45 L240,52 L270,30 L300,38 L330,22 L360,28 L400,10 L400,140 L0,140 Z" fill="url(#area)"/>
-                <path class="chart-line" d="M0,110 L30,95 L60,100 L90,80 L120,85 L150,60 L180,68 L210,45 L240,52 L270,30 L300,38 L330,22 L360,28 L400,10" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-
-            <div class="dash-kpis">
-              <div class="kpi"><small>SEO Traffic</small><strong>+218%</strong><div class="bar"><span style="width:86%"></span></div></div>
-              <div class="kpi"><small>Paid ROAS</small><strong>6.4×</strong><div class="bar"><span style="width:72%"></span></div></div>
-              <div class="kpi"><small>Conv. Rate</small><strong>+41%</strong><div class="bar"><span style="width:58%"></span></div></div>
+            <div class="field">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" name="phone" placeholder="+1 555 000 0000" required />
             </div>
           </div>
-        </div>
+          <div class="field">
+            <label for="service">Primary interest</label>
+            <select id="service" name="service" required>
+              <option value="">Select a service</option>
+              <option>Websites &amp; Funnels</option>
+              <option>SEO &amp; Organic Growth</option>
+              <option>Paid Advertising</option>
+              <option>AI &amp; Automation</option>
+              <option>CRM &amp; Marketing Automation</option>
+              <option>Hosting &amp; Security</option>
+              <option>Branding &amp; Creative</option>
+              <option>Full-funnel growth</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="message">What are you trying to grow?</label>
+            <textarea id="message" name="message" rows="2" placeholder="A few words about your goals…"></textarea>
+          </div>
 
-        <div class="badge-card badge-card-1">
-          <div class="bc-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div><small>New lead</small><strong>$14,500 deal</strong></div>
-        </div>
-        <div class="badge-card badge-card-2">
-          <div class="bc-icon alt"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-          <div><small>Rankings</small><strong>#1 on Google</strong></div>
-        </div>
-      </div>
-    </div>
+          <div class="consents">
+            <label class="consent">
+              <input type="checkbox" id="consentTx" name="consentTx" required />
+              <span class="cbox" aria-hidden="true"></span>
+              <span class="cText">
+                I agree to receive non-marketing texts from <strong>Digirisers</strong> about my request. Reply STOP to opt out.
+                <em class="req">required</em>
+              </span>
+            </label>
+            <label class="consent">
+              <input type="checkbox" id="consentMk" name="consentMk" required />
+              <span class="cbox" aria-hidden="true"></span>
+              <span class="cText">
+                I agree to receive marketing messages from <strong>Digirisers</strong> at the number provided. Reply STOP to opt out.
+                <em class="req">required</em>
+              </span>
+            </label>
+          </div>
 
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee-track">
-        <span>SEO</span><span class="dotsep">●</span>
-        <span>PPC</span><span class="dotsep">●</span>
-        <span>Web Design</span><span class="dotsep">●</span>
-        <span>Content</span><span class="dotsep">●</span>
-        <span>Email</span><span class="dotsep">●</span>
-        <span>Social</span><span class="dotsep">●</span>
-        <span>CRO</span><span class="dotsep">●</span>
-        <span>Amazon</span><span class="dotsep">●</span>
-        <span>Shopify</span><span class="dotsep">●</span>
-        <span>AI &amp; GPT</span><span class="dotsep">●</span>
-        <span>Programmatic</span><span class="dotsep">●</span>
-        <span>Connected TV</span><span class="dotsep">●</span>
-        <span>SEO</span><span class="dotsep">●</span>
-        <span>PPC</span><span class="dotsep">●</span>
-        <span>Web Design</span><span class="dotsep">●</span>
-        <span>Content</span><span class="dotsep">●</span>
-        <span>Email</span><span class="dotsep">●</span>
-        <span>Social</span><span class="dotsep">●</span>
-        <span>CRO</span><span class="dotsep">●</span>
-        <span>Amazon</span><span class="dotsep">●</span>
-        <span>Shopify</span><span class="dotsep">●</span>
-        <span>AI &amp; GPT</span><span class="dotsep">●</span>
-        <span>Programmatic</span><span class="dotsep">●</span>
-        <span>Connected TV</span><span class="dotsep">●</span>
-      </div>
+          <button type="submit" class="btn btn-wa btn-lg btn-block">
+            <svg viewBox="0 0 32 32" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3z"/></svg>
+            Send to WhatsApp
+          </button>
+          <p class="form-note" id="formNote" hidden>Opening WhatsApp — your message is ready to send.</p>
+        </form>
+      </aside>
     </div>
   </section>
+
+  {{-- Marquee strip — moved out of hero so the hero stays compact above the fold --}}
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>Websites</span><span class="dotsep">●</span>
+      <span>Funnels</span><span class="dotsep">●</span>
+      <span>SEO</span><span class="dotsep">●</span>
+      <span>Google Ads</span><span class="dotsep">●</span>
+      <span>Meta Ads</span><span class="dotsep">●</span>
+      <span>TikTok Ads</span><span class="dotsep">●</span>
+      <span>AI Agents</span><span class="dotsep">●</span>
+      <span>GoHighLevel</span><span class="dotsep">●</span>
+      <span>Zapier</span><span class="dotsep">●</span>
+      <span>Email &amp; SMS</span><span class="dotsep">●</span>
+      <span>Brand &amp; Video</span><span class="dotsep">●</span>
+      <span>Hosting &amp; Security</span><span class="dotsep">●</span>
+      <span>Websites</span><span class="dotsep">●</span>
+      <span>Funnels</span><span class="dotsep">●</span>
+      <span>SEO</span><span class="dotsep">●</span>
+      <span>Google Ads</span><span class="dotsep">●</span>
+      <span>Meta Ads</span><span class="dotsep">●</span>
+      <span>TikTok Ads</span><span class="dotsep">●</span>
+      <span>AI Agents</span><span class="dotsep">●</span>
+      <span>GoHighLevel</span><span class="dotsep">●</span>
+      <span>Zapier</span><span class="dotsep">●</span>
+      <span>Email &amp; SMS</span><span class="dotsep">●</span>
+      <span>Brand &amp; Video</span><span class="dotsep">●</span>
+      <span>Hosting &amp; Security</span><span class="dotsep">●</span>
+    </div>
+  </div>
 
   <section class="results" id="results">
     <div class="container">
@@ -1185,102 +1380,7 @@
     </div>
   </section>
 
-  <section class="contact" id="contact">
-    <div class="container">
-      <div class="contact-card">
-        <div class="contact-bg" aria-hidden="true"><div class="cb-blob"></div></div>
-
-        <div class="contact-left">
-          <span class="eyebrow light"><span class="dot"></span> Let's Talk</span>
-          <h2>Ready to <span class="serif-italic">rise?</span></h2>
-          <p>Tell us where you want to grow. We'll show you exactly how to get there — no pressure, no pitch-deck theater. One strategist, one honest conversation.</p>
-
-          <div class="contact-details">
-            <a href="tel:+14019987807" class="contact-line">
-              <span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.3 21 3 13.7 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1L6.6 10.8z"/></svg></span>
-              <div><small>Call us directly</small><strong>+1 (401) 998-7807</strong></div>
-              <span class="arr">→</span>
-            </a>
-            <a href="mailto:info@digirisers.com" class="contact-line">
-              <span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
-              <div><small>Email the team</small><strong>info@digirisers.com</strong></div>
-              <span class="arr">→</span>
-            </a>
-          </div>
-        </div>
-
-        <form class="contact-form" id="leadForm" novalidate>
-          <h3 class="form-title">Start your growth plan</h3>
-          <p class="form-sub">
-            <span class="wa-pill">
-              <svg viewBox="0 0 32 32" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3zm0 23.6c-1.9 0-3.7-.5-5.3-1.4l-.4-.2-4.1 1.1 1.1-4-.2-.4c-1-1.6-1.5-3.5-1.5-5.5 0-5.7 4.6-10.4 10.4-10.4 2.8 0 5.4 1.1 7.3 3 2 2 3 4.6 3 7.3.1 5.9-4.6 10.5-10.3 10.5zm5.7-7.8c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.5-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.5.2-.2.2-.3.3-.5.1-.2.1-.4 0-.5-.1-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5 1.8.8 2.5.8 3.4.7.5-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.3-.6-.4z"/></svg>
-              Replies via WhatsApp — instant response
-            </span>
-          </p>
-
-          <div class="field">
-            <label for="name">Your name</label>
-            <input type="text" id="name" name="name" placeholder="Jane Doe" required />
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="email">Work email</label>
-              <input type="email" id="email" name="email" placeholder="jane@company.com" required />
-            </div>
-            <div class="field">
-              <label for="phone">Phone</label>
-              <input type="tel" id="phone" name="phone" placeholder="+1 555 000 0000" required />
-            </div>
-          </div>
-          <div class="field">
-            <label for="service">Primary interest</label>
-            <select id="service" name="service" required>
-              <option value="">Select a service</option>
-              <option>SEO / Organic Growth</option>
-              <option>PPC / Paid Media</option>
-              <option>Web Design &amp; Development</option>
-              <option>Content &amp; Email Marketing</option>
-              <option>Social Media</option>
-              <option>Ecommerce / Amazon / Shopify</option>
-              <option>Conversion Optimization</option>
-              <option>AI Services</option>
-              <option>Full-funnel Strategy</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="message">What are you trying to grow?</label>
-            <textarea id="message" name="message" rows="3" placeholder="A few words about your goals..."></textarea>
-          </div>
-
-          <div class="consents">
-            <label class="consent">
-              <input type="checkbox" id="consentTx" name="consentTx" required />
-              <span class="cbox" aria-hidden="true"></span>
-              <span class="cText">
-                By checking this box, I consent to receive non-marketing text messages from <strong>Digirisers</strong> about my request and services. Message frequency varies, message &amp; data rates may apply. Text HELP for assistance, reply STOP to opt out.
-                <em class="req">(required)</em>
-              </span>
-            </label>
-
-            <label class="consent">
-              <input type="checkbox" id="consentMk" name="consentMk" required />
-              <span class="cbox" aria-hidden="true"></span>
-              <span class="cText">
-                By checking this box, I consent to receive marketing and promotional messages from <strong>Digirisers</strong>, including special offers, updates, and service information at the phone number provided. Message frequency may vary. Message and data rates may apply. Text HELP for assistance, reply STOP to opt out.
-                <em class="req">(required)</em>
-              </span>
-            </label>
-          </div>
-
-          <button type="submit" class="btn btn-wa btn-lg btn-block">
-            <svg viewBox="0 0 32 32" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.4 1.7 6.3L3 29l6.9-1.8c1.8 1 3.9 1.5 6.1 1.5 7.2 0 13-5.8 13-13S23.2 3 16 3zm0 23.6c-1.9 0-3.7-.5-5.3-1.4l-.4-.2-4.1 1.1 1.1-4-.2-.4c-1-1.6-1.5-3.5-1.5-5.5 0-5.7 4.6-10.4 10.4-10.4 2.8 0 5.4 1.1 7.3 3 2 2 3 4.6 3 7.3.1 5.9-4.6 10.5-10.3 10.5zm5.7-7.8c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.5-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.5.2-.2.2-.3.3-.5.1-.2.1-.4 0-.5-.1-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5 1.8.8 2.5.8 3.4.7.5-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.3-.6-.4z"/></svg>
-            Send to WhatsApp
-          </button>
-          <p class="form-note" id="formNote" hidden>Opening WhatsApp — your message is ready to send.</p>
-        </form>
-      </div>
-    </div>
-  </section>
+  {{-- The lead form moved into the hero (above the fold). Anchors to "#contact" still resolve — the form aside in the hero now carries id="contact". --}}
 
   @include('partials.footer')
 
@@ -1290,7 +1390,7 @@
   <script>
     // Reveal on scroll
     const revealTargets = document.querySelectorAll(
-      '.service-card, .stat-card, .step, .tcard, .industry, .hero-copy, .hero-visual, .section-head, .contact-card, .footer-cta'
+      '.service-card, .stat-card, .step, .tcard, .industry, .section-head, .footer-cta'
     );
     revealTargets.forEach(el => el.classList.add('reveal'));
     const io = new IntersectionObserver((entries) => {
