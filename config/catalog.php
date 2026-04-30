@@ -1212,6 +1212,22 @@ return [
                     'timeline' => '5–7 business days',
                     'idealFor' => 'Sales-led teams that pitch often.',
                 ],
+                [
+                    'slug'  => 'ubaid-bhai-product',
+                    'name'  => 'Ubaid Bhai Product',
+                    'price' => 5,
+                    'cycle' => 'project',
+                    'blurb' => 'Ubaid Bhai Product — a small one-time service in the branding line.',
+                    'detail'=> "Ubaid Bhai Product. A lightweight one-time branding deliverable, billed as a single project. Custom scope confirmed on a quick call before kickoff.",
+                    'includes' => [
+                        'One-time deliverable',
+                        'Scope confirmed on call',
+                        'Single revision round',
+                        'Final files in standard formats',
+                    ],
+                    'timeline' => '1–3 business days',
+                    'idealFor' => 'Small, focused branding asks.',
+                ],
             ],
         ],
 
