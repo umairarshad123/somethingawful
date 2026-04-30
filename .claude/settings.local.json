@@ -34,7 +34,8 @@
       "Bash(/z/xampp/mysql/bin/mysql.exe -uroot digirisers_sql_test -e \"SELECT id, first_name, last_name, email, role FROM users;\")",
       "Bash(/z/xampp/mysql/bin/mysql.exe -uroot digirisers_sql_test -e \"SELECT * FROM migrations;\")",
       "Bash(composer require *)",
-      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot digirisers -e \"SHOW COLUMNS FROM users LIKE 'google_id';\")"
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot digirisers -e \"SHOW COLUMNS FROM users LIKE 'google_id';\")",
+      "Bash(composer install *)"
     ]
   }
 }
