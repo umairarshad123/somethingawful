@@ -118,38 +118,68 @@ class StripeWebhookController extends Controller
     {
         /** @var \Stripe\Checkout\Session $session */
         $session = $event->data->object;
+        $this->processCheckoutSession($session);
+    }
 
-        Log::info('[stripe-webhook] checkout.session.completed', [
+    /**
+     * The actual order/client update routine. Takes a Checkout Session
+     * straight from Stripe so it can be called from:
+     *   - the webhook (event-driven, normal path)
+     *   - the artisan command (recovery for stuck-pending orders)
+     *   - the admin "Sync from Stripe" button (one-click re-run)
+     */
+    public function processCheckoutSession(\Stripe\Checkout\Session $session): ?Order
+    {
+        Log::error('[stripe-webhook] processing checkout.session', [
             'session_id'     => $session->id,
             'customer'       => $session->customer ?? null,
             'subscription'   => $session->subscription ?? null,
+            'payment_intent' => $session->payment_intent ?? null,
             'payment_status' => $session->payment_status ?? null,
+            'status'         => $session->status ?? null,
             'metadata'       => $session->metadata?->toArray() ?? null,
         ]);
 
         $order = $this->findOrderForSession($session);
+
         if (! $order) {
-            Log::warning('[stripe-webhook] checkout.session.completed for unknown order', [
-                'session_id' => $session->id,
-                'metadata'   => $session->metadata?->toArray() ?? null,
+            Log::error('[stripe-webhook] ORDER NOT FOUND FOR STRIPE WEBHOOK', [
+                'session_id'         => $session->id,
+                'metadata.order_id'  => $session->metadata->order_id ?? null,
+                'metadata.order_num' => $session->metadata->order_number ?? null,
+                'metadata.email'     => $session->metadata->customer_email ?? null,
+                'session.email'      => $session->customer_details->email ?? $session->customer_email ?? null,
             ]);
-            return;
+            return null;
         }
 
-        Log::info('[stripe-webhook] order located', [
+        Log::error('[stripe-webhook] order found', [
             'order_id'     => $order->id,
             'order_number' => $order->order_number,
-            'email'        => $order->email,
         ]);
 
-        $order->stripe_customer_id      = $session->customer ?? $order->stripe_customer_id;
-        $order->stripe_payment_intent_id= $session->payment_intent ?? $order->stripe_payment_intent_id;
-        $order->stripe_subscription_id  = $session->subscription ?? $order->stripe_subscription_id;
+        // Capture customer name + email from the session in case the order
+        // form was incomplete (rare, but defensive).
+        $emailFromSession = $session->customer_details->email ?? $session->customer_email ?? null;
+        if ($emailFromSession && empty($order->email)) {
+            $order->email = $emailFromSession;
+        }
+        $nameFromSession = $session->customer_details->name ?? null;
+        if ($nameFromSession && empty(trim((string) $order->first_name . ' ' . (string) $order->last_name))) {
+            $parts = explode(' ', trim($nameFromSession), 2);
+            $order->first_name = $parts[0];
+            $order->last_name  = $parts[1] ?? '';
+        }
+
+        $order->stripe_session_id        = $session->id;
+        $order->stripe_customer_id       = $session->customer ?? $order->stripe_customer_id;
+        $order->stripe_payment_intent_id = $session->payment_intent ?? $order->stripe_payment_intent_id;
+        $order->stripe_subscription_id   = $session->subscription ?? $order->stripe_subscription_id;
 
         // payment_status on the session: 'paid' | 'unpaid' | 'no_payment_required'.
-        // For subscriptions where the trial is free and no upfront charge is taken,
-        // this can read 'no_payment_required' but the subscription is still active.
-        $isPaid = in_array($session->payment_status ?? '', ['paid', 'no_payment_required'], true);
+        // status: 'open' | 'complete' | 'expired'.
+        $isPaid = in_array($session->payment_status ?? '', ['paid', 'no_payment_required'], true)
+               || ($session->status ?? '') === 'complete';
 
         if ($isPaid) {
             $order->payment_status = 'paid';
@@ -157,6 +187,13 @@ class StripeWebhookController extends Controller
             $order->paid_at        = $order->paid_at ?: now();
         }
         $order->save();
+
+        Log::error('[stripe-webhook] order marked paid', [
+            'order_id'       => $order->id,
+            'order_number'   => $order->order_number,
+            'payment_status' => $order->payment_status,
+            'order_status'   => $order->order_status,
+        ]);
 
         // Upsert the customer record + (optionally) a user account.
         $user   = $this->upsertUser($order);
@@ -167,6 +204,12 @@ class StripeWebhookController extends Controller
             'user_id'   => $order->user_id ?: $user?->id,
             'client_id' => $order->client_id ?: $client?->id,
         ])->save();
+
+        Log::error('[stripe-webhook] client upserted', [
+            'client_id' => $client?->id,
+            'user_id'   => $user?->id,
+            'email'     => $order->email,
+        ]);
 
         ActivityLog::record(
             event: 'order.paid',
@@ -179,6 +222,8 @@ class StripeWebhookController extends Controller
                 'session'  => $session->id,
             ],
         );
+
+        return $order;
     }
 
     private function onPaymentSucceeded(Event $event): void
@@ -378,15 +423,57 @@ class StripeWebhookController extends Controller
         return $client;
     }
 
+    /**
+     * Try every reasonable identifier in metadata + the session id itself.
+     * Logs the strategy that found the order for ops visibility.
+     */
     private function findOrderForSession(\Stripe\Checkout\Session $session): ?Order
     {
+        $meta = (array) ($session->metadata?->toArray() ?? []);
+
+        // 1) by stripe_session_id (set during checkout.store on every order)
         if ($order = Order::where('stripe_session_id', $session->id)->first()) {
+            Log::info('[stripe-webhook] order matched by stripe_session_id', [
+                'order_id' => $order->id,
+            ]);
             return $order;
         }
-        $orderId = $session->metadata->order_id ?? null;
-        if ($orderId) {
-            return Order::find((int) $orderId);
+
+        // 2) by metadata.order_id
+        $orderId = $meta['order_id'] ?? null;
+        if ($orderId && $order = Order::find((int) $orderId)) {
+            Log::info('[stripe-webhook] order matched by metadata.order_id', [
+                'order_id' => $order->id,
+            ]);
+            return $order;
         }
+
+        // 3) by metadata.order_number
+        $orderNumber = $meta['order_number'] ?? null;
+        if ($orderNumber && $order = Order::where('order_number', $orderNumber)->first()) {
+            Log::info('[stripe-webhook] order matched by order_number', [
+                'order_id'     => $order->id,
+                'order_number' => $orderNumber,
+            ]);
+            return $order;
+        }
+
+        // 4) fallback by metadata.customer_email + service_slug + still-pending
+        //    (last resort — useful if metadata.order_id was lost)
+        $email = $meta['customer_email'] ?? $session->customer_email ?? null;
+        $slug  = $meta['service_slug'] ?? null;
+        if ($email && $slug && $order = Order::where('email', $email)
+            ->where('service_slug', $slug)
+            ->where('payment_status', 'pending')
+            ->latest()
+            ->first()) {
+            Log::warning('[stripe-webhook] order matched by email + slug fallback', [
+                'order_id' => $order->id,
+            ]);
+            return $order;
+        }
+
         return null;
     }
+
 }

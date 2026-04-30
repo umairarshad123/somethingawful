@@ -55,7 +55,9 @@ class LeadController extends Controller
         if (isset($data['status']) && $data['status'] !== $previousStatus) {
             ActivityLog::record(
                 event: 'lead.status_changed',
-                label: "Status: {$previousStatus} → {$data['status']} for {$lead->email}",
+                // ASCII-only label: production MySQL column charset is utf8
+                // (3-byte), not utf8mb4, so multibyte characters trip a 22007.
+                label: "Status: {$previousStatus} -> {$data['status']} for {$lead->email}",
                 subject: $lead,
                 userId: $lead->user_id,
                 payload: ['from' => $previousStatus, 'to' => $data['status']],

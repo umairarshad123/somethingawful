@@ -163,9 +163,10 @@ Route::middleware(['auth', 'admin'])->prefix('thebestadmin')->name('admin.')->gr
     Route::get('/clients',          [AdminClientController::class, 'index'])->name('clients.index');
     Route::patch('/clients/{client}', [AdminClientController::class, 'update'])->name('clients.update');
 
-    Route::get('/orders',           [AdminOrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}',   [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders',                 [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}',         [AdminOrderController::class, 'show'])->name('orders.show');
     Route::post('/orders/{order}/refund', [AdminOrderController::class, 'refund'])->name('orders.refund');
+    Route::post('/orders/{order}/sync',   [AdminOrderController::class, 'syncFromStripe'])->name('orders.sync');
 
     Route::get('/service-requests', [AdminServiceRequestController::class, 'index'])->name('service-requests.index');
 

@@ -59,10 +59,23 @@
         <strong>Subscription</strong><span style="word-break:break-all;">{{ $order->stripe_subscription_id ?: '—' }}</span>
       </div>
 
+      @if($order->stripe_session_id && $order->payment_status !== 'paid')
+        <hr style="margin:18px 0; border:0; border-top:1px solid var(--line);">
+        <h3 style="font-size:.95rem; margin: 0 0 8px;">Webhook didn't land?</h3>
+        <p style="font-size:.88rem; color:var(--soft); margin:0 0 12px; line-height:1.55;">Pull the latest state directly from Stripe and run the same code path the webhook would. Use this if the order is stuck pending after a confirmed Stripe payment.</p>
+        @if($errors->has('sync'))
+          <div class="ad-flash" style="background:#fef2f2; color:#b91c1c; border-color:#fecaca; margin-bottom:10px;">{{ $errors->first('sync') }}</div>
+        @endif
+        <form method="POST" action="{{ route('admin.orders.sync', $order) }}">
+          @csrf
+          <button type="submit" class="btn" style="background:#4AAE18; color:#fff; padding:11px 16px; font-weight:600; border-radius:10px; border:0; cursor:pointer; font:inherit;">Sync from Stripe -></button>
+        </form>
+      @endif
+
       @if($order->payment_status === 'paid' && ! $order->isRecurring() && $order->stripe_payment_intent_id)
         <hr style="margin:18px 0; border:0; border-top:1px solid var(--line);">
-        @if ($errors->any())
-          <div class="ad-flash" style="background:#fef2f2; color:#b91c1c; border-color:#fecaca;">{{ $errors->first() }}</div>
+        @if ($errors->has('refund'))
+          <div class="ad-flash" style="background:#fef2f2; color:#b91c1c; border-color:#fecaca;">{{ $errors->first('refund') }}</div>
         @endif
         <form method="POST" action="{{ route('admin.orders.refund', $order) }}" onsubmit="return confirm('Refund this order in full? This cannot be undone.');">
           @csrf

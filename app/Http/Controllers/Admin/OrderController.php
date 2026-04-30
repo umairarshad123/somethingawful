@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\StripeWebhookController;
 use App\Models\ActivityLog;
 use App\Models\Order;
 use App\Services\StripeService;
@@ -41,6 +42,34 @@ class OrderController extends Controller
     {
         $order->load(['client', 'subscription', 'user']);
         return view('admin.orders.show', ['order' => $order]);
+    }
+
+    /**
+     * Recovery: fetch the Checkout Session from Stripe and run the same
+     * code path the webhook would. Use when the webhook signature is
+     * mismatched and orders are stuck in 'pending'.
+     */
+    public function syncFromStripe(Request $request, Order $order, StripeService $stripe, StripeWebhookController $webhook): RedirectResponse
+    {
+        if (! $order->stripe_session_id) {
+            return back()->withErrors(['sync' => 'This order has no Stripe session id. Was the checkout submitted?']);
+        }
+
+        try {
+            $session = $stripe->client()->checkout->sessions->retrieve($order->stripe_session_id, [
+                'expand' => ['payment_intent', 'customer'],
+            ]);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['sync' => 'Stripe API error: ' . $e->getMessage()]);
+        }
+
+        $updated = $webhook->processCheckoutSession($session);
+
+        if (! $updated) {
+            return back()->withErrors(['sync' => 'Stripe returned the session but the order could not be located. Check storage/logs/laravel.log.']);
+        }
+
+        return back()->with('flash', "Synced from Stripe. Status: {$updated->payment_status}.");
     }
 
     public function refund(Request $request, Order $order, StripeService $stripe): RedirectResponse
