@@ -63,6 +63,12 @@ Route::get('/shop/{slug}', function (string $slug) {
     foreach (config('catalog.categories', []) as $cat) {
         foreach ($cat['items'] as $item) {
             if (($item['slug'] ?? null) === $slug) {
+                // Bespoke per-service page if one exists, else the
+                // dynamic shop-detail fallback.
+                $bespoke = "services.{$slug}";
+                if (view()->exists($bespoke)) {
+                    return view($bespoke, ['item' => $item, 'cat' => $cat]);
+                }
                 return view('shop-detail', ['item' => $item, 'cat' => $cat]);
             }
         }
