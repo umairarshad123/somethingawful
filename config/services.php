@@ -58,4 +58,21 @@ return [
         'timeout'       => (int) env('GSHEET_TIMEOUT', 8),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Google OAuth (Socialite — "Continue with Google")
+    |--------------------------------------------------------------------------
+    |
+    | Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI in .env.
+    | The redirect URI must match the one registered in your Google Cloud
+    | Console OAuth client (e.g. https://your-domain.com/auth/google/callback
+    | or http://localhost/DigiRisers/auth/google/callback for XAMPP).
+    |
+    */
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_REDIRECT_URI'),
+    ],
+
 ];

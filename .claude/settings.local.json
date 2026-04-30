@@ -25,7 +25,16 @@
       "Bash(/z/xampp/mysql/bin/mysql.exe -uroot -e \"SHOW DATABASES;\")",
       "Bash(/z/xampp/mysql/bin/mysql.exe -uroot -e \"SELECT VERSION\\(\\); SHOW DATABASES LIKE 'digirisers';\")",
       "Bash(/z/xampp/mysql/bin/mysql.exe -uroot -e \"CREATE DATABASE IF NOT EXISTS digirisers CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")",
-      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot -e \"SHOW DATABASES LIKE 'digirisers';\")"
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot -e \"SHOW DATABASES LIKE 'digirisers';\")",
+      "Bash(/z/xampp/mysql/bin/mysqldump.exe -uroot --no-tablespaces --skip-comments --add-drop-table=false --skip-set-charset --default-character-set=utf8mb4 digirisers)",
+      "Bash(grep \"^INSERT INTO \\\\`users\\\\`\" /z/xampp/htdocs/DigiRisers/database/digirisers_schema_seed.sql)",
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot -e \"DROP DATABASE IF EXISTS digirisers_sql_test; CREATE DATABASE digirisers_sql_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")",
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot digirisers_sql_test)",
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot digirisers_sql_test -e \"SHOW TABLES;\")",
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot digirisers_sql_test -e \"SELECT id, first_name, last_name, email, role FROM users;\")",
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot digirisers_sql_test -e \"SELECT * FROM migrations;\")",
+      "Bash(composer require *)",
+      "Bash(/z/xampp/mysql/bin/mysql.exe -uroot digirisers -e \"SHOW COLUMNS FROM users LIKE 'google_id';\")"
     ]
   }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GoogleAuthController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -39,6 +40,10 @@ Route::middleware('guest')->group(function () {
     Route::get('/auth',           [AuthController::class, 'show'])->name('auth.show');
     Route::post('/auth/login',    [AuthController::class, 'login'])->name('auth.login');
     Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
+
+    // Google OAuth (Socialite)
+    Route::get('/auth/google',          [GoogleAuthController::class, 'redirect'])->name('auth.google');
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 });
 
 Route::post('/auth/logout', [AuthController::class, 'logout'])
