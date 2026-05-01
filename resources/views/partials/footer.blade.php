@@ -98,41 +98,41 @@
         <div>
           <h5>Build</h5>
           <ul>
-            <li><a href="{{ url('/services') }}#web-dev">Full-Stack Dev</a></li>
-            <li><a href="{{ url('/services') }}#web-dev">WordPress</a></li>
-            <li><a href="{{ url('/services') }}#web-dev">Laravel</a></li>
-            <li><a href="{{ url('/services') }}#web-dev">APIs</a></li>
-            <li><a href="{{ url('/services') }}#web-dev">Security</a></li>
+            <li><a href="{{ url('/shop/custom-site') }}">Full-Stack Dev</a></li>
+            <li><a href="{{ url('/shop/wp-business') }}">WordPress</a></li>
+            <li><a href="{{ url('/shop/custom-site-integrations') }}">Laravel &amp; APIs</a></li>
+            <li><a href="{{ url('/shop/ecommerce') }}">E-commerce</a></li>
+            <li><a href="{{ url('/shop/security-implementation') }}">Security</a></li>
           </ul>
         </div>
         <div>
           <h5>Grow</h5>
           <ul>
-            <li><a href="{{ url('/services') }}#seo-marketing">SEO</a></li>
-            <li><a href="{{ url('/services') }}#seo-marketing">AI Search</a></li>
-            <li><a href="{{ url('/services') }}#seo-marketing">PPC</a></li>
-            <li><a href="{{ url('/services') }}#seo-marketing">Social</a></li>
-            <li><a href="{{ url('/services') }}#seo-marketing">Email/SMS</a></li>
+            <li><a href="{{ url('/services/seo') }}">SEO</a></li>
+            <li><a href="{{ url('/shop/aeo-optimization') }}">AI Search</a></li>
+            <li><a href="{{ url('/shop/ads-management') }}">PPC</a></li>
+            <li><a href="{{ url('/shop/social-management') }}">Social</a></li>
+            <li><a href="{{ url('/shop/email-automation') }}">Email/SMS</a></li>
           </ul>
         </div>
         <div>
           <h5>Convert</h5>
           <ul>
-            <li><a href="{{ url('/services') }}#design-cro">Web Design</a></li>
-            <li><a href="{{ url('/services') }}#design-cro">Ecommerce</a></li>
-            <li><a href="{{ url('/services') }}#design-cro">Funnels</a></li>
-            <li><a href="{{ url('/services') }}#design-cro">CRO</a></li>
-            <li><a href="{{ url('/services') }}#design-cro">Personalization</a></li>
+            <li><a href="{{ url('/shop/custom-site') }}">Web Design</a></li>
+            <li><a href="{{ url('/shop/ecommerce') }}">Ecommerce</a></li>
+            <li><a href="{{ url('/shop/funnel-build') }}">Funnels</a></li>
+            <li><a href="{{ url('/shop/cro-audit') }}">CRO</a></li>
+            <li><a href="{{ url('/shop/conversion-tracking') }}">Tracking</a></li>
           </ul>
         </div>
         <div>
           <h5>Automate</h5>
           <ul>
-            <li><a href="{{ url('/services') }}#ai-automation">AI Agents</a></li>
-            <li><a href="{{ url('/services') }}#ai-automation">GoHighLevel</a></li>
-            <li><a href="{{ url('/services') }}#ai-automation">Zapier</a></li>
-            <li><a href="{{ url('/services') }}#ai-automation">Lead Mgmt</a></li>
-            <li><a href="{{ url('/services') }}#ai-automation">Workflows</a></li>
+            <li><a href="{{ url('/shop/ai-sales-agent') }}">AI Agents</a></li>
+            <li><a href="{{ url('/shop/ghl-full-setup') }}">GoHighLevel</a></li>
+            <li><a href="{{ url('/shop/zapier-zap') }}">Zapier</a></li>
+            <li><a href="{{ url('/shop/lead-management') }}">Lead Mgmt</a></li>
+            <li><a href="{{ url('/shop/workflow-orchestration') }}">Workflows</a></li>
           </ul>
         </div>
         <div>
