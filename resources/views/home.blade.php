@@ -548,9 +548,7 @@
       opacity: 0; transition: opacity .4s ease; pointer-events: none;
     }
     .service-card:hover::before { opacity: 1; }
-    .service-card:hover { transform: translateY(-6px); border-color: var(--blue-300); box-shadow: var(--shadow-lg); }
-    .service-card.highlight { background: linear-gradient(180deg, #eff6ff 0%, #fff 60%); border-color: var(--blue-200); }
-    .card-num { position: absolute; top: 26px; right: 30px; font-family: var(--font-mono); font-size: .75rem; color: var(--soft-2); letter-spacing: .1em; font-weight: 500; }
+    .service-card:hover { transform: translateY(-4px); border-color: var(--blue-300); box-shadow: var(--shadow-lg); }
     .card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
     .icon-wrap {
       width: 48px; height: 48px; border-radius: 12px;
@@ -558,8 +556,8 @@
       display: grid; place-items: center; flex-shrink: 0;
       transition: background .35s ease, color .35s ease, transform .4s ease;
     }
-    .service-card:hover .icon-wrap { background: var(--ink); color: #fff; transform: rotate(-6deg) scale(1.05); }
-    .service-card.highlight .icon-wrap { background: var(--grad); color: #fff; }
+    .service-card:hover .icon-wrap { background: var(--blue-700); color: #fff; transform: scale(1.04); }
+    .service-card h3 { font-size: 1.05rem; font-weight: 700; color: var(--ink); margin: 0; letter-spacing: -0.01em; line-height: 1.25; }
     .card-blurb { color: var(--soft); font-size: .95rem; margin-bottom: 20px; }
     .badge {
       display: inline-flex; font-size: .62rem; font-weight: 700;
@@ -947,7 +945,6 @@
       /* Services */
       .service-grid { grid-template-columns: 1fr; gap: 16px; }
       .service-card { padding: 28px 24px 24px; border-radius: 22px; }
-      .card-num { top: 22px; right: 24px; }
 
       /* Industries */
       .industry-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -1271,12 +1268,9 @@
 
         @foreach ($platformCats as $i => $pc)
           @php
-            $idx = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
             $minPrice = collect($pc['items'])->min('price');
-            $featured = $i === 0 || $i === 1; // highlight first two visually
           @endphp
-          <article class="service-card @if($featured) highlight @endif">
-            <div class="card-num">{{ $idx }}</div>
+          <article class="service-card">
             <div class="card-head">
               <div class="icon-wrap">{!! $platformIconMap[$pc['icon']] ?? $platformIconMap['sparkle'] !!}</div>
               <h3>{{ $pc['title'] }}</h3>
