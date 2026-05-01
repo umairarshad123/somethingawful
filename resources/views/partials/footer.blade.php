@@ -1,7 +1,14 @@
 {{--
   Footer Partial — Digirisers
   Used across all pages to ensure consistent navigation and links.
+
+  Renders the product Shop CTA bar above the footer when the current
+  page passed an $item — i.e. on every /shop/{slug} product page (both
+  the dynamic shop-detail.blade.php and the 57 bespoke service pages
+  under resources/views/services/{slug}.blade.php).
 --}}
+
+@include('partials.product-shop-cta')
 
 @push('styles')
   <style>
