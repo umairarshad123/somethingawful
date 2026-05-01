@@ -24,9 +24,9 @@
       transform: translate(-50%, calc(-50% + 24px));
       width: min(480px, calc(100vw - 32px));
       max-width: calc(100vw - 32px);
-      max-height: calc(100svh - 32px);
+      max-height: none;
       overflow-x: hidden;
-      overflow-y: auto;
+      overflow-y: visible;
       overscroll-behavior: contain;
       background: #fff;
       border-radius: 22px;
@@ -37,12 +37,15 @@
       opacity: 0; pointer-events: none;
       transition: opacity .35s ease, transform .35s ease;
       padding: 30px 28px 26px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    .dr-popup::-webkit-scrollbar { display: none; width: 0; height: 0; }
     .dr-popup.dr-show {
       opacity: 1; pointer-events: auto;
       transform: translate(-50%, -50%);
     }
-    .dr-popup-body { overflow-x: hidden; }
+    .dr-popup-body { overflow-x: hidden; overflow-y: visible; }
     .dr-popup::before {
       content: ""; position: absolute; inset: -1px;
       border-radius: inherit; pointer-events: none; padding: 1px;
@@ -150,8 +153,11 @@
       .dr-popup .dr-row { grid-template-columns: 1fr; }
       .dr-popup p.dr-popup-sub { margin-bottom: 14px; }
     }
-    @media (max-height: 640px) {
-      .dr-popup { padding-top: 22px; padding-bottom: 18px; }
+    @media (max-height: 720px) {
+      .dr-popup {
+        max-height: calc(100vh - 32px);
+        overflow-y: auto;
+      }
       .dr-popup p.dr-popup-sub { margin-bottom: 12px; }
     }
     @media (prefers-reduced-motion: reduce) {
