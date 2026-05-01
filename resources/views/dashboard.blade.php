@@ -73,9 +73,10 @@
     .db-card > p { font-size: .92rem; color: var(--soft); margin: 0 0 18px; line-height: 1.5; }
 
     .db-actions {
-      display: grid; grid-template-columns: repeat(2, 1fr);
+      display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 12px; margin-top: 6px;
     }
+    @media (max-width: 1100px) { .db-actions { grid-template-columns: repeat(2, 1fr); } }
     .db-action {
       display: flex; flex-direction: column; gap: 4px;
       padding: 16px 18px;
@@ -151,29 +152,39 @@
 
           <div class="db-actions">
             <a class="db-action" href="{{ url('/shop') }}">
-              <strong>Visit the Shop</strong>
-              <small>57 priced services across 8 modules</small>
+              <strong>Shop</strong>
+              <small>Priced services across all modules</small>
               <span class="arr">Browse →</span>
             </a>
             <a class="db-action" href="{{ url('/services') }}">
               <strong>Browse Services</strong>
-              <small>Read the full platform catalog</small>
+              <small>Full platform catalog</small>
               <span class="arr">Explore →</span>
             </a>
-            <a class="db-action" href="{{ route('contact') }}">
-              <strong>Talk to a strategist</strong>
-              <small>Custom scope, free 15-minute call</small>
-              <span class="arr">Get in touch →</span>
+            <a class="db-action" href="{{ route('orders.index') }}">
+              <strong>Orders / Billing History</strong>
+              <small>All your orders and invoices</small>
+              <span class="arr">View history →</span>
             </a>
             <a class="db-action" href="{{ route('billing.portal') }}" style="border-color: #4AAE18;">
-              <strong style="color:#3a8c12;">Manage billing</strong>
+              <strong style="color:#3a8c12;">Manage Billing</strong>
               <small>Cards, invoices, cancel subscriptions</small>
               <span class="arr" style="color:#3a8c12;">Open portal →</span>
+            </a>
+            <a class="db-action" href="#account-details">
+              <strong>Account Details</strong>
+              <small>Your profile information</small>
+              <span class="arr">View →</span>
+            </a>
+            <a class="db-action" href="{{ route('contact') }}">
+              <strong>Contact Support</strong>
+              <small>Talk to a strategist — free 15-min call</small>
+              <span class="arr">Get in touch →</span>
             </a>
           </div>
         </div>
 
-        <div class="db-card">
+        <div class="db-card" id="account-details">
           <h3>Account details</h3>
           <p>This is what we have on file. Reach out if you need to update anything.</p>
           <div class="db-info-grid">

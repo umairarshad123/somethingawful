@@ -117,6 +117,18 @@ Route::get('/shop/{slug}', function (string $slug, Request $request) {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', fn () => view('dashboard'))->name('dashboard');
     Route::get('/dashboard/billing', [BillingPortalController::class, 'open'])->name('billing.portal');
+
+    Route::get('/dashboard/orders', function (Request $request) {
+        $user = $request->user();
+        $orders = \App\Models\Order::query()
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)->orWhere('email', $user->email);
+            })
+            ->orderByDesc('created_at')
+            ->limit(100)
+            ->get();
+        return view('orders', ['orders' => $orders]);
+    })->name('orders.index');
 });
 
 /*
