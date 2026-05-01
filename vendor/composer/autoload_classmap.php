@@ -6,7 +6,9 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Console\\Commands\\BackfillClientsCommand' => $baseDir . '/app/Console/Commands/BackfillClientsCommand.php',
     'App\\Console\\Commands\\MakeAdminCommand' => $baseDir . '/app/Console/Commands/MakeAdminCommand.php',
+    'App\\Console\\Commands\\StripeReconcileCommand' => $baseDir . '/app/Console/Commands/StripeReconcileCommand.php',
     'App\\Http\\Controllers\\Admin\\ActivityLogController' => $baseDir . '/app/Http/Controllers/Admin/ActivityLogController.php',
     'App\\Http\\Controllers\\Admin\\AdminAuthController' => $baseDir . '/app/Http/Controllers/Admin/AdminAuthController.php',
     'App\\Http\\Controllers\\Admin\\ClientController' => $baseDir . '/app/Http/Controllers/Admin/ClientController.php',

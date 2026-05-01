@@ -172,7 +172,8 @@ Route::middleware(['auth', 'admin'])->prefix('thebestadmin')->name('admin.')->gr
     Route::get('/users/{user}',     [AdminUserController::class, 'show'])->name('users.show');
     Route::patch('/users/{user}',   [AdminUserController::class, 'update'])->name('users.update');
 
-    Route::get('/clients',          [AdminClientController::class, 'index'])->name('clients.index');
+    Route::get('/clients',           [AdminClientController::class, 'index'])->name('clients.index');
+    Route::post('/clients/backfill', [AdminClientController::class, 'backfill'])->name('clients.backfill');
     Route::patch('/clients/{client}', [AdminClientController::class, 'update'])->name('clients.update');
 
     Route::get('/orders',                 [AdminOrderController::class, 'index'])->name('orders.index');

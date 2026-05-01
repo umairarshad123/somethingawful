@@ -566,7 +566,9 @@ class ComposerStaticInit53b5d56b3b7e3cbac1713e68c8850f6c
     );
 
     public static $classMap = array (
+        'App\\Console\\Commands\\BackfillClientsCommand' => __DIR__ . '/../..' . '/app/Console/Commands/BackfillClientsCommand.php',
         'App\\Console\\Commands\\MakeAdminCommand' => __DIR__ . '/../..' . '/app/Console/Commands/MakeAdminCommand.php',
+        'App\\Console\\Commands\\StripeReconcileCommand' => __DIR__ . '/../..' . '/app/Console/Commands/StripeReconcileCommand.php',
         'App\\Http\\Controllers\\Admin\\ActivityLogController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/ActivityLogController.php',
         'App\\Http\\Controllers\\Admin\\AdminAuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/AdminAuthController.php',
         'App\\Http\\Controllers\\Admin\\ClientController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/ClientController.php',

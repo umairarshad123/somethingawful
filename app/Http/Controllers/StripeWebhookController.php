@@ -233,11 +233,23 @@ class StripeWebhookController extends Controller
         $order = Order::where('stripe_payment_intent_id', $pi->id)->first();
         if (! $order) return;
 
+        // If the PaymentIntent has a customer attached but the order doesn't
+        // yet, capture it so the client sync below can use it.
+        if (! empty($pi->customer) && ! $order->stripe_customer_id) {
+            $order->stripe_customer_id = (string) $pi->customer;
+        }
+
         $order->forceFill([
             'payment_status' => 'paid',
             'order_status'   => $order->order_status === 'awaiting_payment' ? 'processing' : $order->order_status,
             'paid_at'        => $order->paid_at ?: now(),
+            'stripe_customer_id' => $order->stripe_customer_id,
         ])->save();
+
+        // Make sure the client record is up to date even when this event
+        // arrives without a preceding checkout.session.completed.
+        $user = $this->upsertUser($order);
+        $this->syncClientFromPaidOrder($order, $user);
     }
 
     private function onPaymentFailed(Event $event): void
@@ -273,12 +285,24 @@ class StripeWebhookController extends Controller
             ])->save();
         }
 
-        // Bump the linked client's last_payment_at.
-        if ($sub?->client_id) {
+        // Find the linked order and run the full client sync so a recurring
+        // renewal alone is enough to (re)populate the client row even if the
+        // initial checkout.session.completed never landed.
+        $order = Order::where('stripe_subscription_id', $inv->subscription)
+            ->orWhere('stripe_customer_id', $inv->customer)
+            ->latest()
+            ->first();
+
+        if ($order) {
+            $user = $this->upsertUser($order);
+            $this->syncClientFromPaidOrder($order, $user);
+        } elseif ($sub?->client_id) {
+            // Fallback: if we have a subscription→client link but no order, at
+            // least bump the client's last_payment_at and active state.
             Client::where('id', $sub->client_id)->update([
                 'last_payment_at' => now(),
                 'payment_status'  => 'paid',
-                'status'          => Client::STATUSES[1] ?? 'active', // 'active'
+                'status'          => 'active',
             ]);
         }
     }
@@ -379,9 +403,42 @@ class StripeWebhookController extends Controller
         return $user;
     }
 
-    private function upsertClient(Order $order, ?User $user): Client
+    /**
+     * Create or update the Client row for a paid order.
+     *
+     * Idempotent: safe to call multiple times. Only runs when the order
+     * is actually paid, so leads / pending / failed records can never
+     * leak into the clients table.
+     *
+     * Match priority (first hit wins, prevents duplicates):
+     *   1. user_id   — same authenticated buyer comes back
+     *   2. email     — guest checkout, then signs up later w/ same email
+     *   3. stripe_customer_id — Stripe's own customer linkage
+     *
+     * Public so it can be invoked from the artisan backfill command and
+     * from controllers running a one-shot reconciliation.
+     */
+    public function syncClientFromPaidOrder(Order $order, ?User $user = null): ?Client
     {
-        $client = Client::where('email', $order->email)->first();
+        // Hard guard: only paid orders create/update clients. Leads,
+        // pending, failed, refunded — none of those are customers.
+        if ($order->payment_status !== 'paid') {
+            return null;
+        }
+
+        $user = $user ?: ($order->user_id ? User::find($order->user_id) : null);
+
+        // 1) by user_id   2) by email   3) by stripe_customer_id
+        $client = null;
+        if ($user?->id) {
+            $client = Client::where('user_id', $user->id)->first();
+        }
+        if (! $client && $order->email) {
+            $client = Client::where('email', $order->email)->first();
+        }
+        if (! $client && $order->stripe_customer_id) {
+            $client = Client::where('stripe_customer_id', $order->stripe_customer_id)->first();
+        }
 
         $name = trim($order->first_name . ' ' . $order->last_name);
 
@@ -389,25 +446,33 @@ class StripeWebhookController extends Controller
             'name'                  => $name ?: $order->email,
             'first_name'            => $order->first_name,
             'last_name'             => $order->last_name,
+            'email'                 => $order->email,
             'phone'                 => $order->phone,
             'company'               => $order->company,
             'website'               => $order->website,
-            'service'               => $order->service_name,
+            'service'               => $order->service_name,        // latest service/product
             'billing_cycle'         => $order->billing_cycle,
             'status'                => 'active',
             'payment_status'        => 'paid',
             'stripe_customer_id'    => $order->stripe_customer_id,
             'stripe_subscription_id'=> $order->stripe_subscription_id,
-            'last_payment_at'       => now(),
+            'last_payment_at'       => $order->paid_at ?: now(),
             'user_id'               => $user?->id,
         ];
 
         if ($client) {
-            // Don't downgrade an active customer; only fill blanks.
+            // Refresh active/paid state on every paid order. For everything
+            // else, only fill blanks so we don't clobber admin edits.
             foreach ($payload as $k => $v) {
                 if ($v === null) continue;
-                if (in_array($k, ['status', 'payment_status', 'last_payment_at'], true)) {
-                    $client->{$k} = $v; // always refreshed by a paid order
+                $alwaysRefresh = in_array($k, [
+                    'status', 'payment_status', 'last_payment_at',
+                    'service', 'billing_cycle',
+                    'stripe_customer_id', 'stripe_subscription_id',
+                    'user_id',
+                ], true);
+                if ($alwaysRefresh) {
+                    $client->{$k} = $v;
                     continue;
                 }
                 if (empty($client->{$k})) {
@@ -420,7 +485,22 @@ class StripeWebhookController extends Controller
             $client = Client::create($payload);
         }
 
+        // Backfill the order's client_id so the relationship is solid.
+        if ($client && $order->client_id !== $client->id) {
+            $order->forceFill(['client_id' => $client->id])->save();
+        }
+
         return $client;
+    }
+
+    /**
+     * Backwards-compatible shim. The original webhook flow called
+     * upsertClient() — keep that working so processCheckoutSession does
+     * not need a separate edit.
+     */
+    private function upsertClient(Order $order, ?User $user): ?Client
+    {
+        return $this->syncClientFromPaidOrder($order, $user);
     }
 
     /**
