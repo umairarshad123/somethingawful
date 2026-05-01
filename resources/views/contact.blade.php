@@ -249,17 +249,17 @@
           </div>
           <div>
             <label for="message">What are you trying to grow?</label>
-            <textarea id="message" name="message" rows="3" placeholder="A few words about your goals…"></textarea>
+            <textarea id="message" name="message" rows="3" placeholder="A few words about your goals…" required></textarea>
           </div>
 
           <div class="cp-consents">
             <label class="cp-consent">
               <input type="checkbox" id="consentTx" name="consentTx" required />
-              <span>I agree to receive non-marketing texts from <strong>Digirisers</strong> about my request. Reply STOP to opt out.<em class="req">required</em></span>
+              <span>I agree to receive non-marketing texts from <strong>Digirisers</strong> about my request. Reply STOP to opt out.</span>
             </label>
             <label class="cp-consent">
               <input type="checkbox" id="consentMk" name="consentMk" required />
-              <span>I agree to receive marketing messages from <strong>Digirisers</strong> at the number provided. Reply STOP to opt out.<em class="req">required</em></span>
+              <span>I agree to receive marketing messages from <strong>Digirisers</strong> at the number provided. Reply STOP to opt out.</span>
             </label>
           </div>
 

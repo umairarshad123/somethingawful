@@ -1140,7 +1140,7 @@
           </div>
           <div class="field">
             <label for="message">What are you trying to grow?</label>
-            <textarea id="message" name="message" rows="2" placeholder="A few words about your goals…"></textarea>
+            <textarea id="message" name="message" rows="2" placeholder="A few words about your goals…" required></textarea>
           </div>
 
           <div class="consents">
@@ -1149,7 +1149,6 @@
               <span class="cbox" aria-hidden="true"></span>
               <span class="cText">
                 I agree to receive non-marketing texts from <strong>Digirisers</strong> about my request. Reply STOP to opt out.
-                <em class="req">required</em>
               </span>
             </label>
             <label class="consent">
@@ -1157,7 +1156,6 @@
               <span class="cbox" aria-hidden="true"></span>
               <span class="cText">
                 I agree to receive marketing messages from <strong>Digirisers</strong> at the number provided. Reply STOP to opt out.
-                <em class="req">required</em>
               </span>
             </label>
           </div>

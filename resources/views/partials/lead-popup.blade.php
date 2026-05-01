@@ -189,7 +189,7 @@
         </div>
         <div>
           <label for="drPopupPhone">Phone</label>
-          <input type="tel" id="drPopupPhone" name="phone" placeholder="+1 555 000 0000" />
+          <input type="tel" id="drPopupPhone" name="phone" placeholder="+1 555 000 0000" required />
         </div>
       </div>
       <div>
